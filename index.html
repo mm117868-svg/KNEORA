@@ -609,7 +609,7 @@ canvas.addEventListener("pointerup", () => { if (!dragging) return; let [x, y, w
 function pos(e) { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) * canvas.width / r.width, (e.clientY - r.top) * canvas.height / r.height]; }
 
 /* ?debug exposes the live objects for bench checks; nothing in the app reads this */
-if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor() { return monitor; }, get trace() { return trace; }, get frameNo() { return frameNo; }, get current() { return current; }, get running() { return running; }, video, step };
+if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor() { return monitor; }, get trace() { return trace; }, get frameNo() { return frameNo; }, get current() { return current; }, get running() { return running; }, get poseMs() { return poseMs; }, get poseSkip() { return poseSkip; }, get poseInfo() { return poseInfo; }, video, step };
 
 $("back").onclick = closeExercise;
 $("finish").onclick = () => finish(false);

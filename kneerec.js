@@ -116,25 +116,35 @@ export function drawLeg(ctx, lm, opts = {}) {
 
 /* ---------------- model loading ---------------- */
 const CDN = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
-export const MODEL_CDN = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task";
+const MODEL_URL = v => `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_${v}/float16/latest/pose_landmarker_${v}.task`;
+export const MODEL_CDN = MODEL_URL("lite");
+
+/* Three sizes of the same landmarker: lite is fastest, full is steadier on the lower limb at about half
+   the speed, heavy is the most accurate and several times slower. The pages use full when it is in
+   models/, else lite. ?model=lite|full|heavy on the page URL forces one (from models/ if there, else Google). */
+export const MODEL_VARIANTS = ["lite", "full", "heavy"];
+export const DEFAULT_MODEL_ORDER = ["full", "lite"];
 
 async function head(url) { try { const r = await fetch(url, { method: "HEAD" }); return r.ok; } catch (e) { return false; } }
 
 /* Library, wasm and model are served from this folder (vendor/ and models/) so the page works offline.
-   Anything missing locally is fetched from the same version on the CDN. Returns { landmarker, library, model }. */
-export async function loadPose({ wasmLocal = "./vendor/wasm", modelCandidates = ["./models/pose_landmarker_lite.task", "../models/pose_landmarker_lite.task"], log = () => {} } = {}) {
+   Anything missing locally is fetched from the same version on the CDN. Returns { landmarker, library, model, variant }. */
+export async function loadPose({ wasmLocal = "./vendor/wasm", modelDirs = ["./models", "../models"], variant = null, log = () => {} } = {}) {
   let mod;
   try { mod = await import("./vendor/vision_bundle.mjs"); } catch (e) { mod = await import(CDN + "/vision_bundle.mjs"); }
   const { PoseLandmarker, FilesetResolver } = mod;
   const wasm = (await head(wasmLocal + "/vision_wasm_internal.wasm")) ? wasmLocal : CDN + "/wasm";
   const vision = await FilesetResolver.forVisionTasks(wasm);
-  let model = MODEL_CDN;
-  for (const cand of modelCandidates) if (await head(cand)) { model = cand; break; }
+  const want = variant || new URLSearchParams(location.search).get("model");
+  const order = MODEL_VARIANTS.includes(want) ? [want] : DEFAULT_MODEL_ORDER;
+  let model = null, chosen = order[0], local = false;
+  for (const v of order) { for (const d of modelDirs) { const cand = `${d}/pose_landmarker_${v}.task`; if (await head(cand)) { model = cand; chosen = v; local = true; break; } } if (model) break; }
+  if (!model) { model = MODEL_URL(order[0]); chosen = order[0]; }
   const make = d => PoseLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: model, delegate: d }, runningMode: "VIDEO", numPoses: 1, minPoseDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
   let landmarker;
   try { landmarker = await make("GPU"); } catch (e) { log("GPU delegate unavailable, using CPU: " + e.message); landmarker = await make("CPU"); }
   try { const c = document.createElement("canvas"); c.width = 256; c.height = 256; c.getContext("2d").fillRect(0, 0, 256, 256); landmarker.detectForVideo(c, Math.round(performance.now())); } catch (e) { }   // warm up
-  return { landmarker, library: wasm === wasmLocal ? "local library" : "library from CDN", model: model === MODEL_CDN ? "model from Google" : "local model" };
+  return { landmarker, library: wasm === wasmLocal ? "local library" : "library from CDN", model: `${chosen} model${local ? "" : " from Google"}`, variant: chosen };
 }
 
 /* ---------------- monitoring layer (pixels -> reps). Receives ImageData only. ---------------- */
