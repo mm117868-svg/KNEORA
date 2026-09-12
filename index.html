@@ -619,7 +619,9 @@ function cancelCountdown(backToBrief = false) {
 $("countdown").addEventListener("pointerdown", () => cancelCountdown(true));
 
 let recog = null, voiceRestarts = 0;
-const speechAvailable = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+/* a function declaration, not a const: renderHome() runs while this module is still being
+   evaluated, and a const here would still be in its dead zone when it is called */
+function speechAvailable() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
 const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 /* a word counts only as a whole word in a short utterance, so "have you finished?" from across the room does not end the session */
 const heard = (said, word) => said.trim().split(/\s+/).length <= 3 && new RegExp(`(^|\\W)${escapeRe(word)}(\\W|$)`).test(said);
