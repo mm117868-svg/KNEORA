@@ -16,6 +16,7 @@
   --r:18px;--shadow:0 12px 32px -14px rgba(16,28,43,.35);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
 body{background:var(--paper);color:var(--ink);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
 .display{font-family:"Newsreader","Georgia",serif;font-weight:600;letter-spacing:-.015em;line-height:1.05}
@@ -46,11 +47,18 @@ label.f input,label.f select{display:block;width:100%;margin-top:4px;font:inheri
 details.more{margin-top:10px;font-size:12.5px;color:var(--muted)}
 details.more summary{cursor:pointer;font-weight:600}
 .phasepick{margin:30px 0 8px}
-.phasepick .eyebrow{display:block;margin-bottom:10px}
-.seg{display:flex;background:var(--paper2);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
-.seg button{flex:1;border:none;background:transparent;font-size:13px;font-weight:600;color:var(--muted);padding:10px 4px;border-radius:10px;cursor:pointer;transition:.15s}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bone);box-shadow:var(--shadow)}
-.list{margin-top:22px;display:flex;flex-direction:column;gap:12px}
+.phasepick .eyebrow{display:block;margin-bottom:6px}
+.small-note{margin:0;font-size:13px;color:var(--muted);max-width:44ch}
+.weeknav{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.weeknav a{font-size:12.5px;font-weight:600;color:var(--muted);text-decoration:none;padding:7px 11px;border-radius:10px;background:var(--paper2);border:1px solid var(--line)}
+.weeknav a.now{background:var(--ink);color:var(--bone);border-color:var(--ink)}
+.week{margin-top:26px;padding-top:4px}
+.week.now{border-left:4px solid var(--brand);padding-left:14px;margin-left:-18px}
+.week .head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.week h2{font-family:"Newsreader","Georgia",serif;font-weight:600;font-size:24px;margin:0;letter-spacing:-.01em}
+.week .days{font-size:12.5px;color:var(--muted)}
+.week .badge{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bone);background:var(--brand);padding:4px 8px;border-radius:7px}
+.list{display:flex;flex-direction:column;gap:12px}
 .ex-card{background:var(--bone);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;text-align:left;width:100%;transition:.15s}
 .ex-card:active{transform:scale(.985)}
 .ex-card::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand)}
@@ -140,6 +148,17 @@ details.more summary{cursor:pointer;font-weight:600}
 .brief .setup{font-size:12.5px;color:var(--muted);background:var(--paper2);border-radius:10px;padding:10px 12px;margin-bottom:14px}
 .brief .start{width:100%;background:var(--ink);color:var(--bone);border:none;font-size:16px;font-weight:650;padding:15px;border-radius:14px;cursor:pointer}
 .brief .start:disabled{opacity:.5}
+.brief .hands{margin-top:12px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.brief .hands .bar{flex:0 0 90px;height:8px;border-radius:5px;background:var(--paper2);overflow:hidden}
+.brief .hands .fill{height:100%;width:0;background:var(--brand);transition:width .1s linear}
+.countdown{position:absolute;inset:0;z-index:8;display:grid;place-items:center;font-family:"Newsreader","Georgia",serif;font-weight:600;font-size:clamp(120px,30vh,260px);color:#fff;text-shadow:0 6px 40px rgba(0,0,0,.7);cursor:pointer;text-align:center}
+.countdown small{display:block;font-family:"Inter",sans-serif;font-size:16px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-align:center;color:var(--dkmuted)}
+.handring{position:absolute;left:50%;top:22%;transform:translateX(-50%);z-index:6;width:min(520px,80%);text-align:center;pointer-events:none}
+.handring .htext{font-family:"Newsreader","Georgia",serif;font-weight:600;font-size:clamp(26px,5vh,44px);color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.8);margin-bottom:10px}
+.handring .hbar{height:14px;border-radius:8px;background:rgba(255,255,255,.2);overflow:hidden;border:1px solid rgba(255,255,255,.35)}
+.handring .hfill{height:100%;width:0;background:var(--green);transition:width .1s linear}
+.handring.finish .hfill{background:var(--amber)}
+.stage .mic{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
 .done{position:fixed;inset:0;z-index:30;background:rgba(11,18,32,.97);display:none;overflow:auto;padding:26px 20px}
 .done.show{display:block}
 .done .inner{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
@@ -183,7 +202,7 @@ details.more summary{cursor:pointer;font-weight:600}
 
   <section class="hero">
     <h1 class="display">Your knee,<br><em>day by day.</em></h1>
-    <p>Your camera counts each repetition and measures how far your knee bends, so your physiotherapist can see how the recovery is going. Nothing leaves this device.</p>
+    <p>Your camera counts each repetition and measures how far your knee bends, so your physiotherapist can see how the recovery is going. <span id="privacy">Nothing leaves this device.</span></p>
   </section>
 
   <section class="card details">
@@ -205,20 +224,26 @@ details.more summary{cursor:pointer;font-weight:600}
         <label><input type="checkbox" id="savevideo" checked> Keep the video</label>
         <label><input type="checkbox" id="savefiles" checked> Save session files to Downloads</label>
       </div>
+      <div class="toggles" style="margin-top:12px">
+        <label><input type="checkbox" id="handstart" checked> Start and finish by raising a hand above my head</label>
+        <label><input type="checkbox" id="voice"> Start and finish by voice</label>
+        <label><input type="checkbox" id="speak" checked> Speak the countdown out loud</label>
+      </div>
+      <div class="grid2" style="margin-top:8px">
+        <label class="f">Code word to start<input id="codeword" value="start" autocomplete="off"></label>
+        <label class="f">Word to finish<input id="stopword" value="finish" autocomplete="off"></label>
+      </div>
+      <p class="small-note" style="margin-top:8px">The hand gesture is read from the pose model on this device. Voice uses the browser's own speech recognition, which may send the sound to Google or Apple while it listens, so it is off unless you turn it on.</p>
     </details>
   </section>
 
   <section class="phasepick">
-    <span class="eyebrow">Where are you in recovery?</span>
-    <div class="seg" id="seg" role="group" aria-label="Recovery phase">
-      <button data-phase="1" aria-pressed="true">Week 0–1</button>
-      <button data-phase="2" aria-pressed="false">Week 1–4</button>
-      <button data-phase="3" aria-pressed="false">Week 4–8</button>
-      <button data-phase="4" aria-pressed="false">Week 8+</button>
-    </div>
+    <span class="eyebrow">Your programme, week by week</span>
+    <p class="small-note">All the exercises on one page. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
+    <nav class="weeknav" id="weeknav" aria-label="Jump to a week"></nav>
   </section>
 
-  <section class="list" id="list"></section>
+  <section id="weeks"></section>
 
   <section class="card progress" id="progress"></section>
 
@@ -236,7 +261,7 @@ details.more summary{cursor:pointer;font-weight:600}
     <div class="top">
       <button class="iconbtn" id="back" aria-label="Back">‹</button>
       <div class="title"><span class="eyebrow" id="exPhase"></span><h2 id="exTitle"></h2></div>
-      <div class="clockwrap"><span class="rec" id="rec" title="recording"></span><span class="num" id="clock">00:00</span></div>
+      <div class="clockwrap"><span class="rec" id="rec" title="recording"></span><span class="num" id="clock">00:00</span><span class="mic" id="mic" hidden title="the browser's speech service is listening">mic on</span></div>
       <button class="iconbtn" id="boxbtn" title="Draw the counting box: drag on the picture" aria-label="Adjust counting box" disabled>▭</button>
     </div>
     <div class="track off" id="track">camera off</div>
@@ -256,7 +281,10 @@ details.more summary{cursor:pointer;font-weight:600}
       <ol id="briefSteps"></ol>
       <div class="setup" id="briefSetup"></div>
       <button class="start" id="briefStart">I'm in position — start</button>
+      <div class="hands" id="hands"><div class="bar"><div class="fill" id="handfill"></div></div><span id="handtext"></span></div>
     </div>
+    <div class="handring" id="handring" hidden><div class="htext" id="htext"></div><div class="hbar"><div class="hfill" id="hfill"></div></div></div>
+    <div class="countdown" id="countdown" hidden></div>
 
     <div class="done" id="done"></div>
   </div>
@@ -278,7 +306,7 @@ details.more summary{cursor:pointer;font-weight:600}
 
 <script type="module">
 import { SOFTWARE, pickSide, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
-         FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, pickRecorderMime } from "./kneerec.js";
+         FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js";
 
 /* ---------------- Exercise library ----------------
    kind 'reps': repetitions come from the pixel-motion counter in kneerec.js.
@@ -340,7 +368,8 @@ const ICONS = {
   stand: '<path d="M12 6v7l-4 7M12 13l4 7M12 6l4-2"/><circle cx="12" cy="3" r="1.6"/>',
 };
 const PHASES = { 1: "Week 0–1", 2: "Week 1–4", 3: "Week 4–8", 4: "Week 8+" };
-const phaseForDay = d => d === null ? 1 : d < 7 ? 1 : d < 28 ? 2 : d < 56 ? 3 : 4;
+const PHASE_DAYS = { 1: "days 0 to 6 after the operation", 2: "days 7 to 27", 3: "days 28 to 55", 4: "day 56 onwards" };
+const phaseForDay = d => d === null ? null : d < 7 ? 1 : d < 28 ? 2 : d < 56 ? 3 : 4;
 const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. Shorts or bare legs help. The counting box sets itself after six seconds of movement.";
 
 const $ = id => document.getElementById(id);
@@ -348,26 +377,30 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 const NOPOSE = new URLSearchParams(location.search).has("nopose");
 
 /* ---------------- settings ---------------- */
-const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam" };
-const flags = { showangle: "kr_app_angle", skeleton: "kr_skeleton", savevideo: "kr_app_video", savefiles: "kr_app_files" };
-$("opdate").value = new Date(Date.now() - 14 * 864e5).toISOString().slice(0, 10);
-for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); if (k === "opdate") { phase = phaseForDay(daysPostOp($("opdate").value, new Date())); renderPhase(); } renderHome(); }); }
+const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", codeword: "kr_app_codeword", stopword: "kr_app_stopword" };
+const flags = { showangle: "kr_app_angle", skeleton: "kr_skeleton", savevideo: "kr_app_video", savefiles: "kr_app_files", handstart: "kr_app_handstart", voice: "kr_app_voice", speak: "kr_app_speak" };
+for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); renderHome(); }); }
 for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => localStorage.setItem(flags[k], $(k).checked ? "1" : "0")); }
 
-/* ---------------- home ---------------- */
-let phase = +(localStorage.getItem("kr_app_phase") || 0) || phaseForDay(daysPostOp($("opdate").value, new Date()));
-function renderPhase() { [...$("seg").children].forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.phase === phase))); renderList(); }
-function renderList() {
-  $("list").innerHTML = LIB[phase].map((ex, i) => `<button class="ex-card" data-i="${i}">
-    <div class="ic"><svg viewBox="0 0 24 24">${ICONS[ex.icon]}</svg></div>
-    <div><h3>${esc(ex.title)}</h3><p>${esc(ex.blurb)}</p><p class="meta">${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}</p></div>
-    <div class="tag">${esc(ex.tag)}</div></button>`).join("");
-  $("list").querySelectorAll(".ex-card").forEach(b => b.onclick = () => openExercise(LIB[phase][+b.dataset.i]));
+/* ---------------- home: every exercise on one page, grouped by week ---------------- */
+let phase = 1;   // the week section the open exercise came from; written into the record
+function currentPhase() { const d = daysPostOp($("opdate").value, new Date()); return d === null || d < 0 ? null : phaseForDay(d); }
+function renderWeeks() {
+  const now = currentPhase();
+  $("weeknav").innerHTML = Object.keys(LIB).map(p => `<a href="#week${p}" class="${+p === now ? "now" : ""}">${esc(PHASES[p])}${+p === now ? " · now" : ""}</a>`).join("");
+  $("weeks").innerHTML = Object.keys(LIB).map(p => `<section class="week${+p === now ? " now" : ""}" id="week${p}" aria-label="${esc(PHASES[p])}">
+    <div class="head"><h2>${esc(PHASES[p])}</h2><span class="days">${esc(PHASE_DAYS[p])}</span>${+p === now ? '<span class="badge">you are here</span>' : ""}</div>
+    <div class="list">${LIB[p].map((ex, i) => `<button class="ex-card" data-p="${p}" data-i="${i}">
+      <div class="ic"><svg viewBox="0 0 24 24">${ICONS[ex.icon]}</svg></div>
+      <div><h3>${esc(ex.title)}</h3><p>${esc(ex.blurb)}</p><p class="meta">${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}</p></div>
+      <div class="tag">${esc(ex.tag)}</div></button>`).join("")}</div></section>`).join("");
+  $("weeks").querySelectorAll(".ex-card").forEach(b => b.onclick = () => { phase = +b.dataset.p; openExercise(LIB[phase][+b.dataset.i]); });
 }
-$("seg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; phase = +b.dataset.phase; localStorage.setItem("kr_app_phase", phase); renderPhase(); });
 function renderHome() {
   const d = daysPostOp($("opdate").value, new Date());
-  $("dayline").innerHTML = d === null ? "Enter your operation date to see where you are in recovery." : d < 0 ? `Operation in <b>${-d}</b> day${-d === 1 ? "" : "s"}.` : `Day <b>${d}</b> after your operation · ${esc(PHASES[phaseForDay(d)])}`;
+  $("dayline").innerHTML = d === null ? "Enter your operation date to see where you are in recovery." : d < 0 ? `Operation in <b>${-d}</b> day${-d === 1 ? "" : "s"}.` : `Day <b>${d}</b> after your operation · <a href="#week${phaseForDay(d)}">${esc(PHASES[phaseForDay(d)])}</a>`;
+  $("privacy").textContent = $("voice").checked && speechAvailable() ? "Nothing leaves this device, except the sound the browser's speech service listens to while voice control is on." : "Nothing leaves this device.";
+  renderWeeks();
   const recs = loadRecords().filter(r => r.patient_id === $("patient").value).sort((a, b) => a.started_at.localeCompare(b.started_at));
   const last = recs[recs.length - 1];
   const week = recs.filter(r => (Date.now() - new Date(r.started_at)) < 7 * 864e5).length;
@@ -376,13 +409,14 @@ function renderHome() {
     <p>Last session ${esc(last.started_at.replace("T", " ").slice(0, 16))}: ${esc(last.exercise.replace(/_/g, " "))}, ${last.hold ? `${last.hold.cycles_completed} holds` : `${last.monitoring.repetitions} repetitions`}${last.measurement.p95_flexion_deg !== null ? `, best bend ${last.measurement.p95_flexion_deg.toFixed(0)}°` : ""}.</p>
     <p style="margin-top:12px"><a class="linkbtn" href="report.html">See your progress</a></p>` : `<p>No sessions on this device yet. Pick an exercise above to start.</p>`);
 }
-renderPhase(); renderHome();
+renderHome();
 
 /* ---------------- pose model: load once, in the background ---------------- */
 let landmarker = null, poseState = NOPOSE ? "off" : "loading", poseInfo = "";
 if (NOPOSE) $("engine").textContent = "Pose model off (?nopose): repetitions only.";
-else loadPose({ log: s => console.log(s) }).then(r => { landmarker = r.landmarker; poseState = "ready"; poseInfo = `${r.library}, ${r.model}`; $("engine").textContent = `Pose model ready (${poseInfo}).`; })
-  .catch(e => { poseState = "failed"; $("engine").textContent = "Pose model failed to load; sessions record repetitions only."; console.warn("MediaPipe: " + e.message); });
+else loadPose({ log: s => console.log(s) }).then(r => { landmarker = r.landmarker; poseState = "ready"; poseInfo = `${r.library}, ${r.model}`; $("engine").textContent = `Pose model ready (${poseInfo}).`; refreshHint(); })
+  .catch(e => { poseState = "failed"; $("engine").textContent = "Pose model failed to load; sessions record repetitions only."; console.warn("MediaPipe: " + e.message); refreshHint(); });
+$("voice").addEventListener("change", renderHome);
 
 async function listCams() {
   try { const devs = await navigator.mediaDevices.enumerateDevices(); const cams = devs.filter(d => d.kind === "videoinput");
@@ -394,13 +428,13 @@ listCams();
 
 /* ---------------- exercise screen ---------------- */
 const video = $("video"), canvas = $("canvas"), ctx = canvas.getContext("2d");
-let current = null, stream = null, running = false, recorder = null, chunks = [];
+let current = null, stream = null, running = false, recorder = null, chunks = [], openGen = 0;
 let trace, monitor, t0, frameNo, lastVideoTime = -1, rafId = 0, startedAt, dragging = null, boxMode = false;
 let poseMs = 0, poseSkip = 1, lastLm = null, lastAngle = NaN, lastAll = null, peak = NaN, low = NaN, prescribedDone = false;
 let hold = null;   // { phase: 'hold'|'rest', until, cycles }
 
 async function openExercise(ex) {
-  current = ex; prescribedDone = false; hold = null;
+  current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; handSince = null; handArmed = false; statusBefore = null;
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
   $("briefTitle").textContent = ex.title; $("briefMeta").textContent = `${PHASES[phase]} · ${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}`;
   $("briefSteps").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join(""); $("briefSetup").textContent = SETUP;
@@ -410,50 +444,182 @@ async function openExercise(ex) {
   $("angle").textContent = "—"; $("fill").style.width = "0"; $("angleTile").classList.remove("inzone");
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
   else { z.style.left = "0"; z.style.right = (100 - pct(ex.aim.deg)) + "%"; z.style.borderLeft = "none"; z.style.borderRight = "2px solid var(--green)"; $("angleSub").innerHTML = `straight is <b>0°</b>`; }
-  $("angleTile").style.display = $("showangle").checked && poseState !== "off" ? "block" : "none";
+  $("angleTile").style.display = $("showangle").checked && poseState !== "off" && poseState !== "failed" ? "block" : "none";
   $("status").textContent = "Get into position, then press start."; $("status").className = "status";
   $("finish").disabled = true; $("reset").disabled = true; $("boxbtn").disabled = true; $("clock").textContent = "00:00";
   $("track").textContent = "camera starting"; $("track").className = "track off";
-  $("done").className = "done"; $("done").innerHTML = "";
+  $("done").className = "done"; $("done").innerHTML = ""; $("handring").hidden = true; $("countdown").hidden = true; $("countdown").innerHTML = "";
   $("brief").classList.remove("up"); $("veil").classList.remove("hide"); $("veilBtn").style.display = "none"; $("spin").style.display = "block";
-  $("veilTitle").textContent = "Starting the camera"; $("veilMsg").textContent = "The movement model runs on this device. Nothing is sent anywhere.";
+  $("veilTitle").textContent = "Starting the camera";
+  $("veilMsg").textContent = $("voice").checked && speechAvailable() ? "The movement model runs on this device. Voice control is on, so the browser's speech service listens for your words." : "The movement model runs on this device. Nothing is sent anywhere.";
   $("ex").classList.add("open"); $("ex").setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden";
-  await openCamera();
+  await openCamera(++openGen);
 }
+const screenOpen = gen => gen === openGen && $("ex").classList.contains("open");
 const pct = deg => Math.max(0, Math.min(100, deg / 140 * 100));
 
-async function openCamera() {
+async function openCamera(gen) {
   const constraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }, audio: false };
   if ($("camsel").value) constraints.video.deviceId = { exact: $("camsel").value };
-  try { stream = await navigator.mediaDevices.getUserMedia(constraints); }
+  let s = null;
+  try { s = await navigator.mediaDevices.getUserMedia(constraints); }
   catch (e) {
-    if (constraints.video.deviceId) { try { delete constraints.video.deviceId; stream = await navigator.mediaDevices.getUserMedia(constraints); } catch (e2) { return cameraFailed(e2); } }
-    else return cameraFailed(e);
+    if (constraints.video.deviceId) { try { delete constraints.video.deviceId; s = await navigator.mediaDevices.getUserMedia(constraints); } catch (e2) { return screenOpen(gen) && cameraFailed(e2); } }
+    else return screenOpen(gen) && cameraFailed(e);
   }
+  // the patient may have left the screen while the browser was asking; then the camera goes straight off again
+  if (!screenOpen(gen)) { s.getTracks().forEach(tr => tr.stop()); return; }
+  stream = s;
   await listCams();
+  if (!screenOpen(gen)) return stopCamera();
   video.srcObject = stream; await video.play();
+  if (!screenOpen(gen)) return stopCamera();
   canvas.width = video.videoWidth; canvas.height = video.videoHeight;
   $("veil").classList.add("hide"); $("brief").classList.add("up");
   $("track").textContent = "camera on"; $("track").className = "track";
+  refreshHint();
+  startVoice();
   preview();
 }
+const codeWord = () => ($("codeword").value.trim() || "start").toLowerCase();
+const stopWord = () => ($("stopword").value.trim() || "finish").toLowerCase();
+/* what the brief sheet promises must be what can actually fire right now */
+function refreshHint() {
+  if (!stream || running) return;
+  const ways = [], notes = [];
+  if ($("handstart").checked && poseState !== "off") {
+    if (landmarker) ways.push("raise a hand high above your head and hold it for two seconds");
+    else if (poseState === "loading") notes.push("the movement model is still loading; the hand gesture will work once it is ready");
+    else notes.push("the movement model did not load, so the hand gesture is not available");
+  }
+  if ($("voice").checked) { if (recog) ways.push(`say "${codeWord()}"`); else if (!speechAvailable()) notes.push("voice control is not available in this browser"); else if (voiceFailed) notes.push(voiceFailed); }
+  let t = ways.length ? "Or, hands free: " + ways.join(", or ") + ($("speak").checked && window.speechSynthesis ? ". A spoken countdown follows." : ".") : "";
+  if (notes.length) t += (t ? " " : "") + notes.map(n => n[0].toUpperCase() + n.slice(1) + ".").join(" ");
+  $("handtext").textContent = t; $("hands").style.display = t ? "flex" : "none";
+}
+
+/* ---------------- hands-free start and finish ----------------
+   Hand: the pose landmarks already computed for the picture; a wrist held above the nose for two seconds
+   starts, three seconds finishes. A control gesture, read in this page; it never touches the counter or the
+   angle statistics. Voice: the browser's own speech recognition, opt in, because the sound may leave the
+   device for recognition. Either way a three-second countdown follows so the patient can settle. */
+const HAND_HOLD_START_S = 2, HAND_HOLD_FINISH_S = 3, COUNTDOWN_S = 3, HAND_ABOVE_NOSE = 0.15;   // fraction of frame height: a wrist well above the crown of the head
+let handSince = null, countdownStart = null, previewN = 0, lastSpoken = null, handArmed = false, statusBefore = null, voiceFailed = "";
+
+/* Spoken words from the browser's own speech synthesis, on the device. Plain speech ("three, two, one, go"),
+   not a tone and not a tempo cue, so it stays clear of CONTRIBUTING.md rule 7. */
+function say(text) {
+  if (!$("speak").checked || !window.speechSynthesis) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = "en-GB"; u.rate = 1.0;
+    const v = speechSynthesis.getVoices().find(v => v.localService && v.lang.toLowerCase().startsWith("en")); if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (e) { }
+}
+function handRaised(all) {
+  if (!all) return false;
+  const nose = all[0]; if (!nose || (nose.visibility ?? 0) < 0.5) return false;
+  return [15, 16].some(i => { const w = all[i]; return w && (w.visibility ?? 0) > 0.5 && w.y < nose.y - HAND_ABOVE_NOSE; });   // y grows downwards
+}
+function handHold(raised, holdS, now) {
+  if (!raised) { handSince = null; return 0; }
+  if (handSince === null) handSince = now;
+  return Math.min(1, (now - handSince) / (holdS * 1000));
+}
+/* big progress on the picture itself, readable from two metres */
+function showHand(f, finishing) {
+  const el = $("handring");
+  if (f <= 0) { if (!el.hidden) { el.hidden = true; if (finishing) restoreStatus(); } return; }
+  if (el.hidden) { el.hidden = false; el.className = "handring" + (finishing ? " finish" : ""); say(finishing ? "keep your hand up to finish" : "hand seen, keep it up"); }
+  $("hfill").style.width = (f * 100) + "%";
+  const left = Math.ceil((finishing ? HAND_HOLD_FINISH_S : HAND_HOLD_START_S) * (1 - f));
+  $("htext").textContent = finishing ? `Keep your hand up to finish… ${left}` : `Hand seen. Keep it up… ${left}`;
+  if (finishing) { if (statusBefore === null) statusBefore = $("status").textContent; $("status").textContent = `Hand up: keep it there to finish… ${left}`; }
+}
+function restoreStatus() { if (statusBefore !== null) { $("status").textContent = statusBefore; statusBefore = null; } }
+const WORDS = { 3: "three", 2: "two", 1: "one", 0: "go" };
+function beginCountdown() {
+  if (countdownStart !== null || running || !stream) return;
+  countdownStart = performance.now(); handSince = null; lastSpoken = null; showHand(0, false);
+  $("brief").classList.remove("up"); $("countdown").hidden = false;
+}
+function tickCountdown(now) {
+  const left = COUNTDOWN_S - Math.floor((now - countdownStart) / 1000);
+  const n = Math.max(0, left);
+  if (n !== lastSpoken) { lastSpoken = n; say(WORDS[n]); }
+  if (left > 0) { $("countdown").innerHTML = `${left}<small>get ready · tap the picture to cancel</small>`; return false; }
+  $("countdown").hidden = true; $("countdown").innerHTML = ""; countdownStart = null;
+  return true;
+}
+function cancelCountdown(backToBrief = false) {
+  if (countdownStart !== null && window.speechSynthesis) { try { speechSynthesis.cancel(); } catch (e) { } }
+  countdownStart = null; $("countdown").hidden = true; $("countdown").innerHTML = ""; handSince = null; $("handfill").style.width = "0"; $("handring").hidden = true;
+  if (backToBrief && stream && !running) $("brief").classList.add("up");
+}
+$("countdown").addEventListener("pointerdown", () => cancelCountdown(true));
+
+let recog = null, voiceRestarts = 0;
+const speechAvailable = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/* a word counts only as a whole word in a short utterance, so "have you finished?" from across the room does not end the session */
+const heard = (said, word) => said.trim().split(/\s+/).length <= 3 && new RegExp(`(^|\\W)${escapeRe(word)}(\\W|$)`).test(said);
+function startVoice() {
+  stopVoice(); voiceFailed = "";
+  if (!$("voice").checked || !speechAvailable()) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  try {
+    const r = new SR(); recog = r; voiceRestarts = 0; r.continuous = true; r.interimResults = false; r.lang = navigator.language || "en-GB";
+    r.onresult = e => {
+      voiceRestarts = 0;
+      const said = e.results[e.results.length - 1][0].transcript.toLowerCase();
+      if (!running && countdownStart === null && heard(said, codeWord())) beginCountdown();
+      else if (!running && countdownStart !== null && heard(said, stopWord())) cancelCountdown(true);
+      else if (running && heard(said, stopWord())) { say("finished"); finish(false); }
+    };
+    r.onerror = e => {
+      if (["not-allowed", "service-not-allowed", "audio-capture", "network", "language-not-supported"].includes(e.error)) {
+        voiceFailed = e.error === "not-allowed" || e.error === "service-not-allowed" ? "voice control needs microphone permission for this page" : e.error === "audio-capture" ? "no microphone was found for voice control" : "voice control is not available right now (" + e.error + ")";
+        stopVoice(); refreshHint();
+      }
+    };
+    r.onend = () => {   // keep listening while the screen is open; back off, and give up after a run of silent restarts
+      if (recog !== r || !$("ex").classList.contains("open")) return;
+      if (++voiceRestarts > 20) { voiceFailed = "voice control stopped listening; press Start or use the hand gesture"; stopVoice(); refreshHint(); return; }
+      setTimeout(() => { if (recog === r) { try { r.start(); } catch (e) { } } }, 500);
+    };
+    r.start(); $("mic").hidden = false;
+  } catch (e) { recog = null; voiceFailed = "voice control could not start in this browser"; }
+}
+function stopVoice() { $("mic").hidden = true; if (recog) { const r = recog; recog = null; try { r.onend = null; r.onresult = null; r.stop(); } catch (e) { } } }
 function cameraFailed(e) {
   $("spin").style.display = "none"; $("veilTitle").textContent = "Camera needed";
   $("veilMsg").textContent = "This exercise uses the camera to count repetitions and measure the knee. Allow camera access for this page in the browser, then try again. (" + e.message + ")";
   $("veilBtn").style.display = "inline-block"; $("veilBtn").onclick = () => { $("veil").classList.remove("hide"); $("veilBtn").style.display = "none"; $("spin").style.display = "block"; openCamera(); };
 }
-/* live picture behind the instructions so the patient can get into position; nothing is measured or recorded yet */
+/* live picture behind the instructions so the patient can get into position; nothing is measured or recorded yet.
+   The pose model runs on every third frame here only to watch for a raised hand. */
 let previewId = 0;
-function preview() {
-  cancelAnimationFrame(previewId);
-  const step = () => { if (running || !stream) return; previewId = requestAnimationFrame(step); if (video.readyState >= 2) ctx.drawImage(video, 0, 0, canvas.width, canvas.height); };
-  step();
+function preview() { cancelAnimationFrame(previewId); handSince = null; previewN = 0; previewStep(); }
+function previewStep() {
+  if (running || !stream) return;
+  previewId = requestAnimationFrame(previewStep);
+  if (video.readyState < 2) return;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const now = performance.now();
+  if (countdownStart !== null) { if (tickCountdown(now)) startSession(); return; }
+  if (landmarker && $("handstart").checked && ++previewN % 3 === 0 && video.videoWidth > 0) {
+    let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
+    const f = handHold(handRaised(res && res.landmarks && res.landmarks[0]), HAND_HOLD_START_S, now);
+    $("handfill").style.width = (f * 100) + "%"; showHand(f, false);
+    if (f >= 1) beginCountdown();
+  }
 }
 
-$("briefStart").onclick = startSession;
+$("briefStart").onclick = () => { if (countdownStart === null) beginCountdown(); };   // the same three seconds, so the patient can walk back into position
 function startSession() {
-  if (!stream) return;
-  cancelAnimationFrame(previewId);
+  if (!stream || running) return;
+  cancelAnimationFrame(previewId); cancelCountdown(); handArmed = false; statusBefore = null;
   const fps = stream.getVideoTracks()[0].getSettings().frameRate || 30;
   trace = new AngleTrace(1, canvas.height); monitor = new FlowMonitor(canvas.width, canvas.height, fps);
   frameNo = 0; lastVideoTime = -1; prescribedDone = false; startedAt = new Date(); t0 = performance.now(); poseMs = 0; poseSkip = 1; lastLm = null; lastAngle = NaN; lastAll = null; peak = NaN; low = NaN;
@@ -498,6 +664,18 @@ function step() {
   // screen
   const count = current.kind === "hold" ? hold.cycles : monitor.counter.reps;
   if (count >= current.count && !prescribedDone) { prescribedDone = true; $("status").textContent = `That's your ${current.count}. Finish when you're ready, or carry on.`; $("status").className = "status ok"; }
+
+  // hands-free finish: a hand held high above the head for three seconds. It arms only after the hand that
+  // started the session has come down, so a slow arm after the countdown cannot end it.
+  if (landmarker && $("handstart").checked) {
+    const raised = handRaised(lastAll);
+    if (!handArmed) { if (lastAll && !raised) handArmed = true; }
+    else {
+      const f = handHold(raised, HAND_HOLD_FINISH_S, now);
+      showHand(f, true);
+      if (f >= 1) { handSince = null; $("handring").hidden = true; say("finished"); finish(false); return; }
+    }
+  }
   if (current.kind !== "hold") $("reps").textContent = count;
   const m = Math.floor(t / 60), s = Math.floor(t % 60); $("clock").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   if (landmarker) { $("track").textContent = lm ? "leg in view" : "move so your whole leg is in the picture"; $("track").className = "track " + (lm ? "ok" : ""); }
@@ -530,7 +708,7 @@ function tickHold(now) {
 }
 
 async function finish(abandon = false) {
-  if (!running) return; running = false; cancelAnimationFrame(rafId);
+  if (!running) return; running = false; cancelAnimationFrame(rafId); stopVoice();
   const duration = (performance.now() - t0) / 1000;
   let videoBlob = null;
   if (recorder) { await new Promise(r => { recorder.onstop = r; recorder.stop(); }); videoBlob = new Blob(chunks, { type: recorder.mimeType }); recorder = null; }
@@ -550,6 +728,7 @@ async function finish(abandon = false) {
     software_version: SOFTWARE, app: { page: "app.html", phase, aim: current.aim } };
   if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles };
   rec.measurement.trace_preview = tracePreview(trace.rows);
+  const slot = storeRecord(rec) - 1;   // stored now, before the questions, so walking away from the laptop loses nothing
 
   const m = rec.measurement, done = $("done");
   done.classList.add("show");
@@ -561,7 +740,7 @@ async function finish(abandon = false) {
   rec.patient.difficulty_1_5 = await ask("How hard was that?", "1 = easy, 5 = very hard", [1, 2, 3, 4, 5]);
 
   const stamp = stampOf(startedAt), base = `${rec.patient_id}_${stamp}`;
-  storeRecord(rec);
+  updateRecord(slot, rec);   // the answers join the record that was stored the moment the session ended
   let where = "Saved on this device.";
   if ($("savefiles").checked) {
     download(`${base}_session.json`, new Blob([JSON.stringify(rec, null, 2)], { type: "application/json" }));
@@ -582,10 +761,10 @@ function ask(title, prompt, values) {
     $("q").querySelector(".skip").onclick = () => res(null);
   });
 }
-function stopCamera() { cancelAnimationFrame(previewId); if (stream) { stream.getTracks().forEach(tr => tr.stop()); stream = null; } video.srcObject = null; }
+function stopCamera() { cancelAnimationFrame(previewId); cancelCountdown(); if (stream) { stream.getTracks().forEach(tr => tr.stop()); stream = null; } video.srcObject = null; }
 function closeExercise() {
   if (running) { if (!confirm("Leave this session without saving it?")) return; finish(true); }
-  stopCamera(); running = false;
+  stopVoice(); stopCamera(); running = false;
   $("ex").classList.remove("open"); $("ex").setAttribute("aria-hidden", "true"); document.body.style.overflow = "";
   $("done").className = "done"; $("done").innerHTML = ""; renderHome();
 }
@@ -598,12 +777,17 @@ canvas.addEventListener("pointerup", () => { if (!dragging) return; let [x, y, w
 function pos(e) { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) * canvas.width / r.width, (e.clientY - r.top) * canvas.height / r.height]; }
 
 /* ?debug exposes the live objects for bench checks; nothing in the app reads this */
-if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor() { return monitor; }, get trace() { return trace; }, get frameNo() { return frameNo; }, get current() { return current; }, get running() { return running; }, get poseMs() { return poseMs; }, get poseSkip() { return poseSkip; }, get poseInfo() { return poseInfo; }, video, step };
+if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor() { return monitor; }, get trace() { return trace; }, get frameNo() { return frameNo; }, get current() { return current; }, get running() { return running; }, get poseMs() { return poseMs; }, get poseSkip() { return poseSkip; }, get poseInfo() { return poseInfo; }, get countingDown() { return countdownStart !== null; }, video, step, previewStep, setPose: fn => { landmarker = { detectForVideo: fn }; } };
 
 $("back").onclick = closeExercise;
 $("finish").onclick = () => finish(false);
 $("reset").onclick = () => { if (monitor) { monitor.reset(); $("reps").textContent = "0"; prescribedDone = false; $("status").textContent = "Count reset."; $("status").className = "status"; } };
-document.addEventListener("keydown", e => { if (!$("ex").classList.contains("open") || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return; if (e.key === "q") finish(false); if (e.key === "r") $("boxbtn").click(); if (e.key === "Escape") closeExercise(); });
+document.addEventListener("keydown", e => {
+  if (!$("ex").classList.contains("open") || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+  if ($("done").classList.contains("show")) return;   // the finish screen is answered with its own buttons; a stray key must not lose the record
+  if (e.key === "q") finish(false); if (e.key === "r") $("boxbtn").click();
+  if (e.key === "Escape") { if (countdownStart !== null) cancelCountdown(true); else closeExercise(); }
+});
 </script>
 </body>
 </html>

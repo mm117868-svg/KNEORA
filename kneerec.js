@@ -268,12 +268,19 @@ export class FlowMonitor {
 export function localIso(d) { const p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
 export function stampOf(d) { return d.toISOString().replace(/[-:]/g, "").slice(0, 15).replace("T", "_"); }
 export function download(name, blob) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
-export function daysPostOp(op, when) { return op ? Math.floor((when - new Date(op)) / 864e5) : null; }
+/* calendar days between an ISO date and a moment, both in local time (new Date("YYYY-MM-DD") would be UTC midnight) */
+export function daysPostOp(op, when) {
+  if (!op || !/^\d{4}-\d{2}-\d{2}$/.test(op)) return null;
+  const [y, m, d] = op.split("-").map(Number);
+  const a = new Date(y, m - 1, d), b = new Date(when.getFullYear(), when.getMonth(), when.getDate());
+  return Math.round((b - a) / 864e5);
+}
 
 /* the stored records this browser holds; report.html reads the same key */
 export const STORE_KEY = "kr_sessions";
 export function loadRecords() { try { return JSON.parse(localStorage.getItem(STORE_KEY) || "[]"); } catch (e) { return []; } }
 export function storeRecord(rec) { const store = loadRecords(); store.push(rec); try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { } return store.length; }
+export function updateRecord(index, rec) { const store = loadRecords(); if (index < 0 || index >= store.length) return storeRecord(rec); store[index] = rec; try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { } return index + 1; }
 
 /* The monitoring layer never touches the video mime; the recorder is plain browser API. */
 export function pickRecorderMime() { return ["video/mp4;codecs=avc1", "video/webm;codecs=vp9", "video/webm"].find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || ""; }
