@@ -166,7 +166,7 @@ async function start() {
   video.srcObject = stream; await video.play();
   canvas.width = video.videoWidth; canvas.height = video.videoHeight;
   const fps = stream.getVideoTracks()[0].getSettings().frameRate || 30;
-  trace = new AngleTrace(5); monitor = new FlowMonitor(canvas.width, canvas.height, fps);
+  trace = new AngleTrace(1, canvas.height); monitor = new FlowMonitor(canvas.width, canvas.height, fps);
   frameNo = 0; lastVideoTime = -1; prescribedDone = false; startedAt = new Date(); t0 = performance.now(); poseMs = 0; poseSkip = 1; lastLm = null; lastAngle = NaN; lastAll = null;
   chunks = [];
   if ($("savevideo").checked && window.MediaRecorder) {
@@ -212,7 +212,7 @@ function loop() {
   const [bx, by, bw, bh] = monitor.box; ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 2; ctx.strokeRect(bx, by, bw, bh);
   if ($("bench").checked) {
     $("angle").style.display = "block"; $("angle").firstChild.textContent = Number.isNaN(angle) ? "--" : angle.toFixed(0);
-    if (lm) drawLeg(ctx, lm);
+    if (trace.lastLm) drawLeg(ctx, trace.lastLm);   // the filtered joints, the ones the angle comes from
   } else $("angle").style.display = "none";
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
 }
@@ -238,7 +238,7 @@ async function finish(abandon = false) {
   rec.measurement.trace_preview = tracePreview(trace.rows);
   const chart = angleChartSvg(trace.rows);
   $("overlay").style.display = "flex";
-  $("ov-summary").innerHTML = `<h2>Session done</h2><p>${mon.repetitions} repetitions · ${Math.floor(duration / 60)} min ${Math.floor(duration % 60)} s` + (rec.measurement.peak_flexion_deg !== null ? ` · best bend today ${rec.measurement.peak_flexion_deg.toFixed(0)} degrees` : "") + `</p><div class="chartwrap">${chart}</div>`;
+  $("ov-summary").innerHTML = `<h2>Session done</h2><p>${mon.repetitions} repetitions · ${Math.floor(duration / 60)} min ${Math.floor(duration % 60)} s` + (rec.measurement.p95_flexion_deg !== null ? ` · best bend today ${rec.measurement.p95_flexion_deg.toFixed(0)} degrees (95th percentile; raw peak ${rec.measurement.peak_flexion_deg.toFixed(0)})` : "") + `</p><div class="chartwrap">${chart}</div>`;
   rec.patient.pain_0_10 = await ask("How painful was that?", "0 = no pain … 9 = worst pain", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
   rec.patient.difficulty_1_5 = await ask("How hard was that?", "1 = easy … 5 = very hard", [1, 2, 3, 4, 5]);
   $("ov-q").style.display = "none";

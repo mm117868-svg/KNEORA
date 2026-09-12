@@ -34,24 +34,70 @@ export function kneeFlexionDeg(hip, knee, ankle) {
   return 180 - Math.acos(c) * 180 / Math.PI;
 }
 
+/* One Euro filter (Casiez, Roussel and Vogel, 2012): a first-order low-pass whose cutoff rises with speed,
+   so jitter goes while the joint is still and lag stays small while it moves. Deterministic arithmetic on
+   one coordinate; nothing is learned. */
+export class OneEuro {
+  constructor(minCutoff = 3.0, beta = 10.0, dCutoff = 1.0) { this.minCutoff = minCutoff; this.beta = beta; this.dCutoff = dCutoff; this.reset(); }
+  reset() { this.x = null; this.dx = 0; this.t = null; }
+  static alpha(cutoff, dt) { const tau = 1 / (2 * Math.PI * cutoff); return 1 / (1 + tau / dt); }
+  filter(x, t) {
+    if (this.x === null || this.t === null || t <= this.t) { this.x = x; this.t = t; this.dx = 0; return x; }
+    const dt = t - this.t, dx = (x - this.x) / dt;
+    this.dx += OneEuro.alpha(this.dCutoff, dt) * (dx - this.dx);
+    this.x += OneEuro.alpha(this.minCutoff + this.beta * Math.abs(this.dx), dt) * (x - this.x);
+    this.t = t;
+    return this.x;
+  }
+}
+
+/* One Euro on each coordinate of the hip, knee and ankle, in units of frame height so the speed term does
+   not depend on the camera resolution. Resets on a gap or a change of leg. */
+export class JointFilter {
+  constructor(frameH = 720) { this.h = frameH || 720; this.f = Array.from({ length: 6 }, () => new OneEuro()); this.side = null; }
+  reset() { for (const f of this.f) f.reset(); this.side = null; }
+  apply(lm, t) {
+    if (!lm) { this.reset(); return null; }
+    if (lm.side !== this.side) { this.reset(); this.side = lm.side; }
+    const pts = [lm.hip, lm.knee, lm.ankle].map((p, i) => [this.f[2 * i].filter(p[0] / this.h, t) * this.h, this.f[2 * i + 1].filter(p[1] / this.h, t) * this.h]);
+    return { hip: pts[0], knee: pts[1], ankle: pts[2], visibility: lm.visibility, side: lm.side };
+  }
+}
+
+export const STATS_MIN_VISIBILITY = 0.65;   // frames below this landmark visibility are shown live but kept out of the statistics
+export const MAX_RATE_DEG_S = 600;          // a knee does not move faster than this; a bigger one-frame step is a wrong landmark
+
+/* Per-frame angle series. The joints are filtered first (One Euro); the angle then passes a rate guard that
+   holds the previous value for a frame or two when a step is physically impossible (a wrong landmark), which
+   adds no delay. An optional median (k > 1) is kept for comparison but costs lag. The raw column is the
+   unfiltered angle. lastLm holds the filtered joints of the last frame, for drawing. quantile(p) is the
+   running order statistic of the trusted frames so far, for "best today" on screen. */
 export class AngleTrace {
-  constructor(k = 5) { this.k = k; this.win = []; this.rows = []; }
+  constructor(k = 1, frameH = 720, jointFilter = true, maxRate = MAX_RATE_DEG_S) { this.k = Math.max(1, k); this.maxRate = maxRate; this.win = []; this.rows = []; this.prev = null; this.held = 0; this.joints = jointFilter ? new JointFilter(frameH) : null; this.lastLm = null; this.bins = new Uint32Array(181); this.nTrusted = 0; }
   add(frame, t, lm) {
-    let raw = NaN, vis = 0, side = "";
-    if (lm) { raw = kneeFlexionDeg(lm.hip, lm.knee, lm.ankle); vis = lm.visibility; side = lm.side; }
+    let raw = NaN, filt = NaN, vis = 0, side = "", lmf = null;
+    if (lm) { raw = kneeFlexionDeg(lm.hip, lm.knee, lm.ankle); vis = lm.visibility; side = lm.side; lmf = this.joints ? this.joints.apply(lm, t) : lm; filt = kneeFlexionDeg(lmf.hip, lmf.knee, lmf.ankle); }
     let smooth = NaN;
-    if (Number.isNaN(raw)) this.win = [];
-    else { this.win.push(raw); if (this.win.length > this.k) this.win.shift(); smooth = [...this.win].sort((a, b) => a - b)[Math.floor(this.win.length / 2)]; }
+    if (Number.isNaN(raw) || Number.isNaN(filt)) { this.win = []; this.prev = null; this.held = 0; this.lastLm = null; if (this.joints) this.joints.reset(); }
+    else {
+      if (this.prev && this.held < 2) { const dt = Math.max(t - this.prev[0], 1e-3); if (Math.abs(filt - this.prev[1]) / dt > this.maxRate) { filt = this.prev[1]; this.held++; } else this.held = 0; } else this.held = 0;
+      this.win.push(filt); if (this.win.length > this.k) this.win.shift(); smooth = [...this.win].sort((a, b) => a - b)[Math.floor(this.win.length / 2)];
+      this.prev = [t, smooth]; this.lastLm = lmf;
+      if (vis >= STATS_MIN_VISIBILITY) { this.bins[Math.max(0, Math.min(180, Math.round(smooth)))]++; this.nTrusted++; } }
     this.rows.push([frame, t, raw, smooth, vis, side]);
     return smooth;
   }
+  quantile(p) { if (!this.nTrusted) return NaN; const want = Math.max(1, Math.ceil(p * this.nTrusted)); let c = 0; for (let i = 0; i <= 180; i++) { c += this.bins[i]; if (c >= want) return i; } return 180; }
   csv() { return "frame,t,flexion_raw,flexion_smooth,visibility,side\n" + this.rows.map(r => `${r[0]},${r[1].toFixed(3)},${Number.isNaN(r[2]) ? "" : r[2].toFixed(2)},${Number.isNaN(r[3]) ? "" : r[3].toFixed(2)},${r[4].toFixed(2)},${r[5]}`).join("\n") + "\n"; }
 }
 
-export function summarise(trace, duration, target) {
-  const valid = trace.rows.map(r => r[3]).filter(v => !Number.isNaN(v));
+/* Whole-session statistics: order statistics and time above a threshold only. Frames below minVis are left
+   out: they are the ones most likely to carry a wrong joint, and the maximum is the statistic most hurt by
+   one wrong frame. p95 and p05 are the values to quote; the raw peak is kept. */
+export function summarise(trace, duration, target, minVis = STATS_MIN_VISIBILITY) {
+  const valid = trace.rows.filter(r => !Number.isNaN(r[3]) && r[4] >= minVis).map(r => r[3]);
   const out = { frames_total: trace.rows.length, frames_with_angle: valid.length, peak_flexion_deg: null, p95_flexion_deg: null,
-    min_extension_deg: null, p05_extension_deg: null, mean_flexion_deg: null, median_flexion_deg: null, time_above_target_s: 0, target_flexion_deg: target, histogram_10deg: {}, side: "", trace_file: "angle.csv" };
+    min_extension_deg: null, p05_extension_deg: null, mean_flexion_deg: null, median_flexion_deg: null, time_above_target_s: 0, target_flexion_deg: target, histogram_10deg: {}, side: "", stats_min_visibility: minVis, trace_file: "angle.csv" };
   if (!valid.length) return out;
   const dt = duration / Math.max(1, trace.rows.length);
   const s = [...valid].sort((a, b) => a - b), q = p => s[Math.min(s.length - 1, Math.floor(p * (s.length - 1)))];
