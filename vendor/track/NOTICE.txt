@@ -1,0 +1,8 @@
+jsfeat-min.js
+  jsfeat 0.0.8, vendored unmodified. MIT License.
+  https://github.com/inspirit/jsfeat
+  https://cdn.jsdelivr.net/npm/jsfeat@0.0.8/build/jsfeat-min.js
+
+Used for pyramidal Lucas-Kanade optical flow (jsfeat.optical_flow_lk), which
+follows a grid of points from one frame to the next. Retrieved 12 September
+2026. Served from this site so that the picture stays on the patient's device.

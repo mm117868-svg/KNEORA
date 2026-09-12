@@ -1,0 +1,20 @@
+Vendored, unmodified, for the patient-count layer. Both are Apache License 2.0.
+
+tf.min.js
+  TensorFlow.js 4.22.0
+  https://github.com/tensorflow/tfjs
+  https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js
+
+speech-commands.min.js
+  @tensorflow-models/speech-commands 0.5.4
+  https://github.com/tensorflow/tfjs-models/tree/master/speech-commands
+  https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.5.4/dist/speech-commands.min.js
+
+model/
+  Browser FFT speech command model, 18 word vocabulary, v0.4.
+  Words: zero to nine, up, down, left, right, go, stop, yes, no, plus
+  background noise and unknown.
+  https://storage.googleapis.com/tfjs-models/tfjs/speech-commands/v0.4/browser_fft/18w/
+
+Retrieved 12 September 2026. The files are served from this site so that the
+sound stays on the patient's device.

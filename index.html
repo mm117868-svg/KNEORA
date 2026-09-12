@@ -230,10 +230,16 @@ details.more summary{cursor:pointer;font-weight:600}
         <label><input type="checkbox" id="speak" checked> Speak the countdown out loud</label>
       </div>
       <div class="grid2" style="margin-top:8px">
+        <label class="f">Count repetitions by<select id="countby">
+          <option value="motion">movement in the box</option>
+          <option value="track">following the knee in the picture</option>
+          <option value="voice">saying each number out loud</option>
+        </select></label>
         <label class="f">Code word to start<input id="codeword" value="start" autocomplete="off"></label>
         <label class="f">Word to finish<input id="stopword" value="finish" autocomplete="off"></label>
       </div>
-      <p class="small-note" style="margin-top:8px">The hand gesture is read from the pose model on this device. Voice uses the browser's own speech recognition, which may send the sound to Google or Apple while it listens, so it is off unless you turn it on.</p>
+      <p class="small-note" style="margin-top:8px">The hand gesture is read from the pose model on this device. Voice control for start and finish uses the browser's own speech recognition, which may send the sound to Google or Apple while it listens, so it is off unless you turn it on.</p>
+      <p class="small-note" style="margin-top:8px">Three ways to count, all of them on this device. <b>Movement in the box</b> counts from how the changed pixels move. <b>Following the knee</b> lays points on the knee and follows them from frame to frame, counting one repetition for each full swing; it holds up better when the movement is slow or small. <b>Saying each number out loud</b> puts the count in the patient's hands: say "one, two, three" and a small word spotter running on this device hears it, with the sound staying here. Whichever is chosen, movement in the box is still counted underneath as a cross-check, and both numbers go to the physiotherapist.</p>
     </details>
   </section>
 
@@ -261,7 +267,7 @@ details.more summary{cursor:pointer;font-weight:600}
     <div class="top">
       <button class="iconbtn" id="back" aria-label="Back">‹</button>
       <div class="title"><span class="eyebrow" id="exPhase"></span><h2 id="exTitle"></h2></div>
-      <div class="clockwrap"><span class="rec" id="rec" title="recording"></span><span class="num" id="clock">00:00</span><span class="mic" id="mic" hidden title="the browser's speech service is listening">mic on</span></div>
+      <div class="clockwrap"><span class="rec" id="rec" title="recording"></span><span class="num" id="clock">00:00</span><span class="mic" id="mic" hidden title="the microphone is on">mic on</span></div>
       <button class="iconbtn" id="boxbtn" title="Draw the counting box: drag on the picture" aria-label="Adjust counting box" disabled>▭</button>
     </div>
     <div class="track off" id="track">camera off</div>
@@ -307,6 +313,8 @@ details.more summary{cursor:pointer;font-weight:600}
 <script type="module">
 import { SOFTWARE, pickSide, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js";
+import { VoiceCount, voiceAvailable, VOICE_VERSION } from "./voicecount.js";
+import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js";
 
 /* ---------------- Exercise library ----------------
    kind 'reps': repetitions come from the pixel-motion counter in kneerec.js.
@@ -377,7 +385,7 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 const NOPOSE = new URLSearchParams(location.search).has("nopose");
 
 /* ---------------- settings ---------------- */
-const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", codeword: "kr_app_codeword", stopword: "kr_app_stopword" };
+const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", codeword: "kr_app_codeword", stopword: "kr_app_stopword", countby: "kr_app_countby" };
 const flags = { showangle: "kr_app_angle", skeleton: "kr_skeleton", savevideo: "kr_app_video", savefiles: "kr_app_files", handstart: "kr_app_handstart", voice: "kr_app_voice", speak: "kr_app_speak" };
 for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); renderHome(); }); }
 for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => localStorage.setItem(flags[k], $(k).checked ? "1" : "0")); }
@@ -399,7 +407,7 @@ function renderWeeks() {
 function renderHome() {
   const d = daysPostOp($("opdate").value, new Date());
   $("dayline").innerHTML = d === null ? "Enter your operation date to see where you are in recovery." : d < 0 ? `Operation in <b>${-d}</b> day${-d === 1 ? "" : "s"}.` : `Day <b>${d}</b> after your operation · <a href="#week${phaseForDay(d)}">${esc(PHASES[phaseForDay(d)])}</a>`;
-  $("privacy").textContent = $("voice").checked && speechAvailable() ? "Nothing leaves this device, except the sound the browser's speech service listens to while voice control is on." : "Nothing leaves this device.";
+  $("privacy").textContent = $("voice").checked && speechAvailable() ? "Nothing leaves this device, except the sound the browser's speech service listens to while voice control is on." : $("countby").value === "voice" ? "Nothing leaves this device. Your counting is heard by a word spotter that runs here." : "Nothing leaves this device.";
   renderWeeks();
   const recs = loadRecords().filter(r => r.patient_id === $("patient").value).sort((a, b) => a.started_at.localeCompare(b.started_at));
   const last = recs[recs.length - 1];
@@ -432,6 +440,9 @@ let current = null, stream = null, running = false, recorder = null, chunks = []
 let trace, monitor, t0, frameNo, lastVideoTime = -1, rafId = 0, startedAt, dragging = null, boxMode = false;
 let poseMs = 0, poseSkip = 1, lastLm = null, lastAngle = NaN, lastAll = null, peak = NaN, low = NaN, prescribedDone = false;
 let hold = null;   // { phase: 'hold'|'rest', until, cycles }
+let voice = null;    // the patient-count layer: what the patient counted out loud. Never sees the picture.
+let tracker = null;  // the knee tracker: points followed in the box. Pixels and the clock only.
+let jsfeatLib = null;
 
 async function openExercise(ex) {
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; handSince = null; handArmed = false; statusBefore = null;
@@ -439,7 +450,7 @@ async function openExercise(ex) {
   $("briefTitle").textContent = ex.title; $("briefMeta").textContent = `${PHASES[phase]} · ${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}`;
   $("briefSteps").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join(""); $("briefSetup").textContent = SETUP;
   $("instr").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
-  $("repsLab").textContent = ex.kind === "hold" ? "Holds" : "Repetitions"; $("reps").textContent = "0"; $("repsOf").textContent = ` / ${ex.count}`; $("repsSub").innerHTML = ex.kind === "hold" ? `${ex.hold} s hold, ${ex.rest} s rest` : "counted from movement in the box";
+  $("repsLab").textContent = ex.kind === "hold" ? "Holds" : "Repetitions"; $("reps").textContent = "0"; $("repsOf").textContent = ` / ${ex.count}`; $("repsSub").innerHTML = ex.kind === "hold" ? `${ex.hold} s hold, ${ex.rest} s rest` : voiceWanted() ? "say each number out loud" : trackWanted() ? "following your knee in the picture" : "counted from movement in the box";
   $("holdTile").style.display = ex.kind === "hold" ? "block" : "none"; $("holdCue").textContent = "Get ready"; $("holdCount").textContent = ""; $("holdSub").textContent = "";
   $("angle").textContent = "—"; $("fill").style.width = "0"; $("angleTile").classList.remove("inzone");
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
@@ -479,8 +490,54 @@ async function openCamera(gen) {
   $("track").textContent = "camera on"; $("track").className = "track";
   refreshHint();
   startVoice();
+  startVoiceCount();
+  startTracker();
   preview();
 }
+/* ---------------- patient-count layer ----------------
+   The patient says the number of each repetition. The words are spotted on this device and counted in
+   voicecount.js, which never sees the picture. The pixel-motion counter keeps running underneath as a
+   cross-check; both numbers go into the record, side by side, and neither is used to alter the other. */
+const countBy = () => current && current.kind === "hold" ? "timer" : $("countby").value;
+const voiceWanted = () => countBy() === "voice";
+const trackWanted = () => countBy() === "track";
+const voiceCounting = () => !!(voice && voice.listening && voiceWanted());
+const trackCounting = () => !!(tracker && tracker.ready && trackWanted());
+
+/* the tracker library is fetched from this site once, before the session starts */
+async function startTracker() {
+  tracker = null;
+  if (!trackWanted()) return;
+  try { jsfeatLib = await loadTracker(); $("repsSub").textContent = "following your knee in the picture"; }
+  catch (e) { jsfeatLib = null; $("repsSub").textContent = "the knee tracker did not load; counting movement in the box"; }
+  refreshHint();
+}
+
+async function startVoiceCount() {
+  stopVoiceCount();
+  if (!voiceWanted() || !voiceAvailable()) return;
+  voice = new VoiceCount(() => running ? (performance.now() - t0) / 1000 : null, n => {
+    if (!running) return;
+    $("reps").textContent = n;
+    showCounts();
+    if (navigator.vibrate) navigator.vibrate(15);
+  });
+  $("repsSub").textContent = "starting the word spotter";
+  const ok = await voice.start();
+  $("mic").hidden = !ok;
+  if (ok) $("mic").title = "your counting is heard on this device";
+  $("repsSub").textContent = ok ? "say each number out loud" : voice.failed;
+  refreshHint();
+}
+function stopVoiceCount() { if (voice) voice.stop(); }
+
+/* what the patient counted, with the movement count beside it so a disagreement is visible */
+function showCounts() {
+  if (!monitor) return;
+  if (voiceCounting()) $("repsSub").textContent = `your count \u00b7 movement counted ${monitor.counter.reps}`;
+  else if (trackCounting()) $("repsSub").textContent = `following your knee \u00b7 movement counted ${monitor.counter.reps}`;
+}
+
 const codeWord = () => ($("codeword").value.trim() || "start").toLowerCase();
 const stopWord = () => ($("stopword").value.trim() || "finish").toLowerCase();
 /* what the brief sheet promises must be what can actually fire right now */
@@ -493,6 +550,8 @@ function refreshHint() {
     else notes.push("the movement model did not load, so the hand gesture is not available");
   }
   if ($("voice").checked) { if (recog) ways.push(`say "${codeWord()}"`); else if (!speechAvailable()) notes.push("voice control is not available in this browser"); else if (voiceFailed) notes.push(voiceFailed); }
+  if (voiceWanted()) { if (voice && voice.listening) notes.push("count each repetition out loud and the count follows you"); else if (voice && voice.failed) notes.push(voice.failed); else if (!voiceAvailable()) notes.push("counting out loud is not available in this browser"); }
+  if (trackWanted()) notes.push(jsfeatLib ? "your knee is followed in the picture; take as many repetitions as you want and finish when you are ready" : "the knee tracker is still loading");
   let t = ways.length ? "Or, hands free: " + ways.join(", or ") + ($("speak").checked && window.speechSynthesis ? ". A spoken countdown follows." : ".") : "";
   if (notes.length) t += (t ? " " : "") + notes.map(n => n[0].toUpperCase() + n.slice(1) + ".").join(" ");
   $("handtext").textContent = t; $("hands").style.display = t ? "flex" : "none";
@@ -628,6 +687,9 @@ function startSession() {
     try { const mime = pickRecorderMime(); recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined); recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); }; recorder.start(1000); $("rec").classList.add("on"); } catch (e) { recorder = null; }
   }
   if (current.kind === "hold") hold = { phase: "hold", until: t0 + current.hold * 1000, cycles: 0 };
+  if (voice) voice.reset();
+  tracker = null;
+  if (trackWanted() && jsfeatLib) { tracker = new KneeTracker(canvas.width, canvas.height, fps); tracker.attach(jsfeatLib); }
   running = true; $("brief").classList.remove("up"); $("finish").disabled = false; $("reset").disabled = current.kind === "hold"; $("boxbtn").disabled = false;
   $("status").textContent = current.kind === "hold" ? "Follow the timer." : "Keep going."; $("status").className = "status";
   loop();
@@ -660,9 +722,11 @@ function step() {
 
   // monitoring layer: frame -> repetitions. Gets the frame and the clock only.
   monitor.update(video, frameNo, t);
+  // the knee tracker, when it is the chosen counter. Also pixels and the clock only, and the same box.
+  if (tracker) tracker.update(video, frameNo, t, monitor.box);
 
   // screen
-  const count = current.kind === "hold" ? hold.cycles : monitor.counter.reps;
+  const count = current.kind === "hold" ? hold.cycles : voiceCounting() ? voice.count : trackCounting() ? tracker.counter.reps : monitor.counter.reps;
   if (count >= current.count && !prescribedDone) { prescribedDone = true; $("status").textContent = `That's your ${current.count}. Finish when you're ready, or carry on.`; $("status").className = "status ok"; }
 
   // hands-free finish: a hand held high above the head for three seconds. It arms only after the hand that
@@ -676,7 +740,7 @@ function step() {
       if (f >= 1) { handSince = null; $("handring").hidden = true; say("finished"); finish(false); return; }
     }
   }
-  if (current.kind !== "hold") $("reps").textContent = count;
+  if (current.kind !== "hold") { $("reps").textContent = count; if ((voiceCounting() || trackCounting()) && frameNo % 15 === 0) showCounts(); }
   const m = Math.floor(t / 60), s = Math.floor(t % 60); $("clock").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   if (landmarker) { $("track").textContent = lm ? "leg in view" : "move so your whole leg is in the picture"; $("track").className = "track " + (lm ? "ok" : ""); }
   else { $("track").textContent = poseState === "loading" ? "movement model loading" : "counting movement only"; $("track").className = "track " + (monitor.moving ? "ok" : ""); }
@@ -708,7 +772,7 @@ function tickHold(now) {
 }
 
 async function finish(abandon = false) {
-  if (!running) return; running = false; cancelAnimationFrame(rafId); stopVoice();
+  if (!running) return; running = false; cancelAnimationFrame(rafId); stopVoice(); stopVoiceCount();
   const duration = (performance.now() - t0) / 1000;
   let videoBlob = null;
   if (recorder) { await new Promise(r => { recorder.onstop = r; recorder.stop(); }); videoBlob = new Blob(chunks, { type: recorder.mimeType }); recorder = null; }
@@ -718,13 +782,16 @@ async function finish(abandon = false) {
 
   const target = current.target ?? 90;
   const mon = monitor.summary(duration);
-  const count = current.kind === "hold" ? hold.cycles : mon.repetitions;
+  const vc = voiceWanted() && voice && voice.recognizer ? Object.assign(voice.summary(), { version: VOICE_VERSION }) : null;
+  const tr = trackWanted() && tracker ? tracker.summary(duration) : null;
+  const source = current.kind === "hold" ? "timer" : vc ? "patient_voice" : tr ? "knee_tracker" : "monitoring";
+  const count = current.kind === "hold" ? hold.cycles : vc ? vc.repetitions : tr ? tr.repetitions : mon.repetitions;
   mon.early_stop = count < current.count;
   const op = $("opdate").value || null;
   const rec = { schema_version: 1, patient_id: $("patient").value, operation_date: op, days_post_op: daysPostOp(op, startedAt),
     exercise: current.id, prescribed_reps: current.count, prescribed_minutes: null, started_at: localIso(startedAt), duration_s: +duration.toFixed(1),
     fps: +(frameNo / Math.max(1, duration)).toFixed(1), video_file: videoBlob ? (videoBlob.type.includes("mp4") ? "video.mp4" : "video.webm") : "",
-    measurement: summarise(trace, duration, target), monitoring: mon, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
+    measurement: summarise(trace, duration, target), monitoring: mon, patient_count: vc, tracking: tr, count_source: source, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
     software_version: SOFTWARE, app: { page: "app.html", phase, aim: current.aim } };
   if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles };
   rec.measurement.trace_preview = tracePreview(trace.rows);
@@ -747,8 +814,11 @@ async function finish(abandon = false) {
     download(`${base}_angle.csv`, new Blob([trace.csv()], { type: "text/csv" }));
     download(`${base}_flow.csv`, new Blob([monitor.csv()], { type: "text/csv" }));
     download(`${base}_angle.svg`, new Blob([angleChartSvg(trace.rows, 900, 260, false)], { type: "image/svg+xml" }));
-    if (videoBlob) download(`${base}_${rec.video_file}`, videoBlob);
-    where = `Saved on this device, and ${videoBlob ? "five" : "four"} files named ${base}_… went to your Downloads folder for your physiotherapist.`;
+    let n = 4;
+    if (vc && vc.words_heard) { download(`${base}_voice.csv`, new Blob([voice.csv()], { type: "text/csv" })); n++; }
+    if (tr && tracker.rows.length) { download(`${base}_track.csv`, new Blob([tracker.csv()], { type: "text/csv" })); n++; }
+    if (videoBlob) { download(`${base}_${rec.video_file}`, videoBlob); n++; }
+    where = `Saved on this device, and ${["", "one", "two", "three", "four", "five", "six", "seven"][n] || n} files named ${base}_… went to your Downloads folder for your physiotherapist.`;
   }
   $("q").innerHTML = `<h3>Saved</h3><p>${esc(where)}</p><div class="row"><a href="#" id="doneBack">Back to exercises</a><a href="report.html">See your progress</a></div>`;
   $("doneBack").onclick = e => { e.preventDefault(); closeExercise(); };
@@ -764,7 +834,7 @@ function ask(title, prompt, values) {
 function stopCamera() { cancelAnimationFrame(previewId); cancelCountdown(); if (stream) { stream.getTracks().forEach(tr => tr.stop()); stream = null; } video.srcObject = null; }
 function closeExercise() {
   if (running) { if (!confirm("Leave this session without saving it?")) return; finish(true); }
-  stopVoice(); stopCamera(); running = false;
+  stopVoice(); stopVoiceCount(); stopCamera(); running = false;
   $("ex").classList.remove("open"); $("ex").setAttribute("aria-hidden", "true"); document.body.style.overflow = "";
   $("done").className = "done"; $("done").innerHTML = ""; renderHome();
 }
@@ -781,7 +851,7 @@ if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor
 
 $("back").onclick = closeExercise;
 $("finish").onclick = () => finish(false);
-$("reset").onclick = () => { if (monitor) { monitor.reset(); $("reps").textContent = "0"; prescribedDone = false; $("status").textContent = "Count reset."; $("status").className = "status"; } };
+$("reset").onclick = () => { if (monitor) { monitor.reset(); if (voice) voice.reset(); if (tracker) tracker.reset(); $("reps").textContent = "0"; prescribedDone = false; $("status").textContent = voiceCounting() ? "Count reset. Start again from one." : "Count reset."; $("status").className = "status"; } };
 document.addEventListener("keydown", e => {
   if (!$("ex").classList.contains("open") || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
   if ($("done").classList.contains("show")) return;   // the finish screen is answered with its own buttons; a stray key must not lose the record
