@@ -13,6 +13,10 @@ function status(text){
     lastProgressSent=Date.now();window.parent.postMessage({type:'exercise-analysis-status',token:bridgeToken,text},location.origin);
   }
 }
+function analysisError(text){
+  status(text);
+  if(embedded&&bridgeToken)window.parent.postMessage({type:'exercise-analysis-error',token:bridgeToken,text},location.origin);
+}
 function waitEvent(target,event,action,timeout=15000){return new Promise((resolve,reject)=>{
   let timer;const clean=()=>{clearTimeout(timer);target.removeEventListener(event,ok);target.removeEventListener('error',bad);};
   const ok=()=>{clean();resolve();},bad=()=>{clean();reject(Error('The browser could not decode this video. Try MP4 (H.264) or WebM.'));};
@@ -46,9 +50,9 @@ async function loadRecording(blob, info={}){
     duration=Number.isFinite(video.duration)?video.duration:info.duration;
     if(!Number.isFinite(duration)||duration>300||duration<1)throw Error('Choose a video between 1 second and 5 minutes long.');
     $('recordingName').textContent=sourceName;
-    status(`Ready: ${duration.toFixed(1)} seconds. Select Analyse exercise. Targets are optional.`);$('run').disabled=false;
+    status(embedded?'Recording ready. Starting automatic analysis…':`Ready: ${duration.toFixed(1)} seconds. Select Analyse exercise. Targets are optional.`);$('run').disabled=false;
     return true;
-  }catch(e){status(e.message);return false;}
+  }catch(e){analysisError(e.message);return false;}
 }
 $('file').onchange=()=>{const file=$('file').files[0];if(file)loadRecording(file);};
 async function loadModel(){
@@ -104,9 +108,9 @@ async function run(){
     report={...analyseExercise(samples,config),fileName:sourceName,createdAt:new Date().toISOString(),
       recovery:recoveryContext(config.exercise,daysPostOp),session:{startedAt:metadata.startedAt??null,operationDate:metadata.operationDate??null,prescribedReps:metadata.prescribedReps??null},
       method:'MediaPipe 2D pose; prototype rules, no clinical validation',modelVersion:'pose_landmarker_full/float16/1',softwareVersion:'0.10.22-rc.20250304'};
-    render(report);notifyParent();$('results').scrollIntoView({behavior:'smooth',block:'start'});status('Analysis complete. Review the measurements and tracking coverage.');
-  }catch(e){status(`Analysis could not finish: ${e.message}`);}
-  finally{busy=false;video.controls=true;$('run').disabled=false;$('file').disabled=false;$('settings').disabled=false;$('cancel').hidden=true;if(cancelled)status('Analysis cancelled. No report was saved.');}
+    render(report);notifyParent();$('results').scrollIntoView({behavior:'smooth',block:'start'});status(embedded?'Analysis finished. Your summary has been updated.':'Analysis complete. Review the measurements and tracking coverage.');
+  }catch(e){analysisError(`Analysis could not finish: ${e.message}`);}
+  finally{busy=false;video.controls=true;$('run').disabled=false;$('file').disabled=false;$('settings').disabled=false;$('cancel').hidden=true;if(cancelled)analysisError('Analysis cancelled. No report was saved.');}
 }
 function addMetric(label,value){const p=document.createElement('p'),strong=document.createElement('strong');strong.textContent=label+': ';p.append(strong,document.createTextNode(String(value)));$('sessionMetrics').append(p);}
 function render(r){

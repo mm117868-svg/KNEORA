@@ -30,14 +30,14 @@ export function savedAnalysisSummary(report) {
   section.append(button);return section;
 }
 
-export function mountExerciseAnalysis(host,{blob,metadata,onReport,returnToSummary=false,autoStart=false}) {
+export function mountExerciseAnalysis(host,{blob,metadata,onReport,returnToSummary=false,autoStart=true}) {
   if (!EXERCISES[metadata.exercise]) return ()=>{};
   const card=document.createElement('section');card.className='analysis-card';
-  const heading=document.createElement('h3');heading.textContent=blob?.size?'Your video was captured':'Recording unavailable';
+  const heading=document.createElement('h3');heading.textContent=blob?.size?(autoStart?'Analysing your exercise':'Your video was captured'):'Recording unavailable';
   const text=document.createElement('p');
   text.textContent=blob?.size ? (autoStart?'Your movement details are being analysed on this device. Keep this page open until analysis finishes.':'Select Analyse exercise to add your angles and movement timings to this summary.') : 'No usable recording was captured. Allow camera recording in a supported browser, or use the video upload analyser.';
   card.append(heading,text);
-  const button=document.createElement('button');button.type='button';button.textContent='Analyse exercise';button.disabled=!blob?.size;card.append(button);
+  const button=document.createElement('button');button.type='button';button.textContent='Analyse exercise';button.disabled=!blob?.size;button.hidden=autoStart;card.append(button);
   if(!blob?.size){const a=document.createElement('a');a.href='video-analysis/';a.textContent='Open video analyser';card.append(a);}
   const status=document.createElement('p');status.setAttribute('role','status');card.append(status);host.append(card);
   let recordingURL=null;
@@ -49,17 +49,23 @@ export function mountExerciseAnalysis(host,{blob,metadata,onReport,returnToSumma
     const note=document.createElement('p');note.textContent='This video is available until you leave this page. Download it if you want to keep it. It is not uploaded.';
     review.append(label,player,save,note);card.append(review);
   }
-  let dialog=null,iframe=null,disposed=false,hasReport=false,token=crypto.randomUUID();
+  let dialog=null,iframe=null,disposed=false,hasReport=false,failed=false,readyTimer=null,token=crypto.randomUUID();
+  function analysisFailed(reason){
+    clearTimeout(readyTimer);failed=true;card.setAttribute('aria-busy','false');heading.textContent='Analysis needs another try';
+    text.textContent='Your recording has stopped. Your live results are still shown, and you can replay or download the video.';
+    status.textContent=reason;button.hidden=false;button.textContent='Retry analysis';
+  }
   function message(event){
     if(disposed||event.origin!==location.origin||event.source!==iframe?.contentWindow)return;
     if(event.data?.type==='exercise-analysis-ready'){
+      clearTimeout(readyTimer);
       iframe.contentWindow.postMessage({type:'exercise-analysis-load',token,blob,metadata},location.origin);
     } else if(event.data?.type==='exercise-analysis-complete'&&event.data.token===token) {
       const report=event.data.report;
       if(!report||!EXERCISES[report.exercise])return;
       // Re-selecting a different exercise in the analyser must not overwrite this session.
       if(report.exercise!==metadata.exercise){status.textContent='This report is for a different exercise. Download it in the analyser; this session was not changed.';return;}
-      onReport(report);button.textContent='Open full video report';
+      onReport(report);failed=false;card.setAttribute('aria-busy','false');heading.textContent='Your exercise summary is ready';button.textContent='Open full video report';button.hidden=autoStart;
       text.textContent='Analysis finished. You can replay or download the recording below.';
       status.textContent='Your summary now includes the video measurements.';
       if(returnToSummary&&!hasReport&&dialog?.open){
@@ -67,6 +73,8 @@ export function mountExerciseAnalysis(host,{blob,metadata,onReport,returnToSumma
         document.querySelector('#simpleExerciseSummary h2')?.focus();
       }
       hasReport=true;
+    } else if(event.data?.type==='exercise-analysis-error'&&event.data.token===token&&typeof event.data.text==='string') {
+      analysisFailed(event.data.text);
     } else if(event.data?.type==='exercise-analysis-status'&&event.data.token===token&&typeof event.data.text==='string') {
       status.textContent=event.data.text;
     }
@@ -78,12 +86,17 @@ export function mountExerciseAnalysis(host,{blob,metadata,onReport,returnToSumma
       const header=document.createElement('div');header.className='analysis-dialog-header';
       const title=document.createElement('strong');title.textContent=EXERCISES[metadata.exercise].name+' analysis';
       const close=document.createElement('button');close.type='button';close.textContent='Back to exercise summary';close.onclick=()=>dialog.close();header.append(title,close);
-      iframe=document.createElement('iframe');iframe.title='Exercise measurements and clinical references';iframe.src='video-analysis/?embedded=1&release=recording-voice-2';
+      iframe=document.createElement('iframe');iframe.title='Exercise measurements and clinical references';iframe.src='video-analysis/?embedded=1&release=automatic-summary-1';
+      iframe.onerror=()=>{if(!disposed)analysisFailed('The analyser could not load. Check your connection and try again.');};
+      readyTimer=setTimeout(()=>{if(!disposed)analysisFailed('The analyser did not respond. Check your connection and try again.');},20000);
       dialog.append(header,iframe);document.body.append(dialog);
     }
     if(show)dialog.showModal();
   }
-  button.onclick=()=>openAnalysis();
-  if(autoStart&&blob?.size){button.textContent='View analysis progress';status.textContent='Preparing your recording for analysis…';openAnalysis(false);}
-  return ()=>{disposed=true;window.removeEventListener('message',message);if(dialog){dialog.close();dialog.remove();}if(recordingURL)URL.revokeObjectURL(recordingURL);iframe=null;dialog=null;blob=null;};
+  button.onclick=()=>{
+    if(failed){clearTimeout(readyTimer);dialog?.close();dialog?.remove();dialog=null;iframe=null;token=crypto.randomUUID();failed=false;hasReport=false;button.hidden=autoStart;heading.textContent='Analysing your exercise';text.textContent='Your movement details are being analysed on this device. Keep this page open until analysis finishes.';status.textContent='Preparing your recording for analysis…';card.setAttribute('aria-busy','true');openAnalysis(!autoStart);}
+    else openAnalysis();
+  };
+  if(autoStart&&blob?.size){status.textContent='Preparing your recording for analysis…';card.setAttribute('aria-busy','true');openAnalysis(false);}
+  return ()=>{disposed=true;clearTimeout(readyTimer);window.removeEventListener('message',message);if(dialog){dialog.close();dialog.remove();}if(recordingURL)URL.revokeObjectURL(recordingURL);iframe=null;dialog=null;blob=null;};
 }
