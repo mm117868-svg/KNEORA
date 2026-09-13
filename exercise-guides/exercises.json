@@ -3,7 +3,7 @@
     "id": "heel_slide",
     "title": "Heel slide",
     "subtitle": "Bend your operated knee with control",
-    "duration": 57,
+    "duration": 61.6835,
     "active": true,
     "reviewStatus": "Draft for clinical review",
     "sources": [
@@ -12,56 +12,56 @@
     ],
     "cues": [
       {
-        "start": 0,
-        "end": 7,
+        "start": 0.0,
+        "end": 7.575166666666667,
         "heading": "Get comfortable",
         "text": "Lie on your back with your operated leg straight."
       },
       {
-        "start": 7,
-        "end": 13,
+        "start": 7.575166666666667,
+        "end": 14.068166666666666,
         "heading": "Settle your body",
         "text": "Rest your head and shoulders. Keep the other leg relaxed on the bed."
       },
       {
-        "start": 13,
-        "end": 19,
+        "start": 14.068166666666666,
+        "end": 20.56116666666667,
         "heading": "Slide your heel in",
         "text": "Slide your heel towards your bottom, bending your operated knee."
       },
       {
-        "start": 19,
-        "end": 25,
+        "start": 20.56116666666667,
+        "end": 27.054166666666667,
         "heading": "Keep contact",
         "text": "Keep your heel on the bed. Move within your comfortable range."
       },
       {
-        "start": 25,
-        "end": 31,
+        "start": 27.054166666666667,
+        "end": 33.54716666666667,
         "heading": "Slide back out",
         "text": "Slowly slide your heel away until your operated leg is straight again."
       },
       {
-        "start": 31,
-        "end": 37,
+        "start": 33.54716666666667,
+        "end": 40.04016666666667,
         "heading": "One complete movement",
         "text": "Keep your hips still. Do not force the bend or push through sharp pain."
       },
       {
-        "start": 37,
-        "end": 43,
+        "start": 40.04016666666667,
+        "end": 46.533166666666666,
         "heading": "Watch the slide again",
         "text": "The heel stays in contact as your operated knee bends, then slides back out."
       },
       {
-        "start": 43,
-        "end": 49,
+        "start": 46.533166666666666,
+        "end": 53.02616666666667,
         "heading": "Return and rest",
         "text": "Slowly slide your heel away until your operated leg is straight again."
       },
       {
-        "start": 49,
-        "end": 57,
+        "start": 53.02616666666667,
+        "end": 61.6835,
         "heading": "Follow your plan",
         "text": "Use the range and repetitions your physiotherapist has prescribed."
       }
@@ -73,7 +73,7 @@
     "id": "straight_leg_raise",
     "title": "Straight leg raise",
     "subtitle": "Lift with your operated knee straight",
-    "duration": 57,
+    "duration": 103.7055625,
     "active": true,
     "reviewStatus": "Draft for clinical review",
     "sources": [
@@ -82,56 +82,56 @@
     ],
     "cues": [
       {
-        "start": 0,
-        "end": 7,
+        "start": 0.0,
+        "end": 12.735770833333333,
         "heading": "Set your position",
         "text": "Lie on your back. Bend the other knee, with that foot supported."
       },
       {
-        "start": 7,
-        "end": 13,
+        "start": 12.735770833333333,
+        "end": 23.652145833333332,
         "heading": "Prepare your operated leg",
         "text": "Keep your operated leg straight, with your toes pointing towards the ceiling."
       },
       {
-        "start": 13,
-        "end": 19,
+        "start": 23.652145833333332,
+        "end": 34.56852083333333,
         "heading": "Tighten, then lift",
         "text": "Tighten the thigh of your operated leg. Keep your operated knee straight as you lift."
       },
       {
-        "start": 19,
-        "end": 25,
+        "start": 34.56852083333333,
+        "end": 45.48489583333333,
         "heading": "Keep your operated knee straight",
         "text": "Lift only a little. Keep your back relaxed and your pelvis still."
       },
       {
-        "start": 25,
-        "end": 31,
+        "start": 45.48489583333333,
+        "end": 56.401270833333335,
         "heading": "Lower gently",
         "text": "Lower your whole operated leg slowly back onto the bed."
       },
       {
-        "start": 31,
-        "end": 37,
+        "start": 56.401270833333335,
+        "end": 67.31764583333333,
         "heading": "Check your control",
         "text": "If your operated knee bends as you lift, stop and ask your physiotherapist."
       },
       {
-        "start": 37,
-        "end": 43,
+        "start": 67.31764583333333,
+        "end": 78.23402083333333,
         "heading": "Watch the lift again",
         "text": "Tighten the thigh of your operated leg first. Lift your operated leg as one piece, keeping your operated knee straight."
       },
       {
-        "start": 43,
-        "end": 49,
+        "start": 78.23402083333333,
+        "end": 89.15039583333333,
         "heading": "Return and rest",
         "text": "Lower your whole operated leg slowly back onto the bed."
       },
       {
-        "start": 49,
-        "end": 57,
+        "start": 89.15039583333333,
+        "end": 103.7055625,
         "heading": "Follow your plan",
         "text": "Use your prescribed repetitions. Stop if you feel sharp pain."
       }
@@ -143,7 +143,7 @@
     "id": "seated_extension",
     "title": "Seated knee extension",
     "subtitle": "Straighten, then lower slowly",
-    "duration": 57,
+    "duration": 70.186,
     "active": true,
     "reviewStatus": "Draft for clinical review",
     "sources": [
@@ -151,56 +151,56 @@
     ],
     "cues": [
       {
-        "start": 0,
-        "end": 7,
+        "start": 0.0,
+        "end": 8.619333333333334,
         "heading": "Sit upright",
         "text": "Sit on a stable chair with both feet resting on the floor."
       },
       {
-        "start": 7,
-        "end": 13,
+        "start": 8.619333333333334,
+        "end": 16.007333333333335,
         "heading": "Position your legs",
         "text": "Keep your bottom on the seat, thighs supported and knees facing forwards."
       },
       {
-        "start": 13,
-        "end": 19,
+        "start": 16.007333333333335,
+        "end": 23.395333333333333,
         "heading": "Straighten your operated knee",
         "text": "Lift the foot of your operated leg by slowly straightening your operated knee."
       },
       {
-        "start": 19,
-        "end": 25,
+        "start": 23.395333333333333,
+        "end": 30.783333333333335,
         "heading": "Keep the thigh of your operated leg supported",
         "text": "Keep the thigh of your operated leg on the seat. Straighten only as far as comfortable."
       },
       {
-        "start": 25,
-        "end": 31,
+        "start": 30.783333333333335,
+        "end": 38.17133333333334,
         "heading": "Lower with control",
         "text": "Bend your operated knee slowly and return your foot to the floor."
       },
       {
-        "start": 31,
-        "end": 37,
+        "start": 38.17133333333334,
+        "end": 45.559333333333335,
         "heading": "Stay steady",
         "text": "Keep your body upright. Avoid swinging your operated leg or leaning backwards."
       },
       {
-        "start": 37,
-        "end": 43,
+        "start": 45.559333333333335,
+        "end": 52.94733333333333,
         "heading": "Watch the movement again",
         "text": "The thigh stays still while the lower part of your operated leg rises. Keep your back upright."
       },
       {
-        "start": 43,
-        "end": 49,
+        "start": 52.94733333333333,
+        "end": 60.33533333333334,
         "heading": "Return and rest",
         "text": "Bend your operated knee slowly and return your foot to the floor."
       },
       {
-        "start": 49,
-        "end": 57,
+        "start": 60.33533333333334,
+        "end": 70.186,
         "heading": "Follow your plan",
         "text": "Use your prescribed repetitions and holds. Stop for sharp pain."
       }
@@ -212,7 +212,7 @@
     "id": "quad_set",
     "title": "Quad set",
     "subtitle": "Tighten the front of the thigh of your operated leg",
-    "duration": 57,
+    "duration": 67.19983333333334,
     "active": false,
     "reviewStatus": "Draft for clinical review",
     "sources": [
@@ -221,56 +221,56 @@
     ],
     "cues": [
       {
-        "start": 0,
-        "end": 7,
+        "start": 0.0,
+        "end": 8.252611111111111,
         "heading": "Support your operated leg",
         "text": "Lie comfortably with your operated leg supported and straight."
       },
       {
-        "start": 7,
-        "end": 13,
+        "start": 8.252611111111111,
+        "end": 15.32627777777778,
         "heading": "Settle your position",
         "text": "Keep the other knee bent and your head and shoulders relaxed."
       },
       {
-        "start": 13,
-        "end": 19,
+        "start": 15.32627777777778,
+        "end": 22.399944444444447,
         "heading": "Tighten the thigh of your operated leg",
         "text": "Pull your toes towards you and tighten the front of the thigh of your operated leg."
       },
       {
-        "start": 19,
-        "end": 25,
+        "start": 22.399944444444447,
+        "end": 29.473611111111115,
         "heading": "Press gently down",
         "text": "Gently press the back of your operated knee towards the bed."
       },
       {
-        "start": 25,
-        "end": 31,
+        "start": 29.473611111111115,
+        "end": 36.54727777777778,
         "heading": "Relax the muscle",
         "text": "Release the squeeze and let the thigh of your operated leg relax completely."
       },
       {
-        "start": 31,
-        "end": 37,
+        "start": 36.54727777777778,
+        "end": 43.62094444444445,
         "heading": "Keep breathing",
         "text": "Keep your heel supported. Breathe normally throughout the squeeze."
       },
       {
-        "start": 37,
-        "end": 43,
+        "start": 43.62094444444445,
+        "end": 50.694611111111115,
         "heading": "Watch the squeeze again",
         "text": "Tighten the front of the thigh of your operated leg. Only a small movement may be visible."
       },
       {
-        "start": 43,
-        "end": 49,
+        "start": 50.694611111111115,
+        "end": 57.76827777777778,
         "heading": "Return and rest",
         "text": "Release the squeeze and let the thigh of your operated leg relax completely."
       },
       {
-        "start": 49,
-        "end": 57,
+        "start": 57.76827777777778,
+        "end": 67.19983333333334,
         "heading": "Follow your plan",
         "text": "Use the hold time and repetitions in your prescribed exercise plan."
       }
@@ -282,7 +282,7 @@
     "id": "standing_flexion",
     "title": "Standing knee bend",
     "subtitle": "Bend behind you with support",
-    "duration": 57,
+    "duration": 60.163500000000006,
     "active": false,
     "reviewStatus": "Draft for clinical review",
     "sources": [
@@ -291,56 +291,56 @@
     ],
     "cues": [
       {
-        "start": 0,
-        "end": 7,
+        "start": 0.0,
+        "end": 7.3885000000000005,
         "heading": "Take a steady hold",
         "text": "Stand tall, holding a stable worktop for support."
       },
       {
-        "start": 7,
-        "end": 13,
+        "start": 7.3885000000000005,
+        "end": 13.7215,
         "heading": "Set your stance",
         "text": "Keep your feet about hip width apart and your knees facing forwards."
       },
       {
-        "start": 13,
-        "end": 19,
+        "start": 13.7215,
+        "end": 20.0545,
         "heading": "Bend behind you",
         "text": "Bend your operated knee and bring that heel up behind you."
       },
       {
-        "start": 19,
-        "end": 25,
+        "start": 20.0545,
+        "end": 26.387500000000003,
         "heading": "Keep your thighs aligned",
         "text": "Keep your thighs beside each other. Avoid leaning or arching your back."
       },
       {
-        "start": 25,
-        "end": 31,
+        "start": 26.387500000000003,
+        "end": 32.7205,
         "heading": "Return your foot",
         "text": "Slowly lower your foot until it rests on the floor again."
       },
       {
-        "start": 31,
-        "end": 37,
+        "start": 32.7205,
+        "end": 39.05350000000001,
         "heading": "Stay within your range",
         "text": "Keep holding the support. Do not force the bend."
       },
       {
-        "start": 37,
-        "end": 43,
+        "start": 39.05350000000001,
+        "end": 45.386500000000005,
         "heading": "Watch the bend again",
         "text": "The thigh stays still as the heel rises behind you. Keep holding your support."
       },
       {
-        "start": 43,
-        "end": 49,
+        "start": 45.386500000000005,
+        "end": 51.719500000000004,
         "heading": "Return and rest",
         "text": "Slowly lower your foot until it rests on the floor again."
       },
       {
-        "start": 49,
-        "end": 57,
+        "start": 51.719500000000004,
+        "end": 60.163500000000006,
         "heading": "Follow your plan",
         "text": "Only do this if prescribed. Use your own repetitions and holds."
       }
@@ -352,7 +352,7 @@
     "id": "mini_squat",
     "title": "Mini squat",
     "subtitle": "A small bend with support",
-    "duration": 57,
+    "duration": 72.197625,
     "active": false,
     "reviewStatus": "Draft for clinical review",
     "sources": [
@@ -361,56 +361,56 @@
     ],
     "cues": [
       {
-        "start": 0,
-        "end": 7,
+        "start": 0.0,
+        "end": 8.866375000000001,
         "heading": "Hold a stable support",
         "text": "Stand with feet hip width apart and hold a steady worktop."
       },
       {
-        "start": 7,
-        "end": 13,
+        "start": 8.866375000000001,
+        "end": 16.466125,
         "heading": "Start tall and steady",
         "text": "Place your feet flat. Keep your knees pointing in the same direction as your toes."
       },
       {
-        "start": 13,
-        "end": 19,
+        "start": 16.466125,
+        "end": 24.065875000000002,
         "heading": "Make a small bend",
         "text": "Bend your hips and knees a little, moving your bottom backwards."
       },
       {
-        "start": 19,
-        "end": 25,
+        "start": 24.065875000000002,
+        "end": 31.665625000000002,
         "heading": "Keep your feet planted",
         "text": "Keep both heels down, with your knees pointing in the same direction as your toes."
       },
       {
-        "start": 25,
-        "end": 31,
+        "start": 31.665625000000002,
+        "end": 39.265375000000006,
         "heading": "Stand tall again",
         "text": "Press through your feet and slowly straighten your hips and knees."
       },
       {
-        "start": 31,
-        "end": 37,
+        "start": 39.265375000000006,
+        "end": 46.865125000000006,
         "heading": "Keep it shallow",
         "text": "Keep the bend shallow and comfortable. Avoid bouncing."
       },
       {
-        "start": 37,
-        "end": 43,
+        "start": 46.865125000000006,
+        "end": 54.464875000000006,
         "heading": "Watch the small bend again",
         "text": "Move your bottom back and bend both knees a little. Keep your heels down."
       },
       {
-        "start": 43,
-        "end": 49,
+        "start": 54.464875000000006,
+        "end": 62.06462500000001,
         "heading": "Return and rest",
         "text": "Press through your feet and slowly straighten your hips and knees."
       },
       {
-        "start": 49,
-        "end": 57,
+        "start": 62.06462500000001,
+        "end": 72.197625,
         "heading": "Follow your plan",
         "text": "Only do this if prescribed. Follow your physiotherapist's range and repetitions."
       }
@@ -422,7 +422,7 @@
     "id": "sit_to_stand",
     "title": "Sit to stand",
     "subtitle": "Rise and sit with control",
-    "duration": 57,
+    "duration": 62.69683333333333,
     "active": false,
     "reviewStatus": "Draft for clinical review",
     "sources": [
@@ -431,56 +431,56 @@
     ],
     "cues": [
       {
-        "start": 0,
-        "end": 7,
+        "start": 0.0,
+        "end": 7.6996111111111105,
         "heading": "Prepare your chair",
         "text": "Sit towards the front of a firm, stable chair. Place both feet flat."
       },
       {
-        "start": 7,
-        "end": 13,
+        "start": 7.6996111111111105,
+        "end": 14.299277777777776,
         "heading": "Place your feet",
         "text": "Bring your feet back beneath your knees. Use the armrests if you need them."
       },
       {
-        "start": 13,
-        "end": 19,
+        "start": 14.299277777777776,
+        "end": 20.898944444444442,
         "heading": "Lean, then rise",
         "text": "Lean forwards from your hips, then push through your feet to stand."
       },
       {
-        "start": 19,
-        "end": 25,
+        "start": 20.898944444444442,
+        "end": 27.49861111111111,
         "heading": "Find your balance",
         "text": "Stand tall and steady. Use the armrests if you need support."
       },
       {
-        "start": 25,
-        "end": 31,
+        "start": 27.49861111111111,
+        "end": 34.098277777777774,
         "heading": "Sit down slowly",
         "text": "Move your bottom back and lower slowly onto the chair."
       },
       {
-        "start": 31,
-        "end": 37,
+        "start": 34.098277777777774,
+        "end": 40.697944444444445,
         "heading": "Control the landing",
         "text": "Keep your knees aligned with your toes. Avoid dropping into the seat."
       },
       {
-        "start": 37,
-        "end": 43,
+        "start": 40.697944444444445,
+        "end": 47.29761111111111,
         "heading": "Watch the rise again",
         "text": "Bring your chest forwards over your feet, then push up into standing."
       },
       {
-        "start": 43,
-        "end": 49,
+        "start": 47.29761111111111,
+        "end": 53.897277777777774,
         "heading": "Return and rest",
         "text": "Move your bottom back and lower slowly onto the chair."
       },
       {
-        "start": 49,
-        "end": 57,
+        "start": 53.897277777777774,
+        "end": 62.69683333333333,
         "heading": "Follow your plan",
         "text": "Use the chair height and number of repetitions your physiotherapist recommends."
       }
@@ -492,7 +492,7 @@
     "id": "squat",
     "title": "Squat",
     "subtitle": "A controlled bend and return",
-    "duration": 57,
+    "duration": 64.16260416666667,
     "active": false,
     "reviewStatus": "Draft for clinical review",
     "sources": [
@@ -501,56 +501,56 @@
     ],
     "cues": [
       {
-        "start": 0,
-        "end": 7,
+        "start": 0.0,
+        "end": 7.8796180555555555,
         "heading": "Set your stance",
         "text": "Stand with feet hip width apart. Use a stable support if needed."
       },
       {
-        "start": 7,
-        "end": 13,
+        "start": 7.8796180555555555,
+        "end": 14.633576388888889,
         "heading": "Prepare to move",
         "text": "Keep your feet flat and your chest comfortably lifted. Look ahead."
       },
       {
-        "start": 13,
-        "end": 19,
+        "start": 14.633576388888889,
+        "end": 21.38753472222222,
         "heading": "Bend with control",
         "text": "Move your bottom backwards as you bend your hips and knees."
       },
       {
-        "start": 19,
-        "end": 25,
+        "start": 21.38753472222222,
+        "end": 28.141493055555557,
         "heading": "Stay within your range",
         "text": "Keep your heels down and your knees aligned with your toes."
       },
       {
-        "start": 25,
-        "end": 31,
+        "start": 28.141493055555557,
+        "end": 34.89545138888889,
         "heading": "Return to standing",
         "text": "Push through both feet and straighten your hips and knees smoothly."
       },
       {
-        "start": 31,
-        "end": 37,
+        "start": 34.89545138888889,
+        "end": 41.649409722222224,
         "heading": "Choose the right depth",
         "text": "Go only as low as prescribed. Do not bounce or push through sharp pain."
       },
       {
-        "start": 37,
-        "end": 43,
+        "start": 41.649409722222224,
+        "end": 48.40336805555555,
         "heading": "Watch the bend again",
         "text": "Move back through your hips and bend both knees, keeping your feet planted."
       },
       {
-        "start": 43,
-        "end": 49,
+        "start": 48.40336805555555,
+        "end": 55.15732638888889,
         "heading": "Return and rest",
         "text": "Push through both feet and straighten your hips and knees smoothly."
       },
       {
-        "start": 49,
-        "end": 57,
+        "start": 55.15732638888889,
+        "end": 64.16260416666667,
         "heading": "Follow your plan",
         "text": "Only progress to this exercise when your physiotherapist has recommended it."
       }
@@ -562,7 +562,7 @@
     "id": "single_leg_stance",
     "title": "Single-leg balance",
     "subtitle": "Balance beside a stable support",
-    "duration": 57,
+    "duration": 71.70006249999999,
     "active": false,
     "reviewStatus": "Draft for clinical review",
     "sources": [
@@ -571,56 +571,56 @@
     ],
     "cues": [
       {
-        "start": 0,
-        "end": 7,
+        "start": 0.0,
+        "end": 8.805270833333333,
         "heading": "Hold your support",
         "text": "Stand beside a stable worktop and keep a hand on it."
       },
       {
-        "start": 7,
-        "end": 13,
+        "start": 8.805270833333333,
+        "end": 16.35264583333333,
         "heading": "Prepare your balance",
         "text": "Stand tall with both feet flat. Look ahead and keep your support within reach."
       },
       {
-        "start": 13,
-        "end": 19,
+        "start": 16.35264583333333,
+        "end": 23.900020833333333,
         "heading": "Lift the other foot",
         "text": "Shift onto your operated leg. Lift the other foot just clear of the floor."
       },
       {
-        "start": 19,
-        "end": 25,
+        "start": 23.900020833333333,
+        "end": 31.44739583333333,
         "heading": "Stay tall and level",
         "text": "Keep your pelvis level. Look ahead and keep holding the support."
       },
       {
-        "start": 25,
-        "end": 31,
+        "start": 31.44739583333333,
+        "end": 38.99477083333333,
         "heading": "Put your foot down",
         "text": "Gently return your lifted foot to the floor and rest."
       },
       {
-        "start": 31,
-        "end": 37,
+        "start": 38.99477083333333,
+        "end": 46.54214583333333,
         "heading": "Keep support close",
         "text": "Do not let go until your physiotherapist says you are ready."
       },
       {
-        "start": 37,
-        "end": 43,
+        "start": 46.54214583333333,
+        "end": 54.08952083333333,
         "heading": "Watch the balance again",
         "text": "Move your weight onto your operated leg, then lift the other foot a little."
       },
       {
-        "start": 43,
-        "end": 49,
+        "start": 54.08952083333333,
+        "end": 61.63689583333333,
         "heading": "Return and rest",
         "text": "Gently return your lifted foot to the floor and rest."
       },
       {
-        "start": 49,
-        "end": 57,
+        "start": 61.63689583333333,
+        "end": 71.70006249999999,
         "heading": "Follow your plan",
         "text": "Use your prescribed hold time. Stop if you feel unsteady or dizzy."
       }

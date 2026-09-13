@@ -1,0 +1,746 @@
+{
+  "engine": "OpenAI Speech API",
+  "model": "gpt-4o-mini-tts",
+  "voice": "marin",
+  "direction": "Voice: A warm adult British woman with a soft, rounded tone and a natural contemporary British English accent.\nDelivery: Speak gently and conversationally, as if reassuring one person sitting beside you. Keep the volume even, soften the ends of phrases, and use subtle natural changes in pitch.\nPacing: Calm and unhurried, around 135 words per minute, with a comfortable breath between sentences. Leave a clear two-second pause between paragraphs.\nStyle: Kind, clear and quietly encouraging. Avoid a bright presenter voice, exaggerated enthusiasm, clipped syllables, sing-song rhythm, whispering or ASMR. Read only the supplied script, exactly as written.",
+  "clips": [
+    {
+      "id": "heel_slide",
+      "duration": 61.6835,
+      "originalDuration": 57,
+      "animationTimeScale": 1.0821666666666667,
+      "videoStreamUnchanged": false,
+      "decodeCheckPassed": true,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Lie on your back with your operated leg straight.",
+          "start": 0.15,
+          "speechSeconds": 3.8826666666666667,
+          "availableSeconds": 7.225166666666667,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 2,
+          "text": "Rest your head and shoulders. Keep the other leg relaxed on the bed.",
+          "start": 7.725166666666667,
+          "speechSeconds": 4.671375,
+          "availableSeconds": 6.143,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 3,
+          "text": "Slide your heel towards your bottom, bending your operated knee.",
+          "start": 14.218166666666667,
+          "speechSeconds": 5.043666666666667,
+          "availableSeconds": 6.1430000000000025,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 4,
+          "text": "Keep your heel on the bed. Move within your comfortable range.",
+          "start": 20.711166666666667,
+          "speechSeconds": 4.777625,
+          "availableSeconds": 6.142999999999999,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 5,
+          "text": "Slowly slide your heel away until your operated leg is straight again.",
+          "start": 27.204166666666666,
+          "speechSeconds": 5.441541666666667,
+          "availableSeconds": 6.1430000000000025,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 6,
+          "text": "Keep your hips still. Do not force the bend or push through sharp pain.",
+          "start": 33.69716666666667,
+          "speechSeconds": 5.886333333333333,
+          "availableSeconds": 6.1430000000000025,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 7,
+          "text": "The heel stays in contact as your operated knee bends, then slides back out.",
+          "start": 40.19016666666667,
+          "speechSeconds": 5.993,
+          "availableSeconds": 6.142999999999995,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 8,
+          "text": "Slowly slide your heel away until your operated leg is straight again.",
+          "start": 46.683166666666665,
+          "speechSeconds": 5.441541666666667,
+          "availableSeconds": 6.1430000000000025,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 9,
+          "text": "Use the range and repetitions your physiotherapist has prescribed.",
+          "start": 53.17616666666667,
+          "speechSeconds": 5.043666666666667,
+          "availableSeconds": 8.307333333333334,
+          "modelSpeed": 0.95
+        }
+      ]
+    },
+    {
+      "id": "straight_leg_raise",
+      "duration": 103.7055625,
+      "originalDuration": 57,
+      "animationTimeScale": 1.8193958333333333,
+      "videoStreamUnchanged": false,
+      "decodeCheckPassed": true,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Lie on your back. Bend the other knee, with that foot supported.",
+          "start": 0.15,
+          "speechSeconds": 4.857958333333333,
+          "availableSeconds": 12.385770833333334,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 2,
+          "text": "Keep your operated leg straight, with your toes pointing towards the ceiling.",
+          "start": 12.885770833333334,
+          "speechSeconds": 5.552208333333334,
+          "availableSeconds": 10.566374999999999,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 3,
+          "text": "Tighten the thigh of your operated leg. Keep your operated knee straight as you lift.",
+          "start": 23.80214583333333,
+          "speechSeconds": 6.472291666666667,
+          "availableSeconds": 10.566374999999999,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 4,
+          "text": "Lift only a little. Keep your back relaxed and your pelvis still.",
+          "start": 34.71852083333333,
+          "speechSeconds": 5.939666666666667,
+          "availableSeconds": 10.566375000000003,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 5,
+          "text": "Lower your whole operated leg slowly back onto the bed.",
+          "start": 45.63489583333333,
+          "speechSeconds": 4.247208333333333,
+          "availableSeconds": 10.566375000000003,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 6,
+          "text": "If your operated knee bends as you lift, stop and ask your physiotherapist.",
+          "start": 56.551270833333334,
+          "speechSeconds": 5.79025,
+          "availableSeconds": 10.566374999999995,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 7,
+          "text": "Tighten the thigh of your operated leg first. Lift your operated leg as one piece, keeping your operated knee straight.",
+          "start": 67.46764583333334,
+          "speechSeconds": 10.416375,
+          "availableSeconds": 10.566375000000003,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 8,
+          "text": "Lower your whole operated leg slowly back onto the bed.",
+          "start": 78.38402083333334,
+          "speechSeconds": 4.247208333333333,
+          "availableSeconds": 10.566375000000003,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 9,
+          "text": "Use your prescribed repetitions. Stop if you feel sharp pain.",
+          "start": 89.30039583333334,
+          "speechSeconds": 5.257,
+          "availableSeconds": 14.205166666666665,
+          "modelSpeed": 0.95
+        }
+      ]
+    },
+    {
+      "id": "seated_extension",
+      "duration": 70.186,
+      "originalDuration": 57,
+      "animationTimeScale": 1.2313333333333334,
+      "videoStreamUnchanged": false,
+      "decodeCheckPassed": true,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Sit on a stable chair with both feet resting on the floor.",
+          "start": 0.15,
+          "speechSeconds": 4.265916666666667,
+          "availableSeconds": 8.269333333333334,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 2,
+          "text": "Keep your bottom on the seat, thighs supported and knees facing forwards.",
+          "start": 8.769333333333334,
+          "speechSeconds": 5.886333333333333,
+          "availableSeconds": 7.038000000000002,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 3,
+          "text": "Lift the foot of your operated leg by slowly straightening your operated knee.",
+          "start": 16.157333333333334,
+          "speechSeconds": 5.913875,
+          "availableSeconds": 7.0379999999999985,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 4,
+          "text": "Keep the thigh of your operated leg on the seat. Straighten only as far as comfortable.",
+          "start": 23.545333333333332,
+          "speechSeconds": 6.524791666666666,
+          "availableSeconds": 7.038000000000002,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 5,
+          "text": "Bend your operated knee slowly and return your foot to the floor.",
+          "start": 30.933333333333334,
+          "speechSeconds": 4.265916666666667,
+          "availableSeconds": 7.038000000000002,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 6,
+          "text": "Keep your body upright. Avoid swinging your operated leg or leaning backwards.",
+          "start": 38.321333333333335,
+          "speechSeconds": 6.888,
+          "availableSeconds": 7.0379999999999985,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 7,
+          "text": "The thigh stays still while the lower part of your operated leg rises. Keep your back upright.",
+          "start": 45.70933333333333,
+          "speechSeconds": 5.257,
+          "availableSeconds": 7.0379999999999985,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 8,
+          "text": "Bend your operated knee slowly and return your foot to the floor.",
+          "start": 53.09733333333333,
+          "speechSeconds": 4.265916666666667,
+          "availableSeconds": 7.038000000000006,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 9,
+          "text": "Use your prescribed repetitions and holds. Stop for sharp pain.",
+          "start": 60.48533333333334,
+          "speechSeconds": 5.276125,
+          "availableSeconds": 9.50066666666667,
+          "modelSpeed": 0.95
+        }
+      ]
+    },
+    {
+      "id": "quad_set",
+      "duration": 67.19983333333334,
+      "originalDuration": 57,
+      "animationTimeScale": 1.1789444444444446,
+      "videoStreamUnchanged": false,
+      "decodeCheckPassed": true,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Lie comfortably with your operated leg supported and straight.",
+          "start": 0.15,
+          "speechSeconds": 4.7245,
+          "availableSeconds": 7.902611111111112,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 2,
+          "text": "Keep the other knee bent and your head and shoulders relaxed.",
+          "start": 8.402611111111112,
+          "speechSeconds": 4.496166666666666,
+          "availableSeconds": 6.723666666666668,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 3,
+          "text": "Pull your toes towards you and tighten the front of the thigh of your operated leg.",
+          "start": 15.47627777777778,
+          "speechSeconds": 5.406333333333333,
+          "availableSeconds": 6.723666666666668,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 4,
+          "text": "Gently press the back of your operated knee towards the bed.",
+          "start": 22.549944444444446,
+          "speechSeconds": 4.4199166666666665,
+          "availableSeconds": 6.723666666666668,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 5,
+          "text": "Release the squeeze and let the thigh of your operated leg relax completely.",
+          "start": 29.623611111111114,
+          "speechSeconds": 5.203666666666667,
+          "availableSeconds": 6.723666666666665,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 6,
+          "text": "Keep your heel supported. Breathe normally throughout the squeeze.",
+          "start": 36.69727777777778,
+          "speechSeconds": 4.937,
+          "availableSeconds": 6.723666666666668,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 7,
+          "text": "Tighten the front of the thigh of your operated leg. Only a small movement may be visible.",
+          "start": 43.770944444444446,
+          "speechSeconds": 6.573666666666667,
+          "availableSeconds": 6.723666666666668,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 8,
+          "text": "Release the squeeze and let the thigh of your operated leg relax completely.",
+          "start": 50.844611111111114,
+          "speechSeconds": 5.203666666666667,
+          "availableSeconds": 6.723666666666668,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 9,
+          "text": "Use the hold time and repetitions in your prescribed exercise plan.",
+          "start": 57.91827777777778,
+          "speechSeconds": 4.810291666666667,
+          "availableSeconds": 9.081555555555562,
+          "modelSpeed": 0.95
+        }
+      ]
+    },
+    {
+      "id": "standing_flexion",
+      "duration": 60.163500000000006,
+      "originalDuration": 57,
+      "animationTimeScale": 1.0555,
+      "videoStreamUnchanged": false,
+      "decodeCheckPassed": true,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Stand tall, holding a stable worktop for support.",
+          "start": 0.15,
+          "speechSeconds": 4.476541666666667,
+          "availableSeconds": 7.038500000000001,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 2,
+          "text": "Keep your feet about hip width apart and your knees facing forwards.",
+          "start": 7.538500000000001,
+          "speechSeconds": 4.254208333333334,
+          "availableSeconds": 5.9830000000000005,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 3,
+          "text": "Bend your operated knee and bring that heel up behind you.",
+          "start": 13.871500000000001,
+          "speechSeconds": 5.203666666666667,
+          "availableSeconds": 5.9830000000000005,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 4,
+          "text": "Keep your thighs beside each other. Avoid leaning or arching your back.",
+          "start": 20.2045,
+          "speechSeconds": 4.819708333333334,
+          "availableSeconds": 5.983000000000002,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 5,
+          "text": "Slowly lower your foot until it rests on the floor again.",
+          "start": 26.5375,
+          "speechSeconds": 4.524625,
+          "availableSeconds": 5.982999999999999,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 6,
+          "text": "Keep holding the support. Do not force the bend.",
+          "start": 32.8705,
+          "speechSeconds": 4.265833333333333,
+          "availableSeconds": 5.983000000000006,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 7,
+          "text": "The thigh stays still as the heel rises behind you. Keep holding your support.",
+          "start": 39.203500000000005,
+          "speechSeconds": 5.833,
+          "availableSeconds": 5.982999999999999,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 8,
+          "text": "Slowly lower your foot until it rests on the floor again.",
+          "start": 45.536500000000004,
+          "speechSeconds": 4.524625,
+          "availableSeconds": 5.982999999999999,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 9,
+          "text": "Only do this if prescribed. Use your own repetitions and holds.",
+          "start": 51.8695,
+          "speechSeconds": 4.634416666666667,
+          "availableSeconds": 8.094000000000003,
+          "modelSpeed": 0.95
+        }
+      ]
+    },
+    {
+      "id": "mini_squat",
+      "duration": 72.197625,
+      "originalDuration": 57,
+      "animationTimeScale": 1.2666250000000001,
+      "videoStreamUnchanged": false,
+      "decodeCheckPassed": true,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Stand with feet hip width apart and hold a steady worktop.",
+          "start": 0.15,
+          "speechSeconds": 4.883875,
+          "availableSeconds": 8.516375000000002,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 2,
+          "text": "Place your feet flat. Keep your knees pointing in the same direction as your toes.",
+          "start": 9.016375000000002,
+          "speechSeconds": 7.09975,
+          "availableSeconds": 7.249750000000001,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 3,
+          "text": "Bend your hips and knees a little, moving your bottom backwards.",
+          "start": 16.616125,
+          "speechSeconds": 5.939666666666667,
+          "availableSeconds": 7.249750000000001,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 4,
+          "text": "Keep both heels down, with your knees pointing in the same direction as your toes.",
+          "start": 24.215875,
+          "speechSeconds": 5.939666666666667,
+          "availableSeconds": 7.249750000000001,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 5,
+          "text": "Press through your feet and slowly straighten your hips and knees.",
+          "start": 31.815625,
+          "speechSeconds": 5.465041666666667,
+          "availableSeconds": 7.249750000000004,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 6,
+          "text": "Keep the bend shallow and comfortable. Avoid bouncing.",
+          "start": 39.415375000000004,
+          "speechSeconds": 4.714166666666666,
+          "availableSeconds": 7.249750000000001,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 7,
+          "text": "Move your bottom back and bend both knees a little. Keep your heels down.",
+          "start": 47.015125000000005,
+          "speechSeconds": 5.030375,
+          "availableSeconds": 7.249750000000001,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 8,
+          "text": "Press through your feet and slowly straighten your hips and knees.",
+          "start": 54.614875000000005,
+          "speechSeconds": 5.465041666666667,
+          "availableSeconds": 7.249750000000001,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 9,
+          "text": "Only do this if prescribed. Follow your physiotherapist's range and repetitions.",
+          "start": 62.214625000000005,
+          "speechSeconds": 6.509833333333333,
+          "availableSeconds": 9.782999999999996,
+          "modelSpeed": 0.95
+        }
+      ]
+    },
+    {
+      "id": "sit_to_stand",
+      "duration": 62.69683333333333,
+      "originalDuration": 57,
+      "animationTimeScale": 1.0999444444444444,
+      "videoStreamUnchanged": false,
+      "decodeCheckPassed": true,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Sit towards the front of a firm, stable chair. Place both feet flat.",
+          "start": 0.15,
+          "speechSeconds": 6.206333333333333,
+          "availableSeconds": 7.349611111111111,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 2,
+          "text": "Bring your feet back beneath your knees. Use the armrests if you need them.",
+          "start": 7.849611111111111,
+          "speechSeconds": 6.099666666666667,
+          "availableSeconds": 6.249666666666666,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 3,
+          "text": "Lean forwards from your hips, then push through your feet to stand.",
+          "start": 14.449277777777777,
+          "speechSeconds": 5.310333333333333,
+          "availableSeconds": 6.249666666666666,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 4,
+          "text": "Stand tall and steady. Use the armrests if you need support.",
+          "start": 21.04894444444444,
+          "speechSeconds": 5.043666666666667,
+          "availableSeconds": 6.249666666666668,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 5,
+          "text": "Move your bottom back and lower slowly onto the chair.",
+          "start": 27.64861111111111,
+          "speechSeconds": 4.204625,
+          "availableSeconds": 6.2496666666666645,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 6,
+          "text": "Keep your knees aligned with your toes. Avoid dropping into the seat.",
+          "start": 34.24827777777777,
+          "speechSeconds": 5.513,
+          "availableSeconds": 6.249666666666672,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 7,
+          "text": "Bring your chest forwards over your feet, then push up into standing.",
+          "start": 40.847944444444444,
+          "speechSeconds": 4.83075,
+          "availableSeconds": 6.2496666666666645,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 8,
+          "text": "Move your bottom back and lower slowly onto the chair.",
+          "start": 47.44761111111111,
+          "speechSeconds": 4.204625,
+          "availableSeconds": 6.2496666666666645,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 9,
+          "text": "Use the chair height and number of repetitions your physiotherapist recommends.",
+          "start": 54.04727777777777,
+          "speechSeconds": 5.257,
+          "availableSeconds": 8.449555555555557,
+          "modelSpeed": 0.95
+        }
+      ]
+    },
+    {
+      "id": "squat",
+      "duration": 64.16260416666667,
+      "originalDuration": 57,
+      "animationTimeScale": 1.1256597222222222,
+      "videoStreamUnchanged": false,
+      "decodeCheckPassed": true,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Stand with feet hip width apart. Use a stable support if needed.",
+          "start": 0.15,
+          "speechSeconds": 5.726333333333334,
+          "availableSeconds": 7.529618055555556,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 2,
+          "text": "Keep your feet flat and your chest comfortably lifted. Look ahead.",
+          "start": 8.029618055555556,
+          "speechSeconds": 3.4515416666666665,
+          "availableSeconds": 6.403958333333334,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 3,
+          "text": "Move your bottom backwards as you bend your hips and knees.",
+          "start": 14.78357638888889,
+          "speechSeconds": 4.261041666666666,
+          "availableSeconds": 6.403958333333332,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 4,
+          "text": "Keep your heels down and your knees aligned with your toes.",
+          "start": 21.53753472222222,
+          "speechSeconds": 4.335958333333333,
+          "availableSeconds": 6.403958333333337,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 5,
+          "text": "Push through both feet and straighten your hips and knees smoothly.",
+          "start": 28.291493055555556,
+          "speechSeconds": 4.777625,
+          "availableSeconds": 6.40395833333333,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 6,
+          "text": "Go only as low as prescribed. Do not bounce or push through sharp pain.",
+          "start": 35.045451388888885,
+          "speechSeconds": 6.253958333333333,
+          "availableSeconds": 6.403958333333337,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 7,
+          "text": "Move back through your hips and bend both knees, keeping your feet planted.",
+          "start": 41.79940972222222,
+          "speechSeconds": 5.03375,
+          "availableSeconds": 6.40395833333333,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 8,
+          "text": "Push through both feet and straighten your hips and knees smoothly.",
+          "start": 48.55336805555555,
+          "speechSeconds": 4.777625,
+          "availableSeconds": 6.403958333333337,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 9,
+          "text": "Only progress to this exercise when your physiotherapist has recommended it.",
+          "start": 55.30732638888889,
+          "speechSeconds": 4.971041666666666,
+          "availableSeconds": 8.655277777777778,
+          "modelSpeed": 0.95
+        }
+      ]
+    },
+    {
+      "id": "single_leg_stance",
+      "duration": 71.70006249999999,
+      "originalDuration": 57,
+      "animationTimeScale": 1.2578958333333332,
+      "videoStreamUnchanged": false,
+      "decodeCheckPassed": true,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Stand beside a stable worktop and keep a hand on it.",
+          "start": 0.15,
+          "speechSeconds": 2.88,
+          "availableSeconds": 8.455270833333334,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 2,
+          "text": "Stand tall with both feet flat. Look ahead and keep your support within reach.",
+          "start": 8.955270833333334,
+          "speechSeconds": 7.047375,
+          "availableSeconds": 7.197374999999997,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 3,
+          "text": "Shift onto your operated leg. Lift the other foot just clear of the floor.",
+          "start": 16.50264583333333,
+          "speechSeconds": 5.998291666666667,
+          "availableSeconds": 7.197375000000003,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 4,
+          "text": "Keep your pelvis level. Look ahead and keep holding the support.",
+          "start": 24.05002083333333,
+          "speechSeconds": 4.412083333333333,
+          "availableSeconds": 7.197374999999999,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 5,
+          "text": "Gently return your lifted foot to the floor and rest.",
+          "start": 31.59739583333333,
+          "speechSeconds": 5.043666666666667,
+          "availableSeconds": 7.197374999999996,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 6,
+          "text": "Do not let go until your physiotherapist says you are ready.",
+          "start": 39.144770833333325,
+          "speechSeconds": 4.822,
+          "availableSeconds": 7.197375000000003,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 7,
+          "text": "Move your weight onto your operated leg, then lift the other foot a little.",
+          "start": 46.69214583333333,
+          "speechSeconds": 5.566333333333334,
+          "availableSeconds": 7.197375000000003,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 8,
+          "text": "Gently return your lifted foot to the floor and rest.",
+          "start": 54.23952083333333,
+          "speechSeconds": 5.043666666666667,
+          "availableSeconds": 7.197374999999996,
+          "modelSpeed": 0.95
+        },
+        {
+          "cue": 9,
+          "text": "Use your prescribed hold time. Stop if you feel unsteady or dizzy.",
+          "start": 61.786895833333325,
+          "speechSeconds": 6.469666666666667,
+          "availableSeconds": 9.71316666666666,
+          "modelSpeed": 0.95
+        }
+      ]
+    }
+  ]
+}
