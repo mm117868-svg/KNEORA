@@ -1,0 +1,56 @@
+[
+  {
+    "exercise": "heel_slide",
+    "original_marin_audio_exact_match": true,
+    "full_decode": "passed",
+    "sha256": "44bd7fdeb4eeadb6543549fe0e1d156cfcf9a04cc7a9484d58923c4684da86f6"
+  },
+  {
+    "exercise": "straight_leg_raise",
+    "original_marin_audio_exact_match": true,
+    "full_decode": "passed",
+    "sha256": "454a4c3d9ff781fec2acff4cac7843b27affc330b5df602a89baa845c337007b"
+  },
+  {
+    "exercise": "seated_extension",
+    "original_marin_audio_exact_match": true,
+    "full_decode": "passed",
+    "sha256": "4a35200b5e753022aff0465f6637ae20ce8ddd12ecccb8e641303ea4bbb797aa"
+  },
+  {
+    "exercise": "sit_to_stand",
+    "original_marin_audio_exact_match": true,
+    "full_decode": "passed",
+    "sha256": "56ed4a29d3041a1043a125fb76115dd4aa580bcf8f82d529d7fcb5228c8b8d8d"
+  },
+  {
+    "exercise": "squat",
+    "original_marin_audio_exact_match": true,
+    "full_decode": "passed",
+    "sha256": "7585dd363b8d02df64f523f46aec66bf670e310175060b39e4d514ab1ac83288"
+  },
+  {
+    "exercise": "single_leg_stance",
+    "original_marin_audio_exact_match": true,
+    "full_decode": "passed",
+    "sha256": "5c7a1d4b0c3e2dd3822baf95a628e1a914159bec726f891cd5703b591b9a0bab"
+  },
+  {
+    "exercise": "mini_squat",
+    "original_marin_audio_exact_match": true,
+    "full_decode": "passed",
+    "sha256": "52e2af172562d7720e16b239debec84d9116d182f8c1bb1983f727012b64debe"
+  },
+  {
+    "exercise": "standing_flexion",
+    "original_marin_audio_exact_match": true,
+    "full_decode": "passed",
+    "sha256": "2783a97f8c1ff71094b5afc70378642d7e30b98a8e0f00ada17424dbc7c17a2d"
+  },
+  {
+    "exercise": "quad_set",
+    "original_marin_audio_exact_match": true,
+    "full_decode": "passed",
+    "sha256": "67d0fd91a3664a4d8e89924536818b8ac9df197cff09dbb06c534afb8a50c573"
+  }
+]

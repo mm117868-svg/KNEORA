@@ -1,0 +1,47 @@
+{
+  "heel_slide": [
+    4.95,
+    2.5,
+    4.95
+  ],
+  "straight_leg_raise": [
+    0,
+    2,
+    4.95
+  ],
+  "seated_extension": [
+    0,
+    3.5,
+    0
+  ],
+  "sit_to_stand": [
+    0,
+    4.9,
+    0
+  ],
+  "squat": [
+    0,
+    2.4,
+    0
+  ],
+  "single_leg_stance": [
+    1,
+    1.6,
+    1
+  ],
+  "mini_squat": [
+    0,
+    0.9,
+    0
+  ],
+  "standing_flexion": [
+    0,
+    2,
+    0
+  ],
+  "quad_set": [
+    0,
+    2.5,
+    0
+  ]
+}

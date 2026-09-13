@@ -1,0 +1,18 @@
+{
+  "sources": {
+    "sit_to_stand": "4R0UWmR9Aa",
+    "squat": "rg9HP1Mxtc",
+    "single_leg_stance": "s73KiJol8e",
+    "mini_squat": "jU6bigTLD0",
+    "standing_flexion": "5jOEy7iKxe",
+    "quad_set": "bxJC9X05Y2"
+  },
+  "notes": {
+    "standing_flexion": "Draft shows a fixed support frame; original Marin narration refers to a stable worktop. Review before publication.",
+    "mini_squat": "Only first 0.9 seconds used to retain shallow bend.",
+    "single_leg_stance": "Only 1.0 to 1.6 seconds used to keep foot close to floor.",
+    "squat": "Only first 2.4 seconds used to avoid excessive depth.",
+    "all": "Return phases reverse the selected movement. Existing Marin recordings and cue wording unchanged.",
+    "quad_set": "Reference-based subtle movement; heel remains supported. No clinical validation."
+  }
+}
