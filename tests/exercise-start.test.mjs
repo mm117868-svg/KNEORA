@@ -114,7 +114,7 @@ function finishHarness(count = 10) {
   const context = vm.createContext({setExerciseSidebar(){},$, running: true, rafId: 0, t0: 0, openGen: 1, recorder, chunks: [],
     performance: {now: () => 10000}, cancelAnimationFrame(){}, finishRecording, console,
     stopCamera(){events.push('camera stopped');}, current: {kind: 'reps', count: 10},
-    monitor: {summary: () => ({repetitions: count})}, legGate: {finish: () => ({repetitions: count})}, trackWanted: () => false,
+    monitor: {summary: () => ({repetitions: count})}, positionCounter: {summary: () => ({repetitions: count})}, legGate: {finish: () => ({repetitions: count})}, trackWanted: () => false,
     completionNotice, appVoice: {play(key){events.push(key); return true;}}});
   // Exercise the actual finish sequence through the confirmation, without saving any patient record.
   const start = html.indexOf('async function finish(abandon');

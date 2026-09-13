@@ -696,7 +696,6 @@ import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
 import { renderProgressToDate } from "./progress-to-date.mjs?v=high-five-small-1";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
 import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=position-1";
-import { showExerciseGuide } from "./exercise-guides/guide-player.js?v=marin-v2";
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-1";
 import {SkeletonAverage} from "./live-overlay.mjs";
 import {loadHighFive, highFiveState, drawHands, HIGH_FIVE_SETTINGS} from "./high-five.mjs";
@@ -841,7 +840,7 @@ let phase = 1;   // the week section the open exercise came from; written into t
 function currentPhase() { const d = daysPostOp($("opdate").value, new Date()); return d === null || d < 0 ? null : phaseForDay(d); }
 function exerciseDemoLink(ex) {
   const path=ex.id === "seated_extension" ? "fitness-avatar/v2/seated_extension.mp4" : `videos/${ex.id}.mp4`;
-  return `<a class="exercise-demo" href="./exercise-guides/${path}" target="_blank" rel="noopener" aria-label="Watch ${esc(ex.title)} demonstration (opens in a new tab)">Watch demonstration ↗</a>`;
+  return `<a class="exercise-demo" href="./exercise-guides/${path}" target="_blank" rel="noopener" aria-label="Watch example: ${esc(ex.title)} (opens in a new tab)">Watch example ↗</a>`;
 }
 function renderWeeks() {
   const now = currentPhase();
@@ -852,7 +851,7 @@ function renderWeeks() {
       <div class="ic"><svg viewBox="0 0 24 24">${ICONS[ex.icon]}</svg></div>
       <div><h3>${esc(ex.title)}</h3><p>${esc(ex.blurb)}</p><p class="meta">${isExerciseAvailable(ex) ? `${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}` : "To be introduced in due course"}</p></div>
       <div class="tag">${isExerciseAvailable(ex) ? esc(ex.tag) : "Pending"}</div></button>${exerciseDemoLink(ex)}</div>`).join("")}</div></section>`).join("");
-  $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; chooseExercise(LIB[phase][+b.dataset.i]); });
+  $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; openExercise(LIB[phase][+b.dataset.i]); });
 }
 function renderToday() {
   const now=currentPhase(),host=$("todayExercises"),days=daysPostOp($("opdate").value,new Date());
@@ -861,7 +860,7 @@ function renderToday() {
   host.innerHTML+=`<p class="small-note">Day ${days} after your operation · ${esc(PHASES[now])}. Follow the exercises your physiotherapist has given you.</p><div class="list"></div><div class="today-links"><a href="?view=recovery-summary">Patient summary →</a><a href="?view=progress#exercise-history">Exercise history →</a><a href="?view=progress#progress">View progress and daily checklist →</a><a href="#weeknav">Browse full programme ↓</a></div>`;
   if (!["left","right"].includes($("side").value)) host.querySelector('.list').insertAdjacentHTML('beforebegin','<p class="setup-prompt">Before your first session, <a href="./#side">select your operated leg in Settings →</a></p>');
   const list=host.querySelector('.list');
-  $("week"+now).querySelectorAll('.ex-card:not(:disabled)').forEach(card=>{const copy=card.closest(".exercise-row").cloneNode(true),button=copy.querySelector(".ex-card");button.onclick=()=>{phase=now;chooseExercise(LIB[now][+button.dataset.i]);};list.append(copy);});
+  $("week"+now).querySelectorAll('.ex-card:not(:disabled)').forEach(card=>{const copy=card.closest(".exercise-row").cloneNode(true),button=copy.querySelector(".ex-card");button.onclick=()=>{phase=now;openExercise(LIB[now][+button.dataset.i]);};list.append(copy);});
   if(!list.children.length)list.innerHTML='<p class="small-note">The exercises in this phase are pending. Browse the full programme below and follow your physiotherapist’s plan.</p>';
 }
 function renderHome() {
@@ -961,10 +960,6 @@ let gateBoxReference = null;
 let manualCountingBox = false;
 let legGate = null; // Accepts optical candidates only after the selected leg completes its movement.
 
-async function chooseExercise(ex) {
-  if (!isExerciseAvailable(ex) || !["left", "right"].includes($("side").value)) return openExercise(ex);
-  if (await showExerciseGuide(ex)) return openExercise(ex);
-}
 const appVoice = new AppVoice({onState: () => refreshHint()});
 $("voiceTest").onclick = async () => {
   $("voiceStatus").textContent = "Preparing Marin…";
