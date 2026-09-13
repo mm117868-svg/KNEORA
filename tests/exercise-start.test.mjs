@@ -157,7 +157,7 @@ for (const exercise of ['straight_leg_raise', 'seated_extension', 'heel_slide'])
       loadRecords: () => records, patientRecords: records => records, esc: value => value,
       renderBasicExerciseSummary: record => record.exercise_analysis ? 'Analysed summary' : 'Live summary',
       renderDetailedExerciseSummary: record => record.exercise_analysis ? 'Full measured report' : 'Waiting for analysis',
-      renderHome(){}, disposeAnalysis(){}, smallMovement: () => false,
+      renderHome(){}, disposeAnalysis(){}, mountExerciseContext(){}, smallMovement: () => false,
       mountExerciseAnalysis(host, options){analysis = options; h.events.push('analysis mounted'); return () => {};},
       ask(){h.events.push('patient question'); return new Promise(resolve => {answer = resolve;});}
     });

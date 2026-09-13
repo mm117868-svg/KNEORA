@@ -1,3 +1,5 @@
+import {renderExerciseEvidenceSummary} from './exercise-evidence.mjs?v=pubmed-1';
+import {exerciseContextFacts} from './exercise-context.mjs?v=pubmed-1';
 import {distribution} from './video-analysis/statistics.mjs';
 import {recordedCount} from './patient-progress.js?v=high-five-small-1';
 import {trackingCoverage,videoRepetitionCount} from './measurement-quality.mjs?v=high-five-small-1';
@@ -99,8 +101,9 @@ export function renderDetailedExerciseSummary(record) {
     ['Cadence during complete repetitions',number(t.cadence,' reps/min')]);
   // A partial video count must not be divided by the whole session duration.
   if(!s.report || (finite(s.analysed)&&finite(s.total)&&Math.abs(s.analysed-s.total)<=1&&(s.config.start??0)===0))sessionRows.push(['Repetitions per minute over the whole session',number(t.sessionRate,' reps/min')]);
-  let html=`<section class="exercise-details" aria-label="Full exercise breakdown"><h3>Full exercise breakdown</h3><p>All available measurements for this session. “Not measured” means the recording did not provide that information.</p><h4>Repetitions and time</h4>${facts(sessionRows)}`;
+  let html=`<section class="exercise-details" aria-label="Full exercise breakdown"><h3>Full exercise breakdown</h3><p>All available measurements for this session. “Not measured” means the recording did not provide that information.</p>${renderExerciseEvidenceSummary(record)}<h4>Repetitions and time</h4>${facts(sessionRows)}`;
   if(s.config.smallMovement||record.pose_validation?.small_movement)html+='<p>Small movement mode: repetitions are observed movement attempts. The angles are shown separately and do not establish a full-range exercise or clinical test result.</p>';
+  html+=`<h4>Help, resistance and symptoms during the exercise</h4>${facts(exerciseContextFacts(record))}<p>These details are reported by the patient, not detected by the camera. Compare sessions using the same help, load and setup. Band type and tension are not quantified here.</p>`;
   const symptoms=[];
   if(finite(record.patient?.pain_0_10)&&record.patient.pain_0_10>=0&&record.patient.pain_0_10<=10)symptoms.push(['Pain after exercise',`${record.patient.pain_0_10}/10`]);
   if(finite(record.patient?.difficulty_1_5)&&record.patient.difficulty_1_5>=1&&record.patient.difficulty_1_5<=5)symptoms.push(['Reported effort',`${record.patient.difficulty_1_5}/5`]);

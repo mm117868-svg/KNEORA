@@ -1,8 +1,8 @@
 import {recordedCount} from './patient-progress.js?v=position-1';
-import {EXERCISE_NAMES,METRICS,finite,postOpDay,measurementSeries} from './progress-data.mjs?v=high-five-small-1';
+import {EXERCISE_NAMES,METRICS,finite,postOpDay,measurementSeries} from './progress-data.mjs?v=pubmed-1';
 import {esc,shortDate,dayLabel} from './progress-shared.mjs';
 import {MIN_COUNT_COVERAGE,trackingCoverage,videoRepetitionCount,trackingFeedback} from './measurement-quality.mjs?v=high-five-small-1';
-import {renderDetailedExerciseSummary} from './exercise-details.mjs?v=full-breakdown-1';
+import {renderDetailedExerciseSummary} from './exercise-details.mjs?v=pubmed-1';
 const positive=n=>finite(n)!==null&&n>0?n:null;
 const nonnegative=n=>finite(n)!==null&&n>=0?n:null;
 const round=n=>Math.round(n*10)/10;
@@ -23,7 +23,7 @@ export function timeWords(seconds) {
 }
 const timingWords=s=>finite(s)===null?'not measured':`${round(s)} sec`;
 const facts={
- straight_leg_raise:{title:'Straight leg raise',focus:'This exercise works on keeping your knee steady as you lift your leg. Follow the lift height and pace your physiotherapist has given you.',key:'extraBend',direction:'extra knee bend during lifting',source:'https://www.orthoinfo.org/recovery/total-knee-replacement-exercise-guide/'},
+ straight_leg_raise:{title:'Straight leg raise',focus:'This exercise works on keeping your knee steady as you lift your leg. Follow the lift height and pace your physiotherapist has given you.',key:'extraBend',direction:'extra knee bend during lifting',source:'https://pubmed.ncbi.nlm.nih.gov/28864244/'},
  seated_extension:{title:'Seated knee extension',focus:'The useful things to follow are how far you can straighten your knee and how steadily you bend it back. Keep to the range and pace in your exercise plan.',key:'leastBend',direction:'bend at your straightest position',source:'https://doi.org/10.1093/ptj/pzag058'},
  heel_slide:{title:'Heel slides',focus:'The useful things to follow are how far your knee bends and how well you straighten it again. Build range within your exercise plan, alongside how your knee feels.',key:'greatestBend',direction:'bend at your furthest point',source:'https://doi.org/10.1186/s12891-020-03493-x'}
 };

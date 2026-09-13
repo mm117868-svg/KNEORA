@@ -1,3 +1,5 @@
+import {exercisePerformanceMetrics} from './exercise-evidence.mjs?v=pubmed-1';
+import {normaliseExerciseContext,exerciseContextKey,exerciseContextFacts} from './exercise-context.mjs?v=pubmed-1';
 import {recordedCount} from './patient-progress.js?v=high-five-small-1';
 export const EXERCISE_NAMES = {straight_leg_raise:'Straight leg raise',seated_extension:'Seated knee extension',heel_slide:'Heel slides'};
 export const finite = n => typeof n === 'number' && Number.isFinite(n) ? n : null;
@@ -11,6 +13,8 @@ const reps = r => report(r)?.reps || [];
 const metric = (id,label,unit,get,interpretation,best='range',target=null,source='video') => ({id,label,unit,get,interpretation,best,target,source});
 const timing = 'Follow the pace prescribed by your physiotherapist. There is no validated universal time target for this exercise after knee replacement. Timing alone does not measure control.';
 const common = [
+  metric('painDuring','Worst pain reported during exercise','/10',r=>normaliseExerciseContext(r.patient?.exercise_context).pain_during_0_10,'Patient recall of the worst pain during this session, separate from pain afterwards. Interpret with activity, assistance and the individual plan.','range',null,'patient'),
+  metric('addedWeight','Reported added weight','kg',r=>normaliseExerciseContext(r.patient?.exercise_context).load_kg,'Only an explicitly reported added weight. This is exercise context, not measured quadriceps force or advice to increase resistance.','range',null,'patient'),
   metric('cycle','Repetition time (average)','s',r=>m(r).meanCycleDuration,timing),
   metric('outward','Outward movement time (average)','s',r=>m(r).meanOutwardDuration,timing),
   metric('return','Return time (average)','s',r=>m(r).meanReturnDuration,timing,'target','targetLower'),
@@ -29,6 +33,7 @@ const common = [
 ];
 export const METRICS = {
  straight_leg_raise:[
+  metric('typicalExtraBend','Typical extra knee bend during lift','°',r=>exercisePerformanceMetrics(r).extraBend?.median,'Median extra bend across completed lifts. Less extra bend may describe better maintenance of the starting position, but absolute knee bend matters too. Not clinical extension lag.','min'),
   metric('extraBend','Additional knee bend during lift','°',r=>maximum(reps(r).map(p=>p.maxAdditionalBend)),'Less additional bend may indicate better maintenance of the starting knee position. Aim to retain the extension available to you, as advised by your physiotherapist. This is not clinical extension lag.','min'),
   metric('hip','Approximate hip flexion (peak)','°',r=>m(r).hipFlexion?.maximum,'A trunk-relative 2D estimate. Lift to the range prescribed for you; a higher lift is not automatically better.'),
   metric('lift','Hip lift range above lowered position','°',r=>maximum(reps(r).map(p=>p.peakLift)),'Largest lift in a completed repetition, measured relative to the observed lowered position. Compare with an entered exercise target, not a universal postoperative angle.','target','targetLift'),
@@ -36,12 +41,15 @@ export const METRICS = {
   metric('qab','Manually entered clinical QAB total','/6',r=>report(r)?.clinicalScore?.total ?? report(r)?.slrAssessment?.clinicalScore?.total,'The complete clinician-assessed Quadriceps Activation Battery has three components, each 0 to 2. Six is the scale maximum, not a deadline or a measure of all recovery. Video estimates are excluded.','max',null,'clinical')
  ],
  seated_extension:[
+  metric('typicalStraightening','Typical bend remaining at straightest point','°',r=>exercisePerformanceMetrics(r).straightening?.median,'Median of the least bend in each completed repetition. Less bend describes a straighter knee in this task, not a clinical extension-lag measurement.','min'),
+  metric('straighteningVariation','Variation in straightening endpoints','°',r=>exercisePerformanceMetrics(r).straightening?.standardDeviation,'Standard deviation across at least two completed repetitions. A smaller spread means more similar endpoints, not proven muscle control.'),
   metric('leastBend','Least knee bend achieved','°',r=>m(r).bestObservedStraightening,'Less observed bend indicates a straighter knee in this task. The camera cannot distinguish hyperextension or establish a clinical extension lag. Passive extension must be assessed separately.','min'),
   metric('straightening','Straightening range in a repetition','°',r=>maximum(reps(r).map(p=>p.kneeExcursion)),'Largest observed range in a completed repetition. Interpret the starting position and least bend together; a larger excursion is not always a better result.'),
   ...common,
   metric('returnVariation','Variation in return timing','s',r=>spread(reps(r).map(p=>p.returnDuration)),'Spread (standard deviation) across at least two complete repetitions. A smaller spread means more consistent timing, not proven smoothness or control.','min')
  ],
  heel_slide:[
+  metric('typicalPeakBend','Typical deepest bend per slide','°',r=>exercisePerformanceMetrics(r).peakBend?.median,'Median peak bend across completed slides. Compare comfortable movements with the same assistance and setup; this is not a separate maximum active range test.','max'),
   metric('greatestBend','Greatest knee bend achieved','°',r=>m(r).maximumObservedBend,'Greater comfortable bend can indicate increasing observed range. Compare with your own plan and symptoms. Published active-flexion ranges provide context, not a pass mark for an assisted slide.','max'),
   metric('returnBend','Knee bend at the end of the return','°',r=>mean(reps(r).map(p=>p.returnKneeBend)),'Average bend at the end of completed returns. Less bend indicates a straighter observed return. This endpoint was not stored in older reports; reanalyse their recording if available.','min'),
   metric('slideRange','Movement range in a repetition','°',r=>maximum(reps(r).map(p=>p.kneeExcursion)),'Largest bend-to-straighten excursion in a completed repetition. Compare under the same assistance and camera setup.'),
@@ -61,6 +69,7 @@ export function measurementSeries(r, metric) {
  const a=report(r), c=a?.config || {};
  const side=metric.source==='video'?c.side:r.pose_validation?.side||r.measurement?.side;
  const base=[r.patient_id,r.operation_date||'',r.exercise,metric.source];
+ if(metric.source==='video')base.push(exerciseContextKey(r));
  if(metric.source==='video')base.push(side||'unknown',a?.ruleVersion||'legacy',a?.method||'',a?.modelVersion||'',JSON.stringify(m(r).qualityRules||{}),c.minVisibility??null,!!c.smallMovement,c.bendTolerance??null,c.targetLift??null,c.targetHold??null,c.targetLower??null);
  if(metric.source==='live')base.push(side||'unknown',r.count_source||'monitoring',!!r.hold,r.measurement?.stats_min_visibility??null,r.pose_validation?.version||'',r.pose_validation?.raw_source||'');
  if(metric.source==='clinical')base.push(side||'unknown');
@@ -72,7 +81,8 @@ export function seriesFor(records,exercise,metric) {
   if(metric.source==='video'&&!report(r))continue;
   if(metric.source==='clinical'&&finite(metric.get(r))===null)continue;
   const key=measurementSeries(r,metric),a=report(r),side=metric.source==='video'?a?.config?.side:r.pose_validation?.side||r.measurement?.side;
-  const label=metric.source==='patient'?'Patient reports':metric.source==='clinical'?'Manual clinical assessment':`${side?side[0].toUpperCase()+side.slice(1):'Unknown'} leg · ${metric.source==='video'?'analysed video':'live recording'}`;
+  const context=exerciseContextFacts(r);
+  const label=metric.source==='patient'?'Patient reports':metric.source==='clinical'?'Manual clinical assessment':`${side?side[0].toUpperCase()+side.slice(1):'Unknown'} leg · ${metric.source==='video'?`analysed video · ${context[0][1]} · ${context[1][1]}${normaliseExerciseContext(r.patient?.exercise_context).load_kg!==null?' · '+normaliseExerciseContext(r.patient.exercise_context).load_kg+' kg':''}`:'live recording'}`;
   if(!groups.has(key))groups.set(key,{key,label,records:[]});
   groups.get(key).records.push(r);
  }
