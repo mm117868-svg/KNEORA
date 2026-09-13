@@ -228,6 +228,9 @@ label.f input,label.f select,.short-date>input{border-radius:2px;min-height:44px
 .week .badge{border-radius:2px;font-size:9px}
 .list{gap:10px}
 .ex-card{padding:18px 16px;gap:12px;min-height:116px;align-items:flex-start}
+.exercise-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px}
+.exercise-demo{font-size:13px;font-weight:600;padding:12px 4px;max-width:150px;line-height:1.5}
+@media(max-width:1100px){.exercise-row{grid-template-columns:minmax(0,1fr);gap:0}.exercise-demo{max-width:none;justify-self:start;padding:12px 16px}}
 .ex-card::after{width:3px}
 .ex-card .ic{width:38px;height:38px;border-radius:2px}
 .ex-card .ic svg{width:23px;height:23px}
@@ -836,15 +839,19 @@ for(const id of ["patientName","patientDob"]){$(id).addEventListener("change",()
 /* ---------------- home: every exercise on one page, grouped by week ---------------- */
 let phase = 1;   // the week section the open exercise came from; written into the record
 function currentPhase() { const d = daysPostOp($("opdate").value, new Date()); return d === null || d < 0 ? null : phaseForDay(d); }
+function exerciseDemoLink(ex) {
+  const path=ex.id === "seated_extension" ? "fitness-avatar/v2/seated_extension.mp4" : `videos/${ex.id}.mp4`;
+  return `<a class="exercise-demo" href="./exercise-guides/${path}" target="_blank" rel="noopener" aria-label="Watch ${esc(ex.title)} demonstration (opens in a new tab)">Watch demonstration ↗</a>`;
+}
 function renderWeeks() {
   const now = currentPhase();
   $("weeknav").innerHTML = Object.keys(LIB).map(p => `<a href="#week${p}" class="${+p === now ? "now" : ""}">${esc(PHASES[p])}${+p === now ? " · now" : ""}</a>`).join("");
   $("weeks").innerHTML = Object.keys(LIB).map(p => `<section class="week${+p === now ? " now" : ""}" id="week${p}" aria-label="${esc(PHASES[p])}">
     <div class="head"><h2>${esc(PHASES[p])}</h2><span class="days">${esc(PHASE_DAYS[p])}</span>${+p === now ? '<span class="badge">you are here</span>' : ""}</div>
-    <div class="list">${LIB[p].map((ex, i) => `<button class="ex-card" data-p="${p}" data-i="${i}"${isExerciseAvailable(ex) ? "" : ' disabled aria-disabled="true"'}>
+    <div class="list">${LIB[p].map((ex, i) => `<div class="exercise-row"><button class="ex-card" data-p="${p}" data-i="${i}"${isExerciseAvailable(ex) ? "" : ' disabled aria-disabled="true"'}>
       <div class="ic"><svg viewBox="0 0 24 24">${ICONS[ex.icon]}</svg></div>
       <div><h3>${esc(ex.title)}</h3><p>${esc(ex.blurb)}</p><p class="meta">${isExerciseAvailable(ex) ? `${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}` : "To be introduced in due course"}</p></div>
-      <div class="tag">${isExerciseAvailable(ex) ? esc(ex.tag) : "Pending"}</div></button>`).join("")}</div></section>`).join("");
+      <div class="tag">${isExerciseAvailable(ex) ? esc(ex.tag) : "Pending"}</div></button>${exerciseDemoLink(ex)}</div>`).join("")}</div></section>`).join("");
   $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; chooseExercise(LIB[phase][+b.dataset.i]); });
 }
 function renderToday() {
@@ -854,7 +861,7 @@ function renderToday() {
   host.innerHTML+=`<p class="small-note">Day ${days} after your operation · ${esc(PHASES[now])}. Follow the exercises your physiotherapist has given you.</p><div class="list"></div><div class="today-links"><a href="?view=recovery-summary">Patient summary →</a><a href="?view=progress#exercise-history">Exercise history →</a><a href="?view=progress#progress">View progress and daily checklist →</a><a href="#weeknav">Browse full programme ↓</a></div>`;
   if (!["left","right"].includes($("side").value)) host.querySelector('.list').insertAdjacentHTML('beforebegin','<p class="setup-prompt">Before your first session, <a href="./#side">select your operated leg in Settings →</a></p>');
   const list=host.querySelector('.list');
-  $("week"+now).querySelectorAll('.ex-card:not(:disabled)').forEach(card=>{const copy=card.cloneNode(true);copy.onclick=()=>{phase=now;chooseExercise(LIB[now][+copy.dataset.i]);};list.append(copy);});
+  $("week"+now).querySelectorAll('.ex-card:not(:disabled)').forEach(card=>{const copy=card.closest(".exercise-row").cloneNode(true),button=copy.querySelector(".ex-card");button.onclick=()=>{phase=now;chooseExercise(LIB[now][+button.dataset.i]);};list.append(copy);});
   if(!list.children.length)list.innerHTML='<p class="small-note">The exercises in this phase are pending. Browse the full programme below and follow your physiotherapist’s plan.</p>';
 }
 function renderHome() {
