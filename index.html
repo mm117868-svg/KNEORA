@@ -379,7 +379,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .patient-header-nav{display:flex;align-items:center;gap:24px}
 .patient-header-nav a{font-size:12px;font-weight:700;text-decoration:none;padding:11px 14px;border:1px solid var(--ink);color:var(--ink)}
 .patient-header-nav a:hover{background:var(--ink);color:var(--bone)}
-.progress-view #home>.camera-options,.progress-view #home>.hero,.progress-view #home>.details,.progress-view #home>.phasepick,.progress-view #weeks,.progress-view #home>.safety,.progress-view #home>.foot{display:none}
+.progress-view #todayExercises,.progress-view #home>.camera-options,.progress-view #home>.hero,.progress-view #home>.details,.progress-view #home>.phasepick,.progress-view #weeks,.progress-view #home>.safety,.progress-view #home>.foot{display:none}
 @media(max-width:759px){.patient-header-nav{gap:8px}.patient-header-nav .product-name{display:none}.patient-header-nav a{font-size:10px;padding:10px}.progress-view .patient-progress{margin-bottom:0}}
 
 /* A compact activity calendar on home; detailed recovery tools live in the tracker. */
@@ -426,6 +426,20 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
 .voice-words{margin-top:16px}
 .countdown-choice{margin-top:20px}
 @media(max-width:759px){.settings-grid{grid-template-columns:1fr}.setting-box{padding:16px}.camera-options{margin-top:18px}.session-settings{grid-column:auto}}
+
+.today-exercises{grid-column:1/-1;margin:0 0 28px;padding:24px;border:1px solid var(--line);background:var(--bone)}
+.today-exercises h2{font-size:25px;margin:0 0 8px}
+.today-exercises>.small-note{max-width:none;margin-bottom:18px}
+.today-exercises .today-links{display:flex;gap:20px;flex-wrap:wrap;margin-top:18px;font-size:13px;font-weight:600}
+.camera-options>summary{display:flex;justify-content:space-between;align-items:center;gap:18px;cursor:pointer;list-style:none}
+.camera-options>summary::-webkit-details-marker{display:none}
+.camera-options>summary strong{display:block;font-size:18px}
+.camera-options>summary small{display:block;color:var(--muted);font-size:12px;font-weight:400;line-height:1.6;margin-top:6px}
+.settings-edit{font-size:12px;white-space:nowrap;text-decoration:underline;color:var(--brand)}
+.camera-options[open]>summary{margin-bottom:22px}
+.camera-options[open] .settings-edit{display:none}
+.settings-done{margin-top:20px;background:var(--ink);color:var(--bone);border:0;padding:12px 20px;font:inherit;cursor:pointer}
+@media(max-width:759px){.today-exercises{padding:18px}.today-exercises h2{font-size:23px}}
 </style>
 </head>
 <body>
@@ -450,6 +464,8 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
 
   <section class="progress patient-progress" id="progress" aria-label="Your recovery progress"></section>
 
+  <section id="todayExercises" class="today-exercises" aria-labelledby="todayTitle"></section>
+
   <section class="card details" aria-labelledby="detailsTitle">
     <h2 id="detailsTitle">Your details</h2>
     <p class="settings-intro">Personalise your recovery record. Your details and preferences are saved on this device.</p>
@@ -460,8 +476,8 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
     <div class="dayline" id="dayline"></div>
   </section>
 
-  <section class="card camera-options" aria-labelledby="optionsTitle">
-    <h2 id="optionsTitle">Camera and options</h2>
+  <details class="card camera-options" id="cameraOptions" open>
+    <summary><span><strong id="optionsTitle">Camera and options</strong><small id="settingsSummary"></small></span><span class="settings-edit">Edit settings</span></summary>
     <p class="settings-intro">Set up your camera and choose how you want each session to work.</p>
     <div class="settings-grid">
       <fieldset class="setting-box"><legend>Camera setup</legend>
@@ -495,10 +511,11 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
         <label class="setting-check countdown-choice"><input type="checkbox" id="speak" checked><span>Speak the countdown and hand-detection prompts</span></label>
       </fieldset>
     </div>
-  </section>
+    <button type="button" id="settingsDone" class="settings-done">Done with setup</button>
+  </details>
 
   <section class="phasepick">
-    <span class="eyebrow">Your programme, week by week</span>
+    <span class="eyebrow">Your full programme, week by week</span>
     <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. Performance scoring is planned and is not yet available. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
     <nav class="weeknav" id="weeknav" aria-label="Jump to a week"></nav>
   </section>
@@ -653,13 +670,21 @@ const NOPOSE = PROGRESS_VIEW || new URLSearchParams(location.search).has("nopose
 const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", codeword: "kr_app_codeword", stopword: "kr_app_stopword", countby: "kr_app_countby" };
 const flags = { showangle: "kr_app_angle", skeleton: "kr_skeleton", savevideo: "kr_app_video", savefiles: "kr_app_files", handstart: "kr_app_handstart", voice: "kr_app_voice", speak: "kr_app_speak" };
 for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); renderHome(); }); }
-for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => localStorage.setItem(flags[k], $(k).checked ? "1" : "0")); }
+for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => {localStorage.setItem(flags[k], $(k).checked ? "1" : "0"); updateSettingsSummary();}); }
 
 if (!["left", "right"].includes($("side").value)) $("side").value = "";
 if ($("stopword").value === "finish") { $("stopword").value = "stop"; localStorage.setItem(prefs.stopword, "stop"); }
 const countDescriptions = { motion: "Counts repetitions from changes in pixels inside the movement box.", track: "Follows points inside the knee's movement box from frame to frame using optical flow.", voice: 'Counts the numbers you say aloud, such as “one, two, three”, using an on-device word spotter.' };
 function updateSettingHelp() { $("countDescription").textContent = countDescriptions[$("countby").value] || countDescriptions.motion; $("codeword").disabled = $("stopword").disabled = !$("voice").checked; }
 $("countby").addEventListener("change", updateSettingHelp); $("voice").addEventListener("change", updateSettingHelp); updateSettingHelp();
+
+function updateSettingsSummary() {
+  const leg=$("side").value, camera=$("camsel").selectedOptions[0]?.textContent || "Default camera";
+  const controls=[$("handstart").checked?"Hand controls on":"",$("voice").checked?"Voice controls on":""].filter(Boolean);
+  $("settingsSummary").textContent=[leg?`${leg === "left" ? "Left" : "Right"} leg`:"Choose your operated leg",camera,controls.length?controls.join(" + "):"On-screen controls"].join(" · ");
+}
+$("cameraOptions").open = !["left","right"].includes($("side").value);
+$("settingsDone").onclick = () => { if (!$("side").reportValidity()) return; $("cameraOptions").open=false; $("cameraOptions").querySelector("summary").focus(); };
 
 /* ---------------- home: every exercise on one page, grouped by week ---------------- */
 let phase = 1;   // the week section the open exercise came from; written into the record
@@ -675,11 +700,22 @@ function renderWeeks() {
       <div class="tag">${isExerciseAvailable(ex) ? esc(ex.tag) : "Pending"}</div></button>`).join("")}</div></section>`).join("");
   $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; openExercise(LIB[phase][+b.dataset.i]); });
 }
+function renderToday() {
+  const now=currentPhase(),host=$("todayExercises"),days=daysPostOp($("opdate").value,new Date());
+  host.innerHTML='<h2 id="todayTitle">Your exercises today</h2>';
+  if(now===null){host.innerHTML+=`<p class="small-note">${days===null?'Enter your operation date to see the exercises for your current recovery week.':'Your operation date is in the future. Your current exercises will appear from the day of surgery.'}</p><a href="#opdate">${days===null?'Enter operation date':'Check operation date'}</a>`;return;}
+  host.innerHTML+=`<p class="small-note">Day ${days} after your operation · ${esc(PHASES[now])}. Follow the exercises your physiotherapist has given you.</p><div class="list"></div><div class="today-links"><a href="?view=progress#progress">View progress and daily checklist →</a><a href="#weeknav">Browse full programme ↓</a></div>`;
+  const list=host.querySelector('.list');
+  $("week"+now).querySelectorAll('.ex-card:not(:disabled)').forEach(card=>{const copy=card.cloneNode(true);copy.onclick=()=>{phase=now;openExercise(LIB[now][+copy.dataset.i]);};list.append(copy);});
+  if(!list.children.length)list.innerHTML='<p class="small-note">The exercises in this phase are pending. Browse the full programme below and follow your physiotherapist’s plan.</p>';
+}
 function renderHome() {
   const d = daysPostOp($("opdate").value, new Date());
   $("dayline").innerHTML = d === null ? "Enter your operation date to see where you are in recovery." : d < 0 ? `Operation in <b>${-d}</b> day${-d === 1 ? "" : "s"}.` : `Day <b>${d}</b> after your operation · <a href="#week${phaseForDay(d)}">${esc(PHASES[phaseForDay(d)])}</a>`;
   $("privacy").textContent = $("voice").checked && speechAvailable() ? "Nothing leaves this device, except the sound the browser's speech service listens to while voice control is on." : $("countby").value === "voice" ? "Nothing leaves this device. Your counting is heard by a word spotter that runs here." : "Nothing leaves this device.";
   renderWeeks();
+  renderToday();
+  updateSettingsSummary();
   const recs = patientRecords(loadRecords(), $("patient").value, $("opdate").value);
   if (!PROGRESS_VIEW) { renderHomeActivity($("progress"), recs, $("patient").value, $("opdate").value); return; }
   renderPatientProgress($("progress"), recs, (record, records) => {
@@ -702,6 +738,7 @@ async function listCams() {
     const want = localStorage.getItem("kr_app_cam") || "";
     $("camsel").innerHTML = (cams.length ? cams.map((c, i) => `<option value="${esc(c.deviceId)}">${esc(c.label || "camera " + (i + 1))}</option>`).join("") : "<option value=''>default camera</option>");
     if ([...$("camsel").options].some(o => o.value === want)) $("camsel").value = want; } catch (e) { }
+  updateSettingsSummary();
 }
 listCams();
 
@@ -717,7 +754,7 @@ let jsfeatLib = null;
 
 async function openExercise(ex) {
   if (!isExerciseAvailable(ex)) return;
-  if (!["left", "right"].includes($("side").value)) { $("side").scrollIntoView({block:"center",behavior:"smooth"}); $("side").focus(); $("side").reportValidity(); return; }
+  if (!["left", "right"].includes($("side").value)) { $("cameraOptions").open=true; $("side").scrollIntoView({block:"center",behavior:"smooth"}); $("side").focus(); $("side").reportValidity(); return; }
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; handSince = null; handArmed = false; statusBefore = null;
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
   $("briefTitle").textContent = ex.title; $("briefMeta").textContent = `${PHASES[phase]} · ${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}`;
