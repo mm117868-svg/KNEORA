@@ -44,11 +44,16 @@ export function sessionSummary(record, records) {
   const history=[...before,record];
   return `<div class="patient-session"><div class="eyebrow">Exercise saved · ${escapeHtml(date(record))}</div><h2>${escapeHtml(name(record))}</h2><p class="patient-lead">Here is what you recorded.</p><div class="patient-metrics">${tile(record.hold?'Holds':'Repetitions',`${display(count)}${target>0?' / '+target:''}`,sourceLabel(record))}${tile('Typical best bend',value===null?'Not recorded':`${display(value)}°`,value===null?'No usable knee angle recorded':'Whole-session measurement')}${tile('Time',duration(record),'Minutes : seconds')}${tile('Form score','Planned','To be introduced in due course')}</div><div class="patient-completion"><span>${escapeHtml(completion)}</span>${count!==null&&target>0?`<progress max="${target}" value="${Math.min(count,target)}" aria-label="Recorded count towards the planned count"></progress>`:''}<small>Completing the count does not assess movement quality.</small></div><div class="patient-trend-panel"><h3>Your bend over time</h3><p>${escapeHtml(comparison)}</p>${trend(history,'bend')}<small>Same exercise and recorded leg. Typical best bend is the 95th percentile of the session's knee angles. It is not a movement-quality score.</small></div></div>`;
 }
-export function renderPatientProgress(element, records, onReview) {
+export function renderPatientProgress(element, records, onReview, options = {}) {
+  const scope = JSON.stringify([options.patientId, options.operationDate]);
+  const previousMonth = element.dataset.calendarScope === scope ? element.querySelector("[data-recovery-calendar]")?.dataset.month : null;
+  element.dataset.calendarScope = scope;
   const previousExercise=element.querySelector('[data-progress-exercise]')?.value;
-  const previousMetric=element.querySelector('[aria-pressed="true"]')?.dataset.metric || 'bend';
+  const previousMetric=element.querySelector('[data-metric][aria-pressed="true"]')?.dataset.metric || 'bend';
   const last=records.at(-1), week=records.filter(r=>Date.now()-Date.parse(r.started_at)>=0&&Date.now()-Date.parse(r.started_at)<7*864e5);
   element.innerHTML=`<div class="patient-section-heading"><div><div class="eyebrow">Your recovery</div><h2>Progress at a glance</h2></div><span>Saved on this device</span></div><div class="patient-overview">${tile('Exercise sessions',records.length,'For these patient details')}${tile('Last 7 days',week.length,'Recorded sessions')}${tile('Latest exercise',last?name(last):'Ready when you are',last?date(last):'Choose an active exercise below')}${tile('Form score','Planned','To be introduced in due course')}</div>`;
+  element.insertAdjacentHTML("beforeend", '<section class="recovery-calendar" data-recovery-calendar aria-label="Surgery and exercise calendar"></section>');
+  renderCalendar(element.querySelector("[data-recovery-calendar]"), records, options.operationDate || "", onReview, previousMonth, options);
   if(!last){element.insertAdjacentHTML('beforeend','<div class="patient-empty">Your session results and progress chart will appear here after your first exercise. Choose an exercise below to get started.</div>');return;}
   const exercises=[...new Set(records.map(r=>r.exercise))];
   element.insertAdjacentHTML('beforeend',`<div class="patient-progress-body"><div class="patient-trend-panel"><div class="patient-trend-controls"><label>Exercise<select data-progress-exercise>${exercises.map(id=>`<option value="${escapeHtml(id)}">${escapeHtml(name({exercise:id}))}</option>`).join('')}</select></label><div class="patient-tabs" aria-label="Progress measurement"><button type="button" data-metric="bend">Bend</button><button type="button" data-metric="reps">Repetitions</button></div></div><div data-progress-chart></div></div><div class="patient-recent"><h3>Recent exercises</h3>${records.slice(-4).reverse().map(r=>`<button type="button" class="patient-history-row" data-review="${records.indexOf(r)}"><span><b>${escapeHtml(name(r))}</b><small>${escapeHtml(date(r))} · ${display(recordedCount(r))} ${r.hold?'holds':'reps'}</small></span><span>Review →</span></button>`).join('')}</div></div>`);
@@ -58,4 +63,79 @@ export function renderPatientProgress(element, records, onReview) {
   select.onchange=update;
   element.querySelectorAll('[data-metric]').forEach(b=>b.onclick=()=>{metric=b.dataset.metric;update();});
   element.querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>onReview(records[+b.dataset.review],records));update();
+}
+
+const dayKey = value => `${value.getFullYear()}-${String(value.getMonth()+1).padStart(2,'0')}-${String(value.getDate()).padStart(2,'0')}`;
+function parseDay(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return null;
+  const [year,month,day]=value.split('-').map(Number), result=new Date(year,month-1,day,12);
+  return dayKey(result)===value?result:null;
+}
+export function calendarMonth(year, month, records, operationDate, today = new Date()) {
+  const first=new Date(year,month,1,12), offset=(first.getDay()+6)%7;
+  const size=Math.ceil((offset+new Date(year,month+1,0).getDate())/7)*7;
+  const used=new Map();
+  for(const record of records){
+    // Preserve the calendar date at recording, including when travelling across time zones.
+    const key=String(record.started_at || '').slice(0,10);
+    if(parseDay(key))used.set(key,[...(used.get(key)||[]),record]);
+  }
+  return Array.from({length:size},(_,i)=>{
+    const d=new Date(year,month,1-offset+i,12), key=dayKey(d);
+    return {key,day:d.getDate(),inMonth:d.getMonth()===month,today:key===dayKey(today),surgery:key===operationDate,records:used.get(key)||[]};
+  });
+}
+function renderCalendar(host, records, operationDate, onReview, initialMonth, options) {
+  const today=new Date(), surgery=parseDay(operationDate);
+  let month=parseDay(initialMonth) || new Date(today.getFullYear(),today.getMonth(),1,12);
+  let selected=surgery ? dayKey(today < surgery ? surgery : today) : '';
+  function draw(focusAction) {
+    const cells=calendarMonth(month.getFullYear(),month.getMonth(),records,operationDate,today);
+    const monthName=month.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+    host.dataset.month=dayKey(month);
+    const usedDays=cells.filter(c=>c.inMonth&&c.records.length).length;
+    host.innerHTML=`<div class="recovery-calendar-head"><div><div class="eyebrow">Your activity calendar</div><h3 aria-live="polite">${escapeHtml(monthName)}</h3></div><div class="recovery-calendar-nav"><button type="button" data-calendar-action="previous" aria-label="Previous month">‹</button><button type="button" data-calendar-action="today">Today</button><button type="button" data-calendar-action="surgery"${surgery?'':' disabled'}>Surgery date</button><button type="button" data-calendar-action="next" aria-label="Next month">›</button></div></div><p class="recovery-calendar-caption">${surgery?`Surgery: <strong>${escapeHtml(surgery.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}))}</strong>`:'Enter your operation date in Your details to mark your surgery.'} · ${usedDays} day${usedDays===1?'':'s'} with saved sessions this month</p><div class="recovery-calendar-grid" role="group" aria-label="${escapeHtml(monthName)} activity calendar">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="recovery-weekday">${d}</div>`).join('')}${cells.map(c=>{const fullDate=parseDay(c.key).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),n=c.records.length;return `<button type="button" class="recovery-day${c.inMonth?'':' outside'}${n?' used':''}${c.surgery?' surgery':''}${c.today?' today':''}" data-calendar-day="${c.key}" aria-label="${escapeHtml(fullDate)}${c.today?', today':''}${c.surgery?', surgery date':''}, ${n} saved session${n===1?'':'s'}"${c.today?' aria-current="date"':''} aria-pressed="${selected===c.key}"><span class="recovery-day-number">${c.day}</span>${c.surgery?'<span class="recovery-surgery-mark">◆ <span>Surgery</span></span>':''}${n?`<span class="recovery-use-mark">✓ <span>${n} session${n===1?'':'s'}</span></span>`:''}</button>`;}).join('')}</div><div class="recovery-calendar-legend"><span><i class="used"></i>Saved exercise session</span><span><i class="surgery"></i>Surgery date</span><span><i class="today"></i>Today</span></div><small class="recovery-calendar-note">A filled box means an exercise session was saved on that date. Opening the app alone does not fill a box.</small><div class="recovery-calendar-detail" data-calendar-detail aria-live="polite"></div><section class="recovery-daily" data-daily-checklist aria-label="Daily exercise checklist"></section>`;
+    host.querySelectorAll('[data-calendar-action]').forEach(b=>b.onclick=()=>{const action=b.dataset.calendarAction;selected=action==='surgery'?operationDate:action==='today'?dayKey(today):'';month=action==='today'?new Date(today.getFullYear(),today.getMonth(),1,12):action==='surgery'?new Date(surgery.getFullYear(),surgery.getMonth(),1,12):new Date(month.getFullYear(),month.getMonth()+(action==='next'?1:-1),1,12);draw(action);});
+    host.querySelectorAll('[data-calendar-day]').forEach(b=>b.onclick=()=>{
+      selected=b.dataset.calendarDay;
+      showChecklist();
+      host.querySelectorAll('[data-calendar-day]').forEach(day=>day.setAttribute('aria-pressed',String(day.dataset.calendarDay===selected)));
+      const cell=cells.find(c=>c.key===selected),detail=host.querySelector('[data-calendar-detail]');
+      detail.innerHTML=`<h4>${escapeHtml(parseDay(selected).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}))}${cell.surgery?' · Surgery date':''}</h4>${cell.records.length?cell.records.map((r,i)=>`<button type="button" class="patient-history-row" data-calendar-review="${i}"><span><b>${escapeHtml(name(r))}</b><small>${display(recordedCount(r))} ${r.hold?'holds':'reps'} · ${duration(r)}</small></span><span>Review →</span></button>`).join(''):'<p>No saved exercise sessions on this date.</p>'}`;
+      detail.querySelectorAll('[data-calendar-review]').forEach(row=>row.onclick=()=>onReview(cell.records[+row.dataset.calendarReview],records));
+    });
+    function showChecklist(){
+      renderDailyChecklist(host.querySelector('[data-daily-checklist]'), records, options, selected, key=>{selected=key;const d=parseDay(key);month=new Date(d.getFullYear(),d.getMonth(),1,12);draw();host.querySelector('[data-postop-day]')?.focus();});
+    }
+    showChecklist();
+    if(focusAction)host.querySelector(`[data-calendar-action="${focusAction}"]`)?.focus();
+  }
+  draw();
+}
+
+
+export function dayAfterSurgery(day, operationDate) {
+  const d=parseDay(day), op=parseDay(operationDate);
+  return d&&op?Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(op.getFullYear(),op.getMonth(),op.getDate()))/86400000):null;
+}
+export function savedSetComplete(records, exercise, day) {
+  return records.some(r=>r.exercise===exercise&&String(r.started_at).slice(0,10)===day&&number(r.prescribed_reps)>0&&recordedCount(r)!==null&&recordedCount(r)>=r.prescribed_reps);
+}
+function renderDailyChecklist(element,records,options,selected,onSelect){
+  const surgery=parseDay(options.operationDate),today=new Date();
+  if(!surgery){element.innerHTML='<h3>Your daily exercises</h3><p>Enter your operation date in Your details to choose a day after surgery.</p>';return;}
+  const elapsed=dayAfterSurgery(dayKey(today),options.operationDate), chosen=dayAfterSurgery(selected,options.operationDate);
+  let day=chosen===null||chosen<0?Math.max(0,elapsed):chosen;
+  const maxDay=Math.max(84,elapsed+14,day), dateFor=d=>dayKey(new Date(surgery.getFullYear(),surgery.getMonth(),surgery.getDate()+d,12));
+  const key=dateFor(day),phase=day<7?1:day<28?2:day<56?3:4,exercises=options.exercisesByPhase?.[phase]||[];
+  const storageKey='kr_daily_checks:'+JSON.stringify([options.patientId,options.operationDate]);
+  let checks={};try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))checks=value;}catch{}
+  element.innerHTML=`<label class="recovery-day-picker">Day after surgery<select data-postop-day>${Array.from({length:maxDay+1},(_,i)=>`<option value="${i}"${i===day?' selected':''}>${i===0?'Day 0 · Surgery day':'Day '+i} · ${escapeHtml(parseDay(dateFor(i)).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}))}</option>`).join('')}</select></label><p class="recovery-check-status">${day>elapsed?'Future date. Exercises can be marked on the day.':'Tick each exercise when you have finished it.'}</p>${exercises.map(ex=>{const recorded=savedSetComplete(records,ex.id,key),manual=checks[key]?.[ex.id]===true;return `<label class="recovery-check-row"><input type="checkbox" data-exercise-check="${escapeHtml(ex.id)}"${recorded||manual?' checked':''}${recorded||!ex.available||day>elapsed?' disabled':''}><span>${escapeHtml(ex.title)}<small data-check-label>${!ex.available?'Pending: to be introduced in due course':recorded?'Recorded set complete':manual?'Marked done':'Not marked done'}</small></span></label>`;}).join('')}<p class="recovery-calendar-note">Ticks marked manually are your own record. They do not add a measured session or fill the activity calendar. Follow the exercises your physiotherapist has given you.</p><div class="recovery-check-status" data-check-message role="status"></div>`;
+  element.querySelector('[data-postop-day]').onchange=e=>onSelect(dateFor(+e.target.value));
+  element.querySelectorAll('[data-exercise-check]').forEach(input=>input.onchange=()=>{
+    const id=input.dataset.exerciseCheck,previous=checks[key]?.[id]===true;
+    checks[key]={...(checks[key]||{}),[id]:input.checked};
+    try{localStorage.setItem(storageKey,JSON.stringify(checks));input.closest('label').querySelector('[data-check-label]').textContent=input.checked?'Marked done':'Not marked done';element.querySelector('[data-check-message]').textContent='Checklist saved on this device.';}
+    catch{checks[key][id]=previous;input.checked=previous;element.querySelector('[data-check-message]').textContent='The checklist could not be saved on this device. Please try again.';}
+  });
 }

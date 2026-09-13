@@ -336,6 +336,51 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
  .patient-review{padding:18px}.patient-session h2{font-size:28px}.done{padding:24px 20px}
  .patient-chart-headline{align-items:flex-start;flex-direction:column;gap:3px}
 }
+
+/* Month calendar: recorded activity, surgery and today remain distinct. */
+.recovery-calendar{margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
+.recovery-calendar-head{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.recovery-calendar h3{font-size:28px;letter-spacing:-.025em;margin:7px 0 0;font-weight:800}
+.recovery-calendar-nav{display:flex;gap:6px;flex-wrap:wrap}
+.recovery-calendar-nav button{min-width:42px;min-height:42px;padding:8px 12px;background:var(--bone);border:1px solid var(--line);border-radius:2px;color:var(--ink);font:600 12px Archivo,Arial,sans-serif;cursor:pointer}
+.recovery-calendar-nav button:disabled{opacity:.5;cursor:default}
+.recovery-calendar-nav button:not(:disabled):hover{border-color:var(--ink)}
+.progress .recovery-calendar-caption{font-size:12px;margin:14px 0 20px;line-height:1.6}
+.recovery-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.recovery-weekday{padding:12px 6px;text-align:center;font-size:11px;font-weight:700;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.recovery-day{min-height:86px;padding:10px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bone);color:var(--ink);font:inherit;cursor:pointer;text-align:left;position:relative}
+.recovery-day.outside{background:var(--paper);color:var(--muted)}
+.recovery-day.used{background:var(--brand);color:var(--bone)}
+.recovery-day.surgery{box-shadow:inset 0 0 0 2px var(--ink)}
+.recovery-day.today .recovery-day-number{background:var(--ink);color:var(--bone);border-radius:50%}
+.recovery-day-number{display:grid;place-items:center;width:25px;height:25px;font-size:13px;font-weight:700}
+.recovery-use-mark,.recovery-surgery-mark{font-size:10px;line-height:1.3;font-weight:600}
+.recovery-day[aria-pressed="true"]{outline:3px solid #1d5c57;outline-offset:-4px}
+.recovery-calendar-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;font-size:11px;color:var(--muted)}
+.recovery-calendar-legend>span{display:flex;align-items:center;gap:6px}
+.recovery-calendar-legend i{display:inline-block;width:12px;height:12px;border:1px solid var(--line)}
+.recovery-calendar-legend .used{background:var(--brand);border-color:var(--brand)}
+.recovery-calendar-legend .surgery{border:2px solid var(--ink)}
+.recovery-calendar-legend .today{background:var(--ink);border-radius:50%}
+.recovery-calendar-note{display:block;margin-top:10px;font-size:11px;line-height:1.5;color:var(--muted)}
+.recovery-calendar-detail:not(:empty){margin-top:18px;padding:18px;background:var(--paper2)}
+.recovery-calendar-detail h4{margin:0 0 10px;font-size:14px}
+@media(max-width:759px){.recovery-calendar-head{align-items:flex-start;flex-direction:column;gap:14px}.recovery-calendar h3{font-size:25px}.recovery-day{min-height:68px;padding:5px 3px;gap:4px}.recovery-day-number{width:23px;height:23px;font-size:12px}.recovery-use-mark span,.recovery-surgery-mark span{display:none}.recovery-calendar-legend{gap:12px;font-size:10px}.recovery-weekday{padding:10px 2px;font-size:10px}}
+
+.recovery-daily{margin-top:22px;padding:20px;border:1px solid var(--line);background:var(--bone)}
+.recovery-daily label.recovery-day-picker{display:block;font-size:12px;font-weight:700}
+.recovery-day-picker select{display:block;margin:8px 0 14px;padding:10px;max-width:100%;min-height:44px;background:var(--paper);border:1px solid var(--line);font:inherit;color:var(--ink)}
+.recovery-check-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.recovery-check-row input{width:22px;height:22px;flex:none;accent-color:var(--brand);cursor:pointer}
+.recovery-check-row span{font-size:13px;font-weight:600}
+.recovery-check-row small{display:block;margin-top:4px;font-size:11px;font-weight:400;color:var(--muted)}
+.recovery-check-status{font-size:11px;color:var(--muted);margin:10px 0}
+
+.patient-header-nav{display:flex;align-items:center;gap:24px}
+.patient-header-nav a{font-size:12px;font-weight:700;text-decoration:none;padding:11px 14px;border:1px solid var(--ink);color:var(--ink)}
+.patient-header-nav a:hover{background:var(--ink);color:var(--bone)}
+.progress-view #home>.hero,.progress-view #home>.details,.progress-view #home>.phasepick,.progress-view #weeks,.progress-view #home>.safety,.progress-view #home>.foot{display:none}
+@media(max-width:759px){.patient-header-nav{gap:8px}.patient-header-nav .product-name{display:none}.patient-header-nav a{font-size:10px;padding:10px}.progress-view .patient-progress{margin-bottom:0}}
 </style>
 </head>
 <body>
@@ -347,7 +392,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
       <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M14 5 L14 19 L26 33" stroke="#1a1918" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter"/><circle cx="12.5" cy="23.5" r="4.6" fill="#d64026"/></svg>
       <b>Cambridge<br>Kinematics</b>
     </a>
-    <span class="product-name">Knee Recovery</span>
+    <nav class="patient-header-nav" aria-label="Patient navigation"><span class="product-name">Knee Recovery</span><a class="tracker-link" href="?view=progress#progress">Progress tracker</a><a class="tracker-back" href="index.html" hidden>Back to exercises</a></nav>
   </header>
 
   <section class="progress patient-progress" id="progress" aria-label="Your recovery progress"></section>
@@ -398,7 +443,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 
   <section class="phasepick">
     <span class="eyebrow">Your programme, week by week</span>
-    <p class="small-note">We are focusing first on heel slides, straight leg raises, seated knee extension and standing knee bend, with accurate repetition counting and assessment of movement quality as our development priorities. Performance scoring is planned and is not yet available. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
+    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. Performance scoring is planned and is not yet available. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
     <nav class="weeknav" id="weeknav" aria-label="Jump to a week"></nav>
   </section>
 
@@ -525,7 +570,7 @@ const LIB = {
   ],
 };
 // Keep future exercises visible while restricting entry to the current exercise set.
-const ACTIVE_EXERCISES = new Set(["heel_slide", "straight_leg_raise", "seated_extension", "standing_flexion"]);
+const ACTIVE_EXERCISES = new Set(["heel_slide", "straight_leg_raise", "seated_extension"]);
 const isExerciseAvailable = ex => ACTIVE_EXERCISES.has(ex.id);
 const ICONS = {
   flex: '<path d="M5 19V5M5 12h9a4 4 0 0 0 4-4"/>',
@@ -541,7 +586,12 @@ const SETUP = "Camera side-on to the operated leg, about 2 m away, level with th
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const NOPOSE = new URLSearchParams(location.search).has("nopose");
+const PROGRESS_VIEW = new URLSearchParams(location.search).get("view") === "progress";
+document.body.classList.toggle("progress-view", PROGRESS_VIEW);
+document.querySelector(".tracker-back").hidden = !PROGRESS_VIEW;
+document.querySelector(".tracker-link").hidden = PROGRESS_VIEW;
+if (PROGRESS_VIEW) document.title = "Your progress tracker · Cambridge Kinematics";
+const NOPOSE = PROGRESS_VIEW || new URLSearchParams(location.search).has("nopose");
 
 /* ---------------- settings ---------------- */
 const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", codeword: "kr_app_codeword", stopword: "kr_app_stopword", countby: "kr_app_countby" };
@@ -572,7 +622,7 @@ function renderHome() {
   renderPatientProgress($("progress"), recs, (record, records) => {
     $("patientReviewContent").innerHTML = sessionSummary(record, records);
     $("patientReview").showModal();
-  });
+  }, {patientId: $("patient").value, operationDate: $("opdate").value, exercisesByPhase: Object.fromEntries(Object.entries(LIB).map(([phase, exercises]) => [phase, exercises.map(ex => ({id:ex.id,title:ex.title,available:isExerciseAvailable(ex)}))]))});
 }
 renderHome();
 $("closePatientReview").onclick = () => $("patientReview").close();
@@ -978,8 +1028,7 @@ async function finish(abandon = false) {
     if (videoBlob) { download(`${base}_${rec.video_file}`, videoBlob); n++; }
     where = `Saved on this device, and ${["", "one", "two", "three", "four", "five", "six", "seven"][n] || n} files named ${base}_… went to your Downloads folder for your physiotherapist.`;
   }
-  $("q").innerHTML = `<h3>Saved</h3><p>${esc(where)}</p><div class="row"><a href="#" id="doneBack">Back to exercises</a><a href="#progress" id="doneProgress">See overall progress</a></div>`;
-  $("doneProgress").onclick = e => { e.preventDefault(); closeExercise(); $("progress").scrollIntoView({behavior:"smooth"}); };
+  $("q").innerHTML = `<h3>Saved</h3><p>${esc(where)}</p><div class="row"><a href="#" id="doneBack">Back to exercises</a><a href="?view=progress#progress" id="doneProgress">Open progress tracker</a></div>`;
   $("doneBack").onclick = e => { e.preventDefault(); closeExercise(); };
   renderHome();
 }
