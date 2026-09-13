@@ -1,0 +1,403 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><base href="/">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#efeee9">
+<title>Exercise summary software preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="progress-to-date.css?v=1">
+<link rel="stylesheet" href="exercise-summary.css?v=1">
+<style>
+:root{
+  --paper:#efeee9;--paper2:#e7e5dd;--bone:#fbfaf7;--line:#dad7ce;--ink:#1a1918;--muted:#55524c;
+  --brand:#a8480f;--brand-deep:#a8480f;--brand-soft:#f5e8dd;--go:#2a9d6a;--go-soft:#dff1e7;--warn:#b8860b;--warn-soft:#fbf1d6;
+  --dk:#171716;--dk2:#20201e;--dk3:#2a2926;--dkline:rgba(255,255,255,.12);--dkink:#eef2f7;--dkmuted:#9aa6b8;--green:#3ddc84;--amber:#f2b134;--red:#ff6b6b;
+  --r:2px;--shadow:0 12px 32px -14px rgba(16,28,43,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{background:var(--paper);color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.display{font-family:"Archivo",Arial,sans-serif;font-weight:600;letter-spacing:-.015em;line-height:1.05}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--brand-deep)}
+.num{font-variant-numeric:tabular-nums}
+button{font-family:inherit}
+a{color:var(--brand-deep)}
+
+/* ---------- home ---------- */
+#home{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 24px) 20px 80px}
+.brandbar{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.brandbar svg{width:38px;height:38px;flex:0 0 auto}
+.brandbar b{font-size:14px;font-weight:700;display:block}
+.brandbar span{font-size:12px;color:var(--muted);display:block;margin-top:1px;letter-spacing:.08em;text-transform:uppercase}
+.hero h1{font-size:clamp(36px,10vw,48px);margin:0 0 14px}
+.hero h1 em{font-style:normal;color:var(--brand)}
+.hero p{font-size:15.5px;color:var(--muted);margin:0;max-width:36ch}
+.card{background:var(--bone);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.details{margin-top:28px}
+.details h2{font-size:13px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.f{display:block;font-size:12px;color:var(--muted);font-weight:600}
+label.f input,label.f select{display:block;width:100%;margin-top:4px;font:inherit;font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.dayline{margin-top:12px;font-size:13px;color:var(--muted)}
+.dayline b{color:var(--ink)}
+.toggles{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 14px}
+.toggles label{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+details.more{margin-top:10px;font-size:12.5px;color:var(--muted)}
+details.more summary{cursor:pointer;font-weight:600}
+.phasepick{margin:30px 0 8px}
+.phasepick .eyebrow{display:block;margin-bottom:6px}
+.small-note{margin:0;font-size:13px;color:var(--muted);max-width:44ch}
+.weeknav{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.weeknav a{font-size:12.5px;font-weight:600;color:var(--muted);text-decoration:none;padding:7px 11px;border-radius:10px;background:var(--paper2);border:1px solid var(--line)}
+.weeknav a.now{background:var(--ink);color:var(--bone);border-color:var(--ink)}
+.week{margin-top:26px;padding-top:4px}
+.week.now{border-left:4px solid var(--brand);padding-left:14px;margin-left:-18px}
+.week .head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.week h2{font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:24px;margin:0;letter-spacing:-.01em}
+.week .days{font-size:12.5px;color:var(--muted)}
+.week .badge{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bone);background:var(--brand);padding:4px 8px;border-radius:7px}
+.list{display:flex;flex-direction:column;gap:12px}
+.ex-card{background:var(--bone);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;text-align:left;width:100%;transition:.15s}
+.ex-card:not(:disabled):active{transform:scale(.985)}
+.ex-card:disabled{cursor:default;opacity:1;color:var(--ink);background:var(--paper)}
+.ex-card:disabled::after{background:var(--line)}
+.ex-card:disabled .ic,.ex-card:disabled .tag{background:var(--line)}
+.ex-card:disabled .ic svg{stroke:var(--muted)}
+.ex-card:disabled .tag,.ex-card:disabled .meta{color:var(--muted)}
+.ex-card::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand)}
+.ex-card .ic{width:48px;height:48px;flex:0 0 auto;border-radius:12px;background:var(--brand-soft);display:grid;place-items:center}
+.ex-card .ic svg{width:26px;height:26px;stroke:var(--brand-deep);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ex-card h3{margin:0 0 2px;font-size:16px;font-weight:650}
+.ex-card p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.35}
+.ex-card .meta{margin:4px 0 0;font-size:12px;color:var(--brand-deep);font-weight:600}
+.ex-card .tag{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--brand-deep);background:var(--brand-soft);padding:5px 8px;border-radius:7px;white-space:nowrap;align-self:flex-start}
+.progress{margin-top:26px}
+.progress h2{font-size:13px;margin:0 0 6px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.progress p{margin:0;font-size:13.5px;color:var(--muted)}
+.progress .stats{display:flex;gap:18px;margin:8px 0 10px}
+.progress .stats div{font-size:12px;color:var(--muted)}
+.progress .stats b{display:block;font-size:24px;color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-weight:600;line-height:1.1}
+.linkbtn{display:inline-block;background:var(--ink);color:var(--bone);text-decoration:none;font-weight:600;font-size:13.5px;padding:10px 16px;border-radius:11px}
+.safety{margin:26px 0 0;padding:16px;background:var(--warn-soft);border:1px solid #ecdcbf;border-radius:14px;font-size:12.5px;color:#6b5418}
+.safety b{color:#4e3d0f}
+.foot{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.5}
+.foot a{color:var(--muted)}
+
+/* ---------- exercise screen ---------- */
+#ex{position:fixed;inset:0;background:var(--dk);color:var(--dkink);z-index:20;display:none;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:100%}
+#ex.open{display:grid}
+.stage{position:relative;background:#050a14;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:0}
+.stage video{display:none}
+.stage canvas{max-width:100%;max-height:100%;display:block}
+.stage .top{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 12px) 16px 28px;display:flex;align-items:flex-start;gap:12px;background:linear-gradient(180deg,rgba(5,10,20,.85),rgba(5,10,20,0));pointer-events:none}
+.stage .top>*{pointer-events:auto}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--dkline);background:rgba(255,255,255,.1);color:#fff;font-size:22px;cursor:pointer;display:grid;place-items:center;flex:0 0 auto;line-height:1}
+.stage .title{flex:1;min-width:0}
+.stage .title .eyebrow{color:#9fc4f0}
+.stage .title h2{margin:2px 0 0;font-size:18px;font-weight:600;font-family:"Archivo",Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage .clockwrap{display:flex;align-items:center;gap:8px;align-self:center;font-size:13px;font-weight:600;padding:7px 11px;border-radius:9px;background:rgba(5,10,20,.65);border:1px solid var(--dkline);color:var(--dkmuted)}
+.stage .rec{display:none;width:9px;height:9px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite}
+.stage .rec.on{display:inline-block}
+@keyframes blink{50%{opacity:.25}}
+.stage .track{position:absolute;left:16px;right:16px;bottom:16px;width:max-content;max-width:calc(100% - 32px);font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:9px;background:rgba(5,10,20,.65);border:1px solid var(--dkline);color:var(--amber);display:flex;align-items:center;gap:7px}
+.stage .track::before{content:"";flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:currentColor}
+.stage .track.ok{color:var(--green)}
+.stage .track.off{color:var(--dkmuted)}
+
+.panel{background:var(--dk2);border-left:1px solid var(--dkline);padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);display:flex;flex-direction:column;gap:12px;overflow:auto;min-height:0}
+.tile{background:var(--dk3);border:1px solid var(--dkline);border-radius:14px;padding:12px 14px}
+.tile .lab{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dkmuted)}
+.tile .val{font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:44px;line-height:1;margin-top:6px}
+.tile .val small{font-size:18px;color:var(--dkmuted);font-weight:500;margin-left:2px}
+.tile .sub{font-size:12px;color:var(--dkmuted);margin-top:6px}
+.tile .sub b{color:var(--dkink);font-weight:600}
+.tile.reps .val{color:var(--green)}
+.tile.angle.inzone{border-color:rgba(61,220,132,.5);background:rgba(42,157,106,.22)}
+.bar{position:relative;height:8px;border-radius:5px;background:rgba(255,255,255,.12);margin-top:10px;overflow:visible}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--brand);width:0;transition:width .12s}
+.bar .zone{position:absolute;top:0;bottom:0;background:rgba(61,220,132,.35);border-left:2px solid var(--green)}
+.bar .tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--green)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile.instr ol{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--dkink);line-height:1.45}
+.tile.instr li{margin-bottom:5px}
+.tile.hold .ring{display:flex;align-items:center;gap:14px;margin-top:6px}
+.tile.hold .cue{font-family:"Archivo",Arial,sans-serif;font-size:30px;font-weight:600;line-height:1}
+.tile.hold .count{font-size:44px;font-family:"Archivo",Arial,sans-serif;font-weight:600;color:var(--amber);min-width:56px;text-align:right}
+.tile.hold.on .count{color:var(--green)}
+.panel .status{font-size:13.5px;line-height:1.4;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--dkline);color:var(--dkink)}
+.panel .status.ok{background:rgba(42,157,106,.2);border-color:rgba(61,220,132,.45)}
+.panel .actions{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
+.btn{border:1px solid var(--dkline);background:rgba(255,255,255,.08);color:#fff;font-size:14px;font-weight:600;padding:12px 16px;border-radius:12px;cursor:pointer}
+.btn.primary{background:var(--brand);border-color:var(--brand)}
+.btn.finish{background:var(--green);border-color:var(--green);color:#06261a;flex:1}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.small{font-size:12.5px;padding:9px 12px}
+
+/* veil, brief, done */
+.veil{position:absolute;inset:0;z-index:8;background:var(--dk);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;gap:8px}
+.veil.hide{display:none}
+.veil .spin{width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:var(--brand);animation:spin 1s linear infinite;margin-bottom:14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.veil h3{font-family:"Archivo",Arial,sans-serif;font-size:22px;margin:0;font-weight:600}
+.veil p{color:var(--dkmuted);font-size:14px;margin:4px 0 0;max-width:34ch}
+.veil .small{font-size:11.5px;color:var(--dkmuted);opacity:.7;margin-top:14px}
+.brief{position:absolute;z-index:7;left:0;right:0;bottom:0;background:var(--bone);color:var(--ink);border-radius:22px 22px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom) + 18px);box-shadow:0 -10px 40px -10px rgba(0,0,0,.6);transform:translateY(105%);transition:transform .3s ease;max-height:80%;overflow:auto}
+.brief.up{transform:none}
+.brief .grip{width:38px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+.brief h3{margin:0 0 2px;font-family:"Archivo",Arial,sans-serif;font-size:22px;font-weight:600}
+.brief .meta{font-size:12.5px;color:var(--brand-deep);font-weight:600;margin-bottom:12px}
+.brief ol{margin:0 0 12px;padding-left:20px}
+.brief ol li{font-size:13.5px;line-height:1.5;margin-bottom:6px}
+.brief .setup{font-size:12.5px;color:var(--muted);background:var(--paper2);border-radius:10px;padding:10px 12px;margin-bottom:14px}
+.brief .start{width:100%;background:var(--ink);color:var(--bone);border:none;font-size:16px;font-weight:650;padding:15px;border-radius:14px;cursor:pointer}
+.brief .start:disabled{opacity:.5}
+.brief .hands{margin-top:12px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.brief .hands .bar{flex:0 0 90px;height:8px;border-radius:5px;background:var(--paper2);overflow:hidden}
+.brief .hands .fill{height:100%;width:0;background:var(--brand);transition:width .1s linear}
+.countdown{position:absolute;inset:0;z-index:8;display:grid;place-items:center;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:clamp(120px,30vh,260px);color:#fff;text-shadow:0 6px 40px rgba(0,0,0,.7);cursor:pointer;text-align:center}
+.countdown small{display:block;font-family:"Inter",sans-serif;font-size:16px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-align:center;color:var(--dkmuted)}
+.handring{position:absolute;left:50%;top:22%;transform:translateX(-50%);z-index:6;width:min(520px,80%);text-align:center;pointer-events:none}
+.handring .htext{font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:clamp(26px,5vh,44px);color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.8);margin-bottom:10px}
+.handring .hbar{height:14px;border-radius:8px;background:rgba(255,255,255,.2);overflow:hidden;border:1px solid rgba(255,255,255,.35)}
+.handring .hfill{height:100%;width:0;background:var(--green);transition:width .1s linear}
+.handring.finish .hfill{background:var(--amber)}
+.stage .mic{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
+.done{position:fixed;inset:0;z-index:30;background:rgba(11,18,32,.97);display:none;overflow:auto;padding:26px 20px}
+.done.show{display:block}
+.done .inner{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
+.done h2{font-family:"Archivo",Arial,sans-serif;font-size:30px;margin:0;font-weight:600}
+.done p{color:var(--dkmuted);font-size:15px;margin:0;max-width:40ch}
+.done .stats{display:flex;gap:26px;margin:10px 0 4px;flex-wrap:wrap;justify-content:center}
+.done .stats div{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dkmuted);font-weight:700}
+.done .stats b{display:block;font-family:"Archivo",Arial,sans-serif;font-size:38px;font-weight:600;color:#fff;letter-spacing:0;text-transform:none;line-height:1.1}
+.done .chart{width:min(760px,92vw);margin:6px 0 4px}
+.done .chart svg{width:100%;height:auto;border-radius:10px}
+.done .q h3{font-family:"Archivo",Arial,sans-serif;font-size:24px;margin:8px 0 2px;font-weight:600}
+.done .scale{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.done .scale button{min-width:52px;font-size:20px;padding:12px 0;border-radius:12px;border:1px solid var(--dkline);background:rgba(255,255,255,.08);color:#fff;cursor:pointer}
+.done .scale button:hover{background:var(--brand)}
+.done .skip{background:none;border:none;color:var(--dkmuted);font-size:13px;margin-top:10px;cursor:pointer;text-decoration:underline}
+.done .row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.done .row a{display:inline-block;text-decoration:none;color:#fff;font-weight:600;font-size:14px;padding:12px 18px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid var(--dkline)}
+.done .ring{width:84px;height:84px;border-radius:50%;border:4px solid var(--green);display:grid;place-items:center;margin-bottom:6px}
+.done .ring svg{width:40px;height:40px;stroke:var(--green);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+
+/* narrow screens: video on top, panel below */
+@media (max-width:879px), (orientation:portrait){
+  #ex.open{display:flex;flex-direction:column}
+  .stage{flex:1 1 auto;min-height:38vh}
+  .panel{border-left:none;border-top:1px solid var(--dkline);padding:12px 14px calc(env(safe-area-inset-bottom) + 12px);gap:10px;max-height:52vh}
+  .tile .val{font-size:34px}
+  .tile.instr{display:none}
+  .panel .actions .btn{padding:11px 12px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Cambridge Kinematics visual identity: Archivo, warm paper and restrained orange. */
+#home{max-width:1200px;padding:0 40px 64px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);column-gap:72px}
+.brandbar{grid-column:1/-1;justify-content:space-between;margin:0 0 64px;padding:16px 0;border-bottom:1px solid var(--line)}
+.brand-link{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink)}
+.brandbar svg{width:60px;height:60px}
+.brandbar b{font-size:15.5px;line-height:1.08;font-weight:900;letter-spacing:.045em;text-transform:uppercase}
+.brandbar .product-name{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.hero{align-self:center;padding:8px 0 32px}
+.development-label{font-size:11px;letter-spacing:.12em;margin-bottom:20px;display:flex;align-items:center;gap:9px}
+.development-label::before{content:"";width:6px;height:6px;background:#e2691c;border-radius:50%;flex:none}
+.hero h1{font-size:clamp(40px,5.2vw,64px);font-weight:900;letter-spacing:-.035em;line-height:1.04;margin-bottom:22px}
+.hero h1 em{color:var(--ink)}
+.hero p{font-size:15px;line-height:1.7;max-width:46ch}
+.details{margin:0;padding:24px;align-self:start}
+.details h2{color:var(--ink);margin-bottom:18px}
+label.f input,label.f select{border-radius:2px;min-height:44px;background:var(--bone)}
+.phasepick{grid-column:1/-1;margin:54px 0 0;padding-top:28px;border-top:1px solid var(--line)}
+.phasepick .eyebrow{color:var(--ink);font-size:12px;margin-bottom:12px}
+.small-note{max-width:90ch;font-size:14px;line-height:1.65}
+.weeknav{gap:10px;margin-top:22px}
+.weeknav a{border-radius:2px;padding:12px 18px;text-transform:uppercase;letter-spacing:.07em;font-size:11px;color:var(--ink);background:transparent;border-color:var(--ink)}
+.weeknav a:hover{border-color:var(--brand);color:var(--brand)}
+#weeks{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 32px;margin-top:36px}
+.week{margin:0;padding-top:18px;border-top:2px solid var(--ink);scroll-margin-top:24px}
+.week.now{border-left:0;border-top-color:var(--brand);padding-left:0;margin-left:0}
+.week .head{gap:8px;margin-bottom:18px}
+.week h2{font-size:26px;font-weight:800;letter-spacing:-.025em}
+.week .days{font-size:11px}
+.week .badge{border-radius:2px;font-size:9px}
+.list{gap:10px}
+.ex-card{padding:18px 16px;gap:12px;min-height:116px;align-items:flex-start}
+.ex-card::after{width:3px}
+.ex-card .ic{width:38px;height:38px;border-radius:2px}
+.ex-card .ic svg{width:23px;height:23px}
+.ex-card h3{font-size:15px;font-weight:800;line-height:1.3;margin-bottom:5px}
+.ex-card p{line-height:1.5}
+.ex-card .meta{font-size:11px;margin-top:7px}
+.ex-card .tag{border-radius:2px;font-size:9px;padding:4px 6px;text-transform:uppercase;letter-spacing:.04em}
+.ex-card:not(:disabled):hover{border-color:var(--brand);background:#f8f3ed}
+.ex-card:disabled{border-style:dashed}
+.ex-card:disabled .ic,.ex-card:disabled .tag{background:var(--paper2)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #1d5c57;outline-offset:4px}
+.progress,.safety,.foot{grid-column:1/-1}
+.progress{margin-top:48px;padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.progress h2{color:var(--ink);margin-bottom:10px}
+.progress .stats b{font-weight:800}
+.linkbtn,.safety,.iconbtn,.tile,.btn,.done .row a{border-radius:2px}
+.safety{margin-top:28px}
+.foot{max-width:90ch;margin-top:24px}
+.stage .title .eyebrow{color:#edb28a}
+.stage .title h2,.display{font-weight:800}
+@media(min-width:760px){.week .head .days{margin-left:auto}}
+@media(max-width:759px){
+  #home{display:block;padding:0 20px 40px}
+  .brandbar{margin-bottom:32px;padding:14px 0}
+  .brandbar svg{width:44px;height:44px}
+  .brandbar b{font-size:12px}
+  .brandbar .product-name{font-size:10px;max-width:84px;text-align:right}
+  .brand-link{gap:8px}
+  .hero{padding:0 0 28px}
+  .hero h1{font-size:46px}
+  .development-label{font-size:9px;letter-spacing:.08em;margin-bottom:16px}
+  .details{padding:20px}
+  .phasepick{margin-top:32px;padding-top:24px}
+  .small-note{font-size:13px}
+  .weeknav{gap:6px}
+  .weeknav a{padding:11px 12px;font-size:10px}
+  #weeks{display:block;margin-top:28px}
+  .week{margin-bottom:30px}
+  .ex-card{min-height:104px;padding:16px 12px;gap:10px}
+  .ex-card .ic{width:32px;height:32px}
+  .ex-card .tag{font-size:8px;padding:4px}
+  .ex-card h3{font-size:14px}
+  .ex-card p{font-size:12px}
+}
+
+/* Patient progress and post-exercise review. */
+.patient-progress{margin:0 0 40px;padding:0 0 32px;border-top:0}
+.patient-section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}
+.patient-section-heading h2{font-size:28px;text-transform:none;letter-spacing:-.02em;font-weight:800;margin:6px 0 0}
+.patient-section-heading>span{font-size:11px;color:var(--muted)}
+.patient-overview,.patient-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);background:var(--bone)}
+.patient-metric{padding:18px;border-right:1px solid var(--line);min-width:0}
+.patient-metric:last-child{border-right:0}
+.patient-metric>span,.patient-metric>small{display:block;font-size:11px;color:var(--muted);line-height:1.45}
+.patient-metric>strong{display:block;font-size:28px;font-weight:800;line-height:1.12;margin:9px 0;letter-spacing:-.03em;overflow-wrap:anywhere}
+.patient-overview .patient-metric:nth-child(3)>strong{font-size:19px}
+.patient-progress-body{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:32px;margin-top:24px}
+.patient-trend-panel{min-width:0}
+.patient-trend-panel>small{display:block;color:var(--muted);font-size:11px;line-height:1.5}
+.patient-trend-controls{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.patient-trend-controls label{font-size:11px;color:var(--muted);flex:1;min-width:0}
+.patient-trend-controls select{display:block;max-width:100%;margin-top:4px;min-height:40px;border:1px solid var(--line);border-radius:2px;background:var(--bone);font:inherit;color:var(--ink);padding:8px}
+.patient-tabs{display:flex;gap:4px}
+.patient-tabs button,.patient-review-header button{min-height:40px;padding:8px 12px;background:transparent;border:1px solid var(--line);color:var(--ink);font:600 12px Archivo,Arial,sans-serif;cursor:pointer}
+.patient-tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bone);border-color:var(--ink)}
+.patient-chart-headline{display:flex;align-items:baseline;gap:12px;margin:18px 0 0}
+.patient-chart-headline strong{font-size:32px;letter-spacing:-.03em}
+.patient-chart-headline span{font-size:11px;color:var(--muted)}
+.patient-trend{display:block;width:100%;height:auto;max-height:180px}
+.patient-trend text{font:11px Archivo,Arial,sans-serif;fill:var(--muted)}
+.patient-chart-data{font-size:11px;margin:6px 0 12px;color:var(--muted)}
+.patient-chart-data summary{cursor:pointer;min-height:28px;padding-top:6px}
+.patient-recent h3,.patient-trend-panel h3{font-size:14px;margin:0 0 12px}
+.patient-history-row{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;padding:12px 0;background:none;border:0;border-bottom:1px solid var(--line);text-align:left;color:var(--ink);font:inherit;cursor:pointer}
+.patient-history-row b{font-size:13px}
+.patient-history-row small{display:block;font-size:11px;color:var(--muted);margin-top:5px}
+.patient-history-row>span:last-child{font-size:11px;color:var(--brand);white-space:nowrap;font-weight:700}
+.patient-empty{padding:20px;margin-top:14px;background:var(--paper2);font-size:13px;line-height:1.6;color:var(--muted)}
+.patient-review{width:min(800px,calc(100% - 32px));max-height:90vh;border:1px solid var(--line);padding:24px;background:var(--paper);color:var(--ink)}
+.patient-review::backdrop{background:rgba(26,25,24,.65)}
+.patient-review-header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;font-size:12px;font-weight:700}
+.patient-session{width:100%;text-align:left}
+.patient-session h2{font-size:32px;font-weight:800;margin:10px 0 8px;letter-spacing:-.03em}
+.patient-session .patient-lead{margin-bottom:20px}
+.patient-completion{padding:20px 0;border-bottom:1px solid var(--line);margin-bottom:24px;font-size:13px;font-weight:600}
+.patient-completion progress{width:100%;height:8px;display:block;margin:12px 0;accent-color:var(--brand)}
+.patient-completion small{display:block;color:var(--muted);font-size:11px;font-weight:400;margin-top:8px}
+.done{background:var(--paper);color:var(--ink);padding:32px 20px}
+.done .inner{display:block;max-width:760px;margin:0 auto;min-height:0;text-align:left}
+.done h2{font-weight:800}
+.done p{max-width:none;color:var(--muted);font-size:13px;line-height:1.6}
+.done .q{margin-top:28px;padding-top:20px;border-top:2px solid var(--ink)}
+.done .q h3{font-size:22px;font-weight:800}
+.done .scale{justify-content:flex-start}
+.done .scale button{border:1px solid var(--line);border-radius:2px;color:var(--ink);background:var(--bone);cursor:pointer}
+.done .scale button:hover{background:var(--ink);color:var(--bone)}
+.done .skip{color:var(--muted);min-height:44px}
+.done .row{justify-content:flex-start}
+.done .row a{color:var(--bone);background:var(--ink);border:1px solid var(--ink);border-radius:2px}
+.done .row a:first-child{color:var(--ink);background:transparent}
+@media(max-width:759px){
+ .patient-section-heading{display:block}.patient-section-heading>span{display:block;margin-top:10px}
+ .patient-section-heading h2{font-size:26px}.patient-progress{margin-bottom:28px}
+ .patient-overview,.patient-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .patient-metric{padding:14px}.patient-metric:nth-child(2){border-right:0}.patient-metric:nth-child(-n+2){border-bottom:1px solid var(--line)}
+ .patient-metric>strong{font-size:24px}.patient-progress-body{display:block}.patient-recent{margin-top:24px}
+ .patient-trend-controls{align-items:flex-start;flex-direction:column}.patient-trend-controls select{width:100%}
+ .patient-review{padding:18px}.patient-session h2{font-size:28px}.done{padding:24px 20px}
+ .patient-chart-headline{align-items:flex-start;flex-direction:column;gap:3px}
+}
+
+/* Month calendar: recorded activity, surgery and today remain distinct. */
+.recovery-calendar{margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
+.recovery-calendar-head{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.recovery-calendar h3{font-size:28px;letter-spacing:-.025em;margin:7px 0 0;font-weight:800}
+.recovery-calendar-nav{display:flex;gap:6px;flex-wrap:wrap}
+.recovery-calendar-nav button{min-width:42px;min-height:42px;padding:8px 12px;background:var(--bone);border:1px solid var(--line);border-radius:2px;color:var(--ink);font:600 12px Archivo,Arial,sans-serif;cursor:pointer}
+.recovery-calendar-nav button:disabled{opacity:.5;cursor:default}
+.recovery-calendar-nav button:not(:disabled):hover{border-color:var(--ink)}
+.progress .recovery-calendar-caption{font-size:12px;margin:14px 0 20px;line-height:1.6}
+.recovery-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.recovery-weekday{padding:12px 6px;text-align:center;font-size:11px;font-weight:700;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.recovery-day{min-height:86px;padding:10px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bone);color:var(--ink);font:inherit;cursor:pointer;text-align:left;position:relative}
+.recovery-day.outside{background:var(--paper);color:var(--muted)}
+.recovery-day.used{background:var(--brand);color:var(--bone)}
+.recovery-day.surgery{box-shadow:inset 0 0 0 2px var(--ink)}
+.recovery-day.today .recovery-day-number{background:var(--ink);color:var(--bone);border-radius:50%}
+.recovery-day-number{display:grid;place-items:center;width:25px;height:25px;font-size:13px;font-weight:700}
+.recovery-use-mark,.recovery-surgery-mark{font-size:10px;line-height:1.3;font-weight:600}
+.recovery-day[aria-pressed="true"]{outline:3px solid #1d5c57;outline-offset:-4px}
+.recovery-calendar-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;font-size:11px;color:var(--muted)}
+.recovery-calendar-legend>span{display:flex;align-items:center;gap:6px}
+.recovery-calendar-legend i{display:inline-block;width:12px;height:12px;border:1px solid var(--line)}
+.recovery-calendar-legend .used{background:var(--brand);border-color:var(--brand)}
+.recovery-calendar-legend .surgery{border:2px solid var(--ink)}
+.recovery-calendar-legend .today{background:var(--ink);border-radius:50%}
+.recovery-calendar-note{display:block;margin-top:10px;font-size:11px;line-height:1.5;color:var(--muted)}
+.recovery-calendar-detail:not(:empty){margin-top:18px;padding:18px;background:var(--paper2)}
+.recovery-calendar-detail h4{margin:0 0 10px;font-size:14px}
+@media(max-width:759px){.recovery-calendar-head{align-items:flex-start;flex-direction:column;gap:14px}.recovery-calendar h3{font-size:25px}.recovery-day{min-height:68px;padding:5px 3px;gap:4px}.recovery-day-number{width:23px;height:23px;font-size:12px}.recovery-use-mark span,.recovery-surgery-mark span{display:none}.recovery-calendar-legend{gap:12px;font-size:10px}.recovery-weekday{padding:10px 2px;font-size:10px}}
+
+.recovery-daily{margin-top:22px;padding:20px;border:1px solid var(--line);background:var(--bone)}
+.recovery-daily label.recovery-day-picker{display:block;font-size:12px;font-weight:700}
+.recovery-day-picker select{display:block;margin:8px 0 14px;padding:10px;max-width:100%;min-height:44px;background:var(--paper);border:1px solid var(--line);font:inherit;color:var(--ink)}
+.recovery-check-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.recovery-check-row input{width:22px;height:22px;flex:none;accent-color:var(--brand);cursor:pointer}
+.recovery-check-row span{font-size:13px;font-weight:600}
+.recovery-check-row small{display:block;margin-top:4px;font-size:11px;font-weight:400;color:var(--muted)}
+.recovery-check-status{font-size:11px;color:var(--muted);margin:10px 0}
+
+.patient-header-nav{display:flex;align-items:center;gap:24px}
+.patient-header-nav a{font-size:12px;font-weight:700;text-decoration:none;padding:11px 14px;border:1px solid var(--ink);color:var(--ink)}
+.patient-header-nav a:hover{background:var(--ink);color:var(--bone)}
+.progress-view #home>.hero,.progress-view #home>.details,.progress-view #home>.phasepick,.progress-view #weeks,.progress-view #home>.safety,.progress-view #home>.foot{display:none}
+@media(max-width:759px){.patient-header-nav{gap:8px}.patient-header-nav .product-name{display:none}.patient-header-nav a{font-size:10px;padding:10px}.progress-view .patient-progress{margin-bottom:0}}
+
+.analysis-card{border:1px solid var(--line);padding:20px;margin:24px 0;background:var(--paper)}
+.analysis-card p{line-height:1.6;font-size:14px}.analysis-card h3{margin-top:0}
+.analysis-card button,.analysis-dialog-header button{font:600 14px Archivo,Arial,sans-serif;padding:12px 18px;cursor:pointer;min-height:44px}
+.analysis-card button{background:var(--ink);color:var(--paper);border:0}.analysis-card button:disabled{opacity:.5;cursor:default}
+.exercise-analysis-dialog{width:min(1200px,calc(100vw - 24px));height:94vh;max-height:94vh;padding:0;border:1px solid var(--line);background:var(--paper)}
+.exercise-analysis-dialog::backdrop{background:rgba(26,25,24,.7)}
+.analysis-dialog-header{height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;font-size:14px}
+.exercise-analysis-dialog iframe{display:block;width:100%;height:calc(100% - 70px);border:0}
+@media(max-width:600px){.analysis-dialog-header{font-size:12px;padding:8px}.analysis-dialog-header button{font-size:12px;padding:8px}}
+</style>
+</head><body><div class="done show"><div class="inner"><p style="padding:12px;background:#1a1918;color:white">SOFTWARE PREVIEW ONLY. Synthetic values, no patient records.</p><div class="pt-controls"><label>Preview exercise<select id="exercise"><option value="straight_leg_raise">Straight leg raise</option><option value="seated_extension">Seated knee extension</option><option value="heel_slide">Heel slides</option></select></label><label>Preview state<select id="state"><option value="analysed">After video analysis</option><option value="live">Before video analysis</option><option value="poor">Video not tracked</option></select></label></div><div id="simple"></div><details class="exercise-more"><summary>More detail</summary><div id="detail"></div></details></div></div><script type="module">
+import {renderBasicExerciseSummary} from './exercise-summary.mjs';import {sessionSummary} from './patient-progress.js';import {savedAnalysisSummary} from './video-analysis/live.mjs';
+const $=id=>document.getElementById(id);
+function render(){const exercise=$('exercise').value,state=$('state').value;
+const rec={patient_id:'SYNTHETIC PREVIEW',operation_date:'2026-09-01',started_at:'2026-09-13T10:00:00+01:00',exercise,count_source:'monitoring',duration_s:90,prescribed_reps:10,monitoring:{repetitions:10,tempo_s_per_rep:6},measurement:{side:'left',peak_flexion_deg:95,p95_flexion_deg:93,min_extension_deg:5},patient:{pain_0_10:2,difficulty_1_5:2}};
+if(state!=='live')rec.exercise_analysis={exercise,exerciseName:$('exercise').selectedOptions[0].textContent,config:{side:'left',minVisibility:.5},reps:state==='poor'?[]:Array.from({length:10},()=>({maxAdditionalBend:5,peakLift:30,kneeExcursion:80,maximumKneeBend:95,returnKneeBend:5})),metrics:{repetitionTrackingCoverage:state==='poor'?0:1,maximumObservedBend:state==='poor'?null:95,bestObservedStraightening:state==='poor'?null:5,hipFlexion:state==='poor'?null:{maximum:35},kneeBend:state==='poor'?null:{minimum:5,maximum:95},meanCycleDuration:6,meanOutwardDuration:2,meanHold:1,meanReturnDuration:3,analysedDuration:90}};
+$('simple').innerHTML=renderBasicExerciseSummary(rec);$('detail').innerHTML=sessionSummary(rec,[rec]);if(rec.exercise_analysis)$('detail').append(savedAnalysisSummary(rec.exercise_analysis));}
+$('exercise').onchange=render;$('state').onchange=render;render();
+</script></body></html>

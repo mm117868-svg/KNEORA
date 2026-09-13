@@ -1,0 +1,11 @@
+{
+  "voice": "marin",
+  "model": "gpt-4o-mini-tts",
+  "label": "Marin, soft and warm British female delivery",
+  "instructions": "Voice: A warm adult British woman with a soft, rounded tone and a natural contemporary British English accent.\nDelivery: Speak gently and conversationally, as if reassuring one person sitting beside you. Keep the volume even, soften the ends of phrases, and use subtle natural changes in pitch.\nPacing: Calm and unhurried, around 135 words per minute, with a comfortable breath between sentences. Leave a clear two-second pause between paragraphs.\nStyle: Kind, clear and quietly encouraging. Avoid a bright presenter voice, exaggerated enthusiasm, clipped syllables, sing-song rhythm, whispering or ASMR. Read only the supplied script, exactly as written.",
+  "policy": "Use this voice and delivery for every new spoken communication from the app. Use local generated audio, disclose that the voice is AI-generated, and retain written prompts when audio is unavailable. Do not substitute browser speech synthesis or another voice.",
+  "prompts": {
+    "repetitions_complete": "Your repetitions are now complete. The recording has stopped. You may now move from your exercise position when you are ready.",
+    "session_ended": "Your exercise session has ended. The recording has stopped. You may now move from your exercise position when you are ready."
+  }
+}

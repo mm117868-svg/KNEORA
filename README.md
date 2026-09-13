@@ -5,21 +5,31 @@ Static copy of the browser version of Knee Recovery (Cambridge Kinematics).
 control exposed, `report.html` the physio report built from the records the
 browser holds. `kneerec.js` holds two layers: MediaPipe Pose for a
 whole-session knee angle, a pixel-motion counter for repetitions, written
-side by side and never joined. `voicecount.js` is the patient's own count: the
-patient says the number of each repetition and a word spotter on the device
-hears it. `kneetrack.js` is a steadier counter from the picture alone, which
+side by side and never joined. `kneetrack.js` is a counter from the picture alone, which
 follows points on the knee and counts one repetition for each full swing.
 The counting method is chosen on the home page; movement in the box is always
 counted underneath as a cross-check. Everything runs in the visitor's browser; no
 video leaves the device. No passcode gate; noindex.
+
+Exercises now start only with a raised hand held for two seconds, followed by a five-second visual countdown. There is no ready/start button or voice command. Marin, with the approved soft, warm British female delivery, is the shared voice for all new app speech. Countdown audio is prepared for generation using the hidden-key local launcher; the app identifies it as visual only until the recording exists. See [VOICE.md](VOICE.md). Historical voice-counted records remain readable.
 
 Serve with GitHub Pages (Settings > Pages > Deploy from branch, root).
 Built by `tools/pages.py` in the knee-recovery folder; edit there, not here.
 
 ## Recorded exercise analyser
 
-`video-analysis/` contains the standalone recorded straight leg raise analyser, with local MediaPipe assets, per-joint measurements, frame-quality filtering, TXT/CSV/JSON reports and an explicitly unvalidated SLR video estimate. Clinical QAB entries remain separate. Videos stay in the browser. Open `video-analysis/` from the home-page footer or see `video-analysis/README.md` for local setup, methods and limitations.
+`video-analysis/` contains the recorded straight leg raise, seated knee extension and heel slide analyser, with local MediaPipe assets, per-joint measurements, frame-quality filtering, TXT/CSV/JSON reports and an explicitly unvalidated SLR video estimate. Clinical QAB entries remain separate. After a live recording is stopped, Analyse exercise opens its video directly and saves a compact report to that session. Videos stay in the browser. Open `video-analysis/` from the home-page footer or see `video-analysis/README.md` for local setup, methods and limitations.
 
-The recorded analyser is maintained as a separate addition to this static build. Future regeneration with `tools/pages.py` should preserve this directory and its footer link.
+The recorded analyser is maintained as a separate addition to this static build. Future regeneration with `tools/pages.py` should preserve this directory, the main app recording integration, the progress summary changes and its footer link. See `video-analysis/POSTOPERATIVE_EVIDENCE.md` for clinical reference choices.
 
-Run its tests with `node --test video-analysis/analysis.test.mjs`.
+Run its tests with `node --test video-analysis/analysis.test.mjs video-analysis/exercises.test.mjs`.
+
+## Progress to date and questionnaires
+
+The patient navigation now includes **Progress to date** (`?view=progress-to-date`) and **Patient-reported measures** (`?view=patient-measures`). Daily exercise metrics, best observed results, downloadable summaries and source-linked recovery context are implemented in `progress-data.mjs`, `progress-to-date.mjs`, `progress-shared.mjs`, `recovery-references.mjs` and `progress-to-date.css`. Dated KOOS JR and Oxford score entries are implemented in `patient-measures.mjs`. Preserve these files and their main-page integration during any regeneration of this static build.
+
+See [PROGRESS_AND_QUESTIONNAIRES.md](PROGRESS_AND_QUESTIONNAIRES.md) for aggregation rules, questionnaire scoring, source links, local storage, limitations and UI fixtures. Run `node --test tests/progress.test.mjs` for the new progress and questionnaire checks.
+
+The **Recovery timeline** panel (`?view=recovery-timeline`) adds a seven-stage chronological guide from the first postoperative day through 12 months and beyond. `recovery-timeline.mjs` and `recovery-timeline.css` provide the interactive diagram, evidence references, complete timeline and current app measurement capabilities. It is an educational overview, not a personalised rehabilitation prescription or automated progress grade. Preserve these files and the navigation link when regenerating the static build.
+
+The **Recovery summary** (`?view=recovery-summary`) separates dedicated knee bending and straightening checks from **Exercise metrics** (`?view=progress-to-date`, previously labelled Progress to date). It supports patient-triggered MediaPipe end-position sequences, uploaded images, clinical angle entry and imported depth-derived XYZ measurements. Direct depth-camera capture is not connected. It also summarises existing symptoms, questionnaire results and exercise participation without inferring muscle strength. Preserve `recovery-summary.mjs`, `recovery-summary.css`, `recovery-measurements.mjs`, `recovery-camera.mjs` and their main-page integration. See [RECOVERY_MEASUREMENTS.md](RECOVERY_MEASUREMENTS.md).

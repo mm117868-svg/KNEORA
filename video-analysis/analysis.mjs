@@ -79,8 +79,10 @@ export function analyse(samples,config) {
   const reference=candidates.filter(s=>s.hipAngle>=lowestObserved-3);
   const baseHip=median(reference.map(s=>s.hipAngle)),baseBend=median(reference.map(s=>s.bend));
   const trace=selected.map(s=>({...s,hipFlexion:Number.isFinite(s.hipAngle)?180-s.hipAngle:null,lift:Number.isFinite(s.hipAngle)?baseHip-s.hipAngle:null}));
-  const reps=[];let pending=null,lastRest=null,incomplete=0;
+  const reps=[];let pending=null,lastRest=null,incomplete=0,previousTime=null;
   for(const s of trace.filter(s=>s.t>=config.start)) {
+    if(previousTime!==null && s.t-previousTime>0.25){if(pending){incomplete++;pending=null;}lastRest=null;}
+    previousTime=s.t;
     if(!s.valid){if(pending){incomplete++;pending=null;}lastRest=null;continue;}
     if(s.lift<=3){
       if(pending){
