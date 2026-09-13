@@ -1,0 +1,44 @@
+{
+  "generator": "MPFB 2",
+  "commit": "437dd513888a92399d1d3200d2e80859fae55abc",
+  "blender": "4.5.13 LTS",
+  "assetLicense": "CC0-1.0",
+  "sources": [
+    {
+      "pack": "MakeHuman system assets CC0",
+      "url": "https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
+      "paths": [
+        "skins/middleage_caucasian_male",
+        "eyes/high-poly",
+        "eyes/materials",
+        "eyebrows/eyebrow001",
+        "eyelashes/eyelashes01",
+        "teeth/teeth_base",
+        "hair/short04",
+        "clothes/shoes06"
+      ],
+      "attribution": [
+        "MakeHuman community",
+        "Data Collection AB",
+        "Joel Palmius",
+        "Jonas Hauquier"
+      ]
+    },
+    {
+      "pack": "Shirts 01 CC0",
+      "url": "https://static.makehumancommunity.org/assets/assetpacks.html",
+      "paths": [
+        "clothes/toigo_basic_tucked_t-shirt"
+      ],
+      "attribution": [
+        "Toigo"
+      ]
+    }
+  ],
+  "custom": [
+    "Weighted sports shorts derived from CC0 body mesh",
+    "Teal shirt material",
+    "Grey hair tint",
+    "Exercise animation and scene"
+  ]
+}

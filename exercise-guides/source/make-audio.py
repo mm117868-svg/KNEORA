@@ -3,10 +3,10 @@ import json,subprocess,wave,os
 root=Path(__file__).resolve().parent.parent
 ff=os.environ.get('GUIDES_FFMPEG','ffmpeg')
 for ex in json.loads((root/'exercises.json').read_text()):
- out=bytearray(30*24000*2)
+ out=bytearray(int(ex['duration']*24000)*2)
  for i,c in enumerate(ex['cues']):
   stem=root/'source'/f'{ex["id"]}-{i}';aiff=stem.with_suffix('.aiff');wav=stem.with_suffix('.wav')
-  subprocess.run(['say','-v','Daniel','-r','172','-o',str(aiff),c['text']],check=True)
+  subprocess.run(['say','-v','Daniel','-r','154','-o',str(aiff),c['text']],check=True)
   subprocess.run([ff,'-v','error','-y','-i',str(aiff),'-ar','24000','-ac','1',str(wav)],check=True)
   with wave.open(str(wav)) as w: pcm=w.readframes(w.getnframes());duration=w.getnframes()/w.getframerate()
   available=c['end']-c['start']-.2

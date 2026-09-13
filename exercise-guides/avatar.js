@@ -44,7 +44,7 @@ export function makeAvatar(canvas){
   eyes[0].position.copy(p(.713,.103,.043));eyes[1].position.copy(p(.713,.103,-.043));
   return {p,up,forward};
  }
- function pose(id,t){const q=movement(t),lying=['heel_slide','straight_leg_raise','quad_set'].includes(id),sitting=id==='seated_extension',rising=id==='sit_to_stand',squatting=['mini_squat','squat'].includes(id),standing=!lying&&!sitting&&!rising;
+ function pose(id,t,render=true){const q=movement(t),lying=['heel_slide','straight_leg_raise','quad_set'].includes(id),sitting=id==='seated_extension',rising=id==='sit_to_stand',squatting=['mini_squat','squat'].includes(id),standing=!lying&&!sitting&&!rising;
   bed.visible=lying;chair.visible=sitting||rising;support.visible=['standing_flexion','mini_squat','squat','single_leg_stance'].includes(id);
   let hip=V(0,.97,0),angle=0,ps=[];
   if(lying){hip=V(-.06,.54,0);angle=-Math.PI/2;
@@ -63,19 +63,19 @@ export function makeAvatar(canvas){
    const f=V(Math.cos(theta),Math.sin(theta),0),u=V(-Math.sin(theta),Math.cos(theta),0);l.foot.position.copy(v.an).addScaledVector(f,.063).addScaledVector(u,-.044);l.foot.rotation.z=theta;
    l.sole.position.copy(l.foot.position).addScaledVector(u,-.039);l.sole.rotation.z=theta;l.band.position.copy(v.k).lerp(v.an,.14);l.band.quaternion.setFromUnitVectors(V(0,1,0),v.k.clone().sub(v.an).normalize());l.band.visible=i===0;
   });
-  arms.forEach((a,i)=>{const z=i?-.245:.245,s=p(.445,0,z);let hand,elbow;
+  const armTargets=[];arms.forEach((a,i)=>{const z=i?-.245:.245,s=p(.445,0,z);let hand,elbow;
    if(lying){hand=hip.clone().add(V(.05,.015,z*1.1));elbow=hip.clone().add(V(-.22,.015,z*1.2));}
    else if(sitting){hand=hip.clone().add(V(.24,.02,z));elbow=p(.17,.08,z*1.05);}
    else if(rising){hand=V(-.17,.73,z*1.2).lerp(p(-.015,.13,z*1.1),smooth((q-.25)/.35));elbow=ik(s,hand,.27,.26,-1);}
    else if(support.visible){hand=V(.60,1.075,z*1.1);elbow=ik(s,hand,.29,.28,-1);}
    else{hand=p(-.02,.06,z*1.1);elbow=p(.20,.02,z*1.05);}
-   a.shoulder.position.copy(s);between(a.upper,s,elbow);between(a.lower,elbow,hand);a.elbow.position.copy(elbow);a.hand.position.copy(hand);a.hand.quaternion.setFromUnitVectors(V(0,1,0),elbow.clone().sub(hand).normalize());
+   armTargets.push({shoulder:s,elbow,hand});a.shoulder.position.copy(s);between(a.upper,s,elbow);between(a.lower,elbow,hand);a.elbow.position.copy(elbow);a.hand.position.copy(hand);a.hand.quaternion.setFromUnitVectors(V(0,1,0),elbow.clone().sub(hand).normalize());
   });
   highlight.visible=id==='quad_set'&&t>=5&&t<21;highlight.position.copy(ps[0].k).lerp(ps[0].h,.47);highlight.position.z+=.07;highlight.rotation.y=Math.PI/2;highlight.scale.setScalar(.95+.06*Math.sin(t*3));
   if(lying){camera.left=-1.20;camera.right=1.20;camera.top=.768;camera.bottom=-.768;camera.position.set(1.0,2.15,7);camera.lookAt(-.03,.56,0);}
   else{camera.left=-1.45;camera.right=1.45;camera.top=.927;camera.bottom=-.927;camera.position.set(2.5,2.45,8);camera.lookAt(.03,.93,0);}
-  camera.updateProjectionMatrix();renderer.render(scene,camera);
-  return {exercise:id,t,q,joints:ps.map(({h,k,an})=>({hip:h.toArray(),knee:k.toArray(),ankle:an.toArray()}))};
+  camera.updateProjectionMatrix();if(render)renderer.render(scene,camera);
+  return {exercise:id,t,q,hip,angle,legs:ps,arms:armTargets,joints:ps.map(({h,k,an})=>({hip:h.toArray(),knee:k.toArray(),ankle:an.toArray()}))};
  }
  return {pose,renderer,scene,camera,group,bed,chair,support};
 }

@@ -1,0 +1,27 @@
+{
+  "selected_direction": "02 Fitness avatar",
+  "reference": "references/fitness-avatar-t-pose.png",
+  "reference_jpeg": "references/fitness-avatar-t-pose.jpg",
+  "status": "Reference prepared; 3D generation has not started",
+  "endpoint": "meshy/v7/image-to-3d",
+  "parameters": {
+    "should_texture": true,
+    "should_remesh": true,
+    "target_polycount": 30000,
+    "topology": "triangle",
+    "enable_pbr": true,
+    "pose_mode": "t-pose",
+    "model_type": "standard",
+    "symmetry_mode": "auto",
+    "enable_rigging": true,
+    "rigging_height_meters": 1.78,
+    "enable_animation": false
+  },
+  "last_attempt": {
+    "outcome": "rejected before queue submission",
+    "http_status": 403,
+    "reason": "User is locked. Reason: Exhausted balance."
+  },
+  "next_step": "Resume generation when Fal credit is available, or use a different editable avatar if the user chooses that route.",
+  "integration": "The existing exercise videos, timing, narration, camera flow and live site have not been replaced."
+}

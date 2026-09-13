@@ -1,0 +1,225 @@
+{
+  "status": "passed",
+  "date": "2026-09-13",
+  "contentStatus": "Draft for clinical review",
+  "browser": {
+    "videos": 9,
+    "duration": 57,
+    "dimensions": [
+      1280,
+      720
+    ],
+    "captionsPerVideo": 9,
+    "mobileOverflow": false,
+    "automaticCameraDuringGuide": false,
+    "watchAndSkip": true,
+    "cancelAndFocus": true,
+    "errors": []
+  },
+  "media": [
+    {
+      "id": "heel_slide",
+      "frames": 1368,
+      "duration": 57,
+      "audioPeak": 27503,
+      "modelBytes": 28606720,
+      "modelAnimationSeconds": 57
+    },
+    {
+      "id": "straight_leg_raise",
+      "frames": 1368,
+      "duration": 57,
+      "audioPeak": 26209,
+      "modelBytes": 28606736,
+      "modelAnimationSeconds": 57
+    },
+    {
+      "id": "seated_extension",
+      "frames": 1368,
+      "duration": 57,
+      "audioPeak": 30168,
+      "modelBytes": 28612324,
+      "modelAnimationSeconds": 57
+    },
+    {
+      "id": "quad_set",
+      "frames": 1368,
+      "duration": 57,
+      "audioPeak": 26995,
+      "modelBytes": 28606712,
+      "modelAnimationSeconds": 57
+    },
+    {
+      "id": "standing_flexion",
+      "frames": 1368,
+      "duration": 57,
+      "audioPeak": 27804,
+      "modelBytes": 28599476,
+      "modelAnimationSeconds": 57
+    },
+    {
+      "id": "mini_squat",
+      "frames": 1368,
+      "duration": 57,
+      "audioPeak": 26478,
+      "modelBytes": 28599460,
+      "modelAnimationSeconds": 57
+    },
+    {
+      "id": "sit_to_stand",
+      "frames": 1368,
+      "duration": 57,
+      "audioPeak": 27720,
+      "modelBytes": 28612300,
+      "modelAnimationSeconds": 57
+    },
+    {
+      "id": "squat",
+      "frames": 1368,
+      "duration": 57,
+      "audioPeak": 30063,
+      "modelBytes": 28599444,
+      "modelAnimationSeconds": 57
+    },
+    {
+      "id": "single_leg_stance",
+      "frames": 1368,
+      "duration": 57,
+      "audioPeak": 26683,
+      "modelBytes": 28599480,
+      "modelAnimationSeconds": 57
+    }
+  ],
+  "rig": [
+    {
+      "id": "heel_slide",
+      "bones": true,
+      "animationDuration": 57,
+      "maxAnkleError": 1.1194330545914982e-07
+    },
+    {
+      "id": "straight_leg_raise",
+      "bones": true,
+      "animationDuration": 57,
+      "maxAnkleError": 5.200385853163052e-08
+    },
+    {
+      "id": "seated_extension",
+      "bones": true,
+      "animationDuration": 57,
+      "maxAnkleError": 1.0628523648953746e-07
+    },
+    {
+      "id": "quad_set",
+      "bones": true,
+      "animationDuration": 57,
+      "maxAnkleError": 8.316860393073405e-08
+    },
+    {
+      "id": "standing_flexion",
+      "bones": true,
+      "animationDuration": 57,
+      "maxAnkleError": 6.731873129033476e-08
+    },
+    {
+      "id": "mini_squat",
+      "bones": true,
+      "animationDuration": 57,
+      "maxAnkleError": 6.220217278945877e-08
+    },
+    {
+      "id": "sit_to_stand",
+      "bones": true,
+      "animationDuration": 57,
+      "maxAnkleError": 1.0750455714997779e-07
+    },
+    {
+      "id": "squat",
+      "bones": true,
+      "animationDuration": 57,
+      "maxAnkleError": 1.3537825137841292e-07
+    },
+    {
+      "id": "single_leg_stance",
+      "bones": true,
+      "animationDuration": 57,
+      "maxAnkleError": 5.007693320314374e-08
+    }
+  ],
+  "blender": {
+    "blenderVersion": "4.5.13 LTS",
+    "armatures": 1,
+    "boneCount": 53,
+    "meshCount": 9,
+    "packedImages": [
+      {
+        "name": "brown_eye.png",
+        "packed": true,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "eyebrow001.png",
+        "packed": true,
+        "size": [
+          512,
+          512
+        ]
+      },
+      {
+        "name": "eyelashes01.png",
+        "packed": true,
+        "size": [
+          512,
+          512
+        ]
+      },
+      {
+        "name": "middleage_lightskinned_male_diffuse.png",
+        "packed": true,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "shoes06_diffuse.png",
+        "packed": true,
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "short04_diffuse.png",
+        "packed": true,
+        "size": [
+          2048,
+          2048
+        ]
+      },
+      {
+        "name": "teeth.png",
+        "packed": true,
+        "size": [
+          2048,
+          2048
+        ]
+      }
+    ],
+    "bodyShapeKeys": 11
+  },
+  "videoSeeking": {
+    "seconds": 24,
+    "rangeStatus": 206
+  },
+  "narration": "All nine cue windows in every guide contain nonzero audio; source narration has no clipped samples.",
+  "visualReview": "Start, movement and hold positions inspected across the exercise set; quad-set contraction has a graphic cue.",
+  "limits": [
+    "No clinical sign-off or patient usability study",
+    "No real camera or repetition-counting validation",
+    "Local interpretation of style 2, not an exact reconstruction of the reference image"
+  ]
+}

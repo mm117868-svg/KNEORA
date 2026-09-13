@@ -1,6 +1,6 @@
 # Optional animated exercise guides
 
-Nine original 30-second videos demonstrate the movements in the current Knee Recovery exercise library. Each has a simple 3D character, British English narration, six caption cues and a complete outward-and-return movement. Static exercises show a contraction or balance hold and release.
+Nine 57-second videos demonstrate the movements in the current Knee Recovery exercise library. Each has a skinned adult fitness character built in Blender, British English narration, nine caption cues and two demonstrations of the movement. Static exercises show a contraction or balance hold and release.
 
 The patient can select **Watch how to do it** or **Skip and start**. A demonstration never starts the camera or a recording. Continuing enters the existing camera setup. Closing the guide returns to the exercise list. Finishing a video leaves the decision to start with the patient.
 
@@ -35,11 +35,13 @@ Movement descriptions were checked on 13 September 2026 against the following NH
 
 ## Editable model and media
 
-`avatar.js` defines the character and motion mathematically in Three.js 0.180.0. It uses fixed limb lengths, joint rotations and inverse kinematics for selected movements. It is a simplified visual character, not an anatomical or patient-specific biomechanical model. It does not use pose estimation, patient footage or an AI video generator.
+The [style 2 fitness character](fitness-avatar/README.md) was built in Blender 4.5.13 using MPFB and CC0 MakeHuman assets. It has a continuous human mesh, fitted clothing and a 53-bone armature. This is a local interpretation of the chosen character reference, not an exact reconstruction.
 
-The `models/` files are glTF 2.0 binary models with named 30-second animations. They contain the character and relevant furniture, with individual mesh transforms animated at 12 samples per second. In Blender, import a GLB using **File > Import > glTF 2.0**. The character has separate animated mesh parts rather than a skinned armature. A muscle cue used in the quad-set video is a graphic annotation and is not in the GLB.
+`fitness-avatar.js` loads the skinned mesh and applies deterministic exercise movements. `avatar.js` supplies the movement targets and furniture. This does not use pose estimation or patient recordings. The [packed Blender source](fitness-avatar/fitness-avatar-editable.blend) retains the editable body, skeleton and materials.
 
-`videos/` contains H.264 MP4s at 1280 × 720, 24 frames per second, with AAC narration, JPEG posters and WebVTT captions. The MP4s contain no patient recordings. Voice was rendered with the macOS Daniel voice. Narration is timed to the six cues in `exercises.json`.
+The `models/` files are glTF 2.0 binary models with named 57-second animations. They contain the skinned character and relevant furniture, with the skeleton and root transforms sampled at 12 frames per second. In Blender, import a GLB using **File > Import > glTF 2.0** to edit a particular exercise animation.
+
+`videos/` contains H.264 MP4s at 1280 × 720, 24 frames per second, with AAC narration, JPEG posters and WebVTT captions. The MP4s contain no patient recordings. Voice was rendered with the macOS Daniel voice. Narration is timed to the nine cues in `exercises.json`.
 
 `exercises.json` is the canonical script and timing source. The individual JSON files in `source/` preserve the initial script drafts.
 
@@ -72,8 +74,12 @@ node exercise-guides/source/export-models.cjs
 
 `GUIDES_BASE_URL` and `GUIDES_BROWSER` can override the local URL and browser executable. If narration changes, update the matching WebVTT captions before release. The current JSON cues define their start and end times.
 
-Three.js and its bundled exporter utilities are MIT licensed; see [vendor/LICENSE](vendor/LICENSE). The meshes and animation logic were created for this project.
+Three.js and its bundled loader/exporter utilities are MIT licensed; see [vendor/LICENSE](vendor/LICENSE). The human and clothing assets are CC0. See [asset provenance](fitness-avatar/source/asset-provenance.json). The exercise animation logic was created for this project.
 
 ## Verification
 
-Browser checks passed for all nine video durations and caption tracks, desktop and mobile layouts, model playback, watch/skip, cancellation, focus restoration and camera access only after continuing. All MP4s decoded fully to 720 frames with an audio stream; the source narration contains a non-zero signal and no clipped samples. GLB structure and 30-second animation timelines were checked. Start and movement poses were visually inspected. This does not substitute for clinician review or establish tracking accuracy.
+All nine MP4s decode completely to 1,368 frames at 24 fps, with audio, a 57-second duration and nine matching caption cues. Browser checks passed for desktop and mobile playback, model scrubbing, watch/skip, cancellation, focus restoration and camera access only after continuing. Video seeking and HTTP 206 range responses passed.
+
+All nine GLBs load with a 57-second animation and the skinned armature. Their sampled ankle positions match the live browser animation within 0.005 metres. The Blender source opens successfully with one 53-bone armature, nine meshes, body shape keys and all seven image textures packed. Start, movement and hold positions were visually inspected. The quad-set film includes a graphic contraction cue.
+
+See [verification results](source/verification.json). These technical checks do not substitute for clinical review, patient usability testing or repetition-counting validation.
