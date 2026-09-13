@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Local recording integration check</title>
+<style>body{font:16px system-ui;max-width:950px;margin:30px auto;padding:20px}button{font:inherit;padding:12px;margin:5px}p{line-height:1.6}.exercise-analysis-dialog{width:95vw;height:94vh;padding:0}.analysis-dialog-header{height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 20px}.exercise-analysis-dialog iframe{width:100%;height:calc(100% - 70px);border:0}</style>
+<h1>Local integration check</h1><p>Software test only. A generated canvas clip contains no person. The supplied repository example is a separate recorded fixture. Neither test validates clinical accuracy.</p>
+<button id="synthetic">Record a 2-second canvas fixture</button><button id="example">Load supplied seated-extension example</button><p id="state" role="status">Choose a fixture.</p><div id="host"></div><pre id="result"></pre>
+<script type="module">
+import {finishRecording,mountExerciseAnalysis} from '../live.mjs';
+const $=id=>document.getElementById(id);let dispose=()=>{};
+function mount(blob,duration){dispose();$('host').replaceChildren();$('result').textContent='';
+ // Exercise app uses relative analyser URL at the site root.
+ const originalBase=document.querySelector('base');if(!originalBase){const b=document.createElement('base');b.href='/';document.head.append(b);}
+ dispose=mountExerciseAnalysis($('host'),{blob,metadata:{exercise:'seated_extension',side:'auto',duration,daysPostOp:14,startedAt:'2026-09-13T10:00:00',prescribedReps:10},onReport:r=>{$('result').textContent=JSON.stringify({exercise:r.exercise,day:r.recovery.daysPostOp,reps:r.reps.length,sampled:r.metrics.sampledFrames,knee:r.metrics.kneeBend,hip:r.metrics.hipFlexion,traceStored:'trace' in r},null,2);}});
+ $('state').textContent=`Finalised recording: ${blob.size} bytes. Analyse exercise is now available.`;
+}
+$('synthetic').onclick=async()=>{try{const c=document.createElement('canvas');c.width=640;c.height=360;const ctx=c.getContext('2d'),stream=c.captureStream(10),chunks=[];const recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};recorder.start(100);$('state').textContent='Recording generated frames…';const start=performance.now();const timer=setInterval(()=>{ctx.fillStyle='#e8eee9';ctx.fillRect(0,0,640,360);ctx.fillStyle='#183c2a';ctx.font='30px system-ui';ctx.fillText('Synthetic test: no person',60,180);ctx.fillText(String(Math.round(performance.now()-start)),60,240);},100);await new Promise(r=>setTimeout(r,2100));const blob=await finishRecording(recorder,chunks);clearInterval(timer);stream.getTracks().forEach(t=>t.stop());mount(blob,2.1);}catch(e){$('state').textContent=e.message;}};
+$('example').onclick=async()=>{try{$('state').textContent='Loading local example…';const response=await fetch('/examples/rep-count/seated-extension-rep-count.mp4');if(!response.ok)throw Error('Example not found');const blob=await response.blob();mount(blob,null);}catch(e){$('state').textContent=e.message;}};
+</script></html>

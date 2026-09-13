@@ -2,15 +2,16 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { chromium } = require('playwright');
 const base = process.env.TEST_URL || 'http://127.0.0.1:8783/';
+const countMethod = process.env.TEST_COUNT_METHOD || 'motion';
 const out = require('node:path').join(require('node:os').tmpdir(), 'leg-gate-browser');
 fs.mkdirSync(out, {recursive: true});
 (async () => {
   const browser = await chromium.launch({headless:true, ...(process.env.CHROME_PATH ? {executablePath:process.env.CHROME_PATH} : {channel:'chrome'}), args:['--enable-unsafe-swiftshader']});
   const page = await browser.newPage({viewport:{width:1280,height:960}});
   const errors=[]; page.on('pageerror', e=>errors.push(e.message));
-  await page.addInitScript(() => {
+  await page.addInitScript(countMethod => {
     localStorage.setItem('kr_side','left');
-    localStorage.setItem('kr_app_countby','motion');
+    localStorage.setItem('kr_app_countby',countMethod);
     localStorage.setItem('kr_skeleton','0');
     for(const key of ['angle','video','files','handstart','voice','speak']) localStorage.setItem('kr_app_'+key,'0');
     window.cameraCalls=0;
@@ -21,7 +22,7 @@ fs.mkdirSync(out, {recursive: true});
       const paint=()=>{ctx.fillStyle='#555';ctx.fillRect(0,0,960,640);ctx.fillStyle='#888';ctx.fillRect((frame++%5)*4,0,12,12);};
       paint();setInterval(paint,40);return c.captureStream(25);
     }});
-  });
+  }, countMethod);
   await page.goto(base+'?debug&nopose');
   await page.waitForFunction(()=>!!window.kr);
   await page.evaluate(()=>{
@@ -34,6 +35,7 @@ fs.mkdirSync(out, {recursive: true});
       p[25]={x:.28+.2*Math.cos(lift),y:.68-.3*Math.sin(lift),visibility:1,presence:1};
       p[27]={x:.28+.4*Math.cos(lift),y:.68-.6*Math.sin(lift),visibility:1,presence:1};
       p[15]={x:.1+.02*Math.sin(performance.now()/80),y:.1,visibility:1,presence:1};
+      if(window.testHand)p[0]={x:.1,y:.5,visibility:1,presence:1};
       return {landmarks:[p]};
     });
   });
@@ -51,13 +53,18 @@ fs.mkdirSync(out, {recursive: true});
   const previewGreen=await greenPixels();assert.ok(previewGreen>250,'knee-ankle skeleton visible without hip, head or torso');
   assert.equal(await page.locator('#skeleton').count(),0);
   await page.screenshot({path:out+'/partial-leg-preview.png'});
-  await page.evaluate(()=>window.testPartial=false);
-  await page.locator('#briefStart').click();
+  await page.evaluate(()=>{window.testPartial=false;window.testHand=true;});
+  await page.waitForFunction(()=>window.kr.countingDown);
+  await page.evaluate(()=>window.testHand=false);
   await page.waitForFunction(()=>window.kr.running && !!window.kr.legGate?.reference);
   await page.evaluate(()=>{
     window.kr.monitor.update=function(video,frame,t){
       if(!window.opticalPending)return 0;
-      window.opticalPending--;this.counter.reps++;this.counter.times.push(t);return 1;
+      window.opticalPending--;window.opticalFrame=frame;this.counter.reps++;this.counter.times.push(t);return 1;
+    };
+    if(window.kr.tracker)window.kr.tracker.update=function(video,frame,t){
+      if(window.opticalFrame!==frame)return 0;
+      this.counter.reps++;this.counter.times.push(t);return 1;
     };
     window.opticalPending=2;
   });
@@ -87,14 +94,15 @@ fs.mkdirSync(out, {recursive: true});
   await page.waitForFunction(()=>JSON.parse(localStorage.getItem('kr_sessions')||'[]').length>0);
   const record=await page.evaluate(()=>JSON.parse(localStorage.getItem('kr_sessions')).at(-1));
   assert.equal(record.count_source,'pose_gated_optical');
+  assert.equal(record.pose_validation.raw_source,countMethod==='track'?'knee_tracker':'monitoring');
   assert.equal(record.pose_validation.repetitions,1);
   assert.equal(record.monitoring.repetitions,6);
   assert.equal(record.pose_validation.rejected,3);
   assert.equal(record.pose_validation.unconfirmed,2);
   assert.equal(record.pose_validation.pending,0);
-  assert.match(await page.locator('#done').innerText(),/Camera count confirmed in the selected leg/);
+  assert.match(await page.locator('#simpleExerciseSummary').innerText(),/Camera count confirmed in the selected leg/);
   await page.screenshot({path:out+'/saved-summary.png'});
-  for(const view of ['settings','summary','progress']){
+  for(const view of ['settings','recovery-summary','progress-to-date','recovery-timeline','patient-measures','progress']){
     await page.goto(base+'?view='+view);
     await page.waitForFunction(()=>document.querySelector('.patient-header-nav [aria-current="page"]'));
     assert.equal(await page.locator('.patient-header-nav [aria-current="page"]').getAttribute('data-page'),view);
@@ -107,7 +115,7 @@ fs.mkdirSync(out, {recursive: true});
   assert.match(await page.locator('#out').innerText(),/1\/10/);
   assert.match(await page.locator('#out').innerText(),/1 reps \(selected-leg confirmation; 3 rejected and 2 unconfirmed/);
   assert.deepEqual(errors,[]);
-  const result={base,simulation:true,scratchOnlyCount:0,validLegCycleCount:1,rawOpticalEvents:6,rejected:3,unconfirmed:2,partialPreviewGreenPixels:previewGreen,partialSessionGreenPixels:partialGreen,staleSkeletonHidden:true,storedCountSource:record.count_source,progressAndReport:true,mobileOverflow:false,errors};
+  const result={base,countMethod,simulation:true,scratchOnlyCount:0,validLegCycleCount:1,rawOpticalEvents:6,rejected:3,unconfirmed:2,partialPreviewGreenPixels:previewGreen,partialSessionGreenPixels:partialGreen,staleSkeletonHidden:true,storedCountSource:record.count_source,progressAndReport:true,mobileOverflow:false,errors};
   fs.writeFileSync(out+'/result.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
   await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});

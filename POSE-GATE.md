@@ -39,8 +39,8 @@ candidate decisions, thresholds and pose coverage are in `pose_validation`.
 `monitoring` and `tracking` retain raw optical results. Patient summaries and the
 physio report display the accepted count; raw tempo and activity remain labelled
 as raw pixel-motion measures. Historical counts retain their original method and
-are not mixed with the new method in repetition trends. Spoken patient counts and
-timed holds retain their existing methods. The technical bench remains available
+are not mixed with the new method in repetition trends. Historical spoken patient
+counts and timed holds remain readable. The technical bench remains available
 for examining the raw algorithms.
 
 Run the deterministic regression checks with:
@@ -54,7 +54,8 @@ local server at port 8783, or set `TEST_URL` to another serving root. This uses
 an isolated browser context, a generated camera stream and injected pose and
 optical events. It verifies preview and session overlays, rejection and accepted
 counts, saved records, progress, reports and mobile layout. No real camera or
-patient record is used by the test. `CHROME_PATH` can select a Chrome executable.
+patient record is used by the test. `CHROME_PATH` can select a Chrome executable. Set `TEST_COUNT_METHOD=track`
+to check the optical tracker as the candidate source.
 
 These checks cover unrelated hand movement, the other leg, camera translation,
 valid cycles of all three active exercises, duplicate events, missing or stale
