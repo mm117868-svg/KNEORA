@@ -139,3 +139,24 @@ function renderDailyChecklist(element,records,options,selected,onSelect){
     catch{checks[key][id]=previous;input.checked=previous;element.querySelector('[data-check-message]').textContent='The checklist could not be saved on this device. Please try again.';}
   });
 }
+
+export function visitDates(previous, records, today) {
+  return [...new Set([...(Array.isArray(previous)?previous:[]),...records.map(r=>String(r.started_at||'').slice(0,10)),today].filter(d=>typeof d==='string'&&parseDay(d)))].sort();
+}
+export function renderHomeActivity(element, records, patientId, operationDate) {
+  const today=new Date(),key='kr_app_visits:'+JSON.stringify(patientId);
+  let previous=[],saved=true;
+  try{previous=JSON.parse(localStorage.getItem(key)||'[]');}catch{}
+  const visits=visitDates(previous,records,dayKey(today));
+  try{localStorage.setItem(key,JSON.stringify(visits));}catch{saved=false;}
+  let month=new Date(today.getFullYear(),today.getMonth(),1,12);
+  function draw(focus){
+    const days=calendarMonth(month.getFullYear(),month.getMonth(),[],operationDate,today);
+    element.classList.add('home-activity');
+    element.setAttribute('aria-label','App activity calendar');
+    element.innerHTML=`<div class="mini-calendar"><div class="mini-calendar-head"><h2 aria-live="polite">${escapeHtml(month.toLocaleDateString('en-GB',{month:'long',year:'numeric'}))}</h2><div><button type="button" data-mini-nav="-1" aria-label="Previous month">‹</button><button type="button" data-mini-nav="1" aria-label="Next month">›</button></div></div><div class="mini-calendar-grid" role="group" aria-label="Days this app was used">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<span class="mini-weekday" aria-label="${d}">${d[0]}</span>`).join('')}${days.map(d=>d.inMonth?`<span class="mini-day${visits.includes(d.key)?' visited':''}${d.today?' today':''}${d.surgery?' surgery':''}" aria-label="${escapeHtml(parseDay(d.key).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}))}${visits.includes(d.key)?', app used':''}${d.today?', today':''}${d.surgery?', surgery date':''}"${d.today?' aria-current="date"':''}>${d.day}</span>`:'<span aria-hidden="true"></span>').join('')}</div><div class="mini-calendar-legend"><span><i></i>App used</span><span>○ Today</span>${parseDay(operationDate)?'<span>□ Surgery</span>':''}</div></div><p class="mini-calendar-note">${saved?'Days opened or with a saved session on this device.':'Activity could not be saved on this device.'}</p><a class="mini-tracker-link" href="?view=progress#progress">Open progress tracker →</a>`;
+    element.querySelectorAll('[data-mini-nav]').forEach(b=>b.onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+(+b.dataset.miniNav),1,12);draw(b.dataset.miniNav);});
+    if(focus)element.querySelector(`[data-mini-nav="${focus}"]`)?.focus();
+  }
+  draw();
+}
