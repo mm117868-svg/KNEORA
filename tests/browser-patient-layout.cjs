@@ -24,7 +24,7 @@ const age=Number(today.slice(0,4))-1960;
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await page.goto(base+'?view=settings&nopose#side');await page.locator('#side').waitFor();assert.equal(await page.locator('#cameraOptions').getAttribute('open'),'');assert.equal(await page.evaluate(()=>document.activeElement.id),'side');
   await page.goto(base+'?view=recovery-summary');await page.locator('.rs-primary-trend').first().waitFor();
-  assert.equal(await page.locator('.rs-movement-chart').count(),2);assert.equal(await page.locator('.rs-range,.rs-comparison,.rs-measurement-records').count(),0);
+  assert.equal(await page.locator('.rs-movement-chart').count(),1);assert.equal(await page.locator('.rs-range,.rs-comparison,.rs-measurement-records').count(),0);
   const text=await page.locator('#recoverySummary').innerText();for(const unwanted of ['Muscle strength','Pain and effort','Recovery measurements over time','Compare the two camera sources'])assert.ok(!text.includes(unwanted),unwanted);
   const graphs=await page.locator('[data-recovery-graphs]').boundingBox(),form=await page.locator('#recoveryCheck').boundingBox();assert.ok(graphs.y+graphs.height<=form.y);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
@@ -32,12 +32,12 @@ const age=Number(today.slice(0,4))-1960;
   await page.locator('[data-start-motion="straighten"]').click();assert.equal(await page.locator('[name=motion]').inputValue(),'straighten');
  }
  await page.goto(base+'tests/recovery-summary-fixture.html');await page.locator('.rs-primary-trend').first().waitFor();
- assert.match(await page.locator('.rs-primary-trend').nth(1).innerText(),/5°/);
+ assert.match(await page.locator('[data-trend-stat=straighten]').innerText(),/5°/);
  const oldCircles=await page.locator('.rs-primary-trend').first().locator('circle').count();assert.ok(oldCircles>0);
  await page.locator('[data-open-camera]').click();await page.getByRole('button',{name:'Simulate open-palm trigger (software test)'}).click();await page.locator('[data-measurement-preview]').waitFor();
  assert.equal(await page.locator('[name=confirmed]').isChecked(),true);await page.locator('[data-save-measurement]').click();assert.match(await page.locator('[data-save-status]').innerText(),/Saved knee bending: 96°/);
  assert.match(await page.locator('.rs-primary-trend').first().innerText(),/96°/);
  // Review must be invalidated when its measurement context changes.
  await page.locator('[data-open-camera]').click();await page.locator('[data-capture]').click();await page.locator('[data-measurement-preview]').waitFor();await page.locator('[name=motion]').selectOption('straighten');assert.equal(await page.locator('[data-save-measurement]').isDisabled(),true);
- assert.deepEqual(errors,[]);console.log('PASS: desktop/mobile layout, profile persistence, collapsed settings, legacy links, two leading graphs, removed sections, synthetic palm capture/save and stale-result invalidation.');await browser.close();
+ assert.deepEqual(errors,[]);console.log('PASS: desktop/mobile layout, profile persistence, collapsed settings, legacy links, one combined graph, removed sections, synthetic palm capture/save and stale-result invalidation.');await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});

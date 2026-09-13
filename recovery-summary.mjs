@@ -3,7 +3,7 @@ import {localDate,postOpDay,dayNumber,dayAt,finite,METRICS} from './progress-dat
 import {readProms,scopedProms,PROM_NAMES} from './patient-measures.mjs';
 import {readMeasurements,scopedMeasurements,saveMeasurement,measurementSeriesKey,depthImport,SOURCE_NAMES,MOTION_NAMES,MODE_NAMES,POSITION_NAMES} from './recovery-measurements.mjs?v=endpoint-2';
 import {createEndpointCamera} from './recovery-camera.mjs?v=ten-photos-1';
-import {maximumMovementTrend,movementChart} from './recovery-trends.mjs';
+import {maximumMovementTrend,combinedMovementChart} from './recovery-trends.mjs?v=combined-1';
 import {RECOVERY_SOURCES} from './recovery-references.mjs';
 
 const degrees=n=>finite(n)===null?'Not measured':`${Math.round(n)}°`;
@@ -70,13 +70,21 @@ export function renderRecoverySummary(host,exerciseRecords,options={}){
  q('[data-use-clinical]').onclick=()=>{invalidate();const raw=field('clinical_angle').value,device=field('clinical_device').value.trim();if(raw===''||!Number.isFinite(Number(raw))||Number(raw)<0||Number(raw)>180||!device){q('[data-save-status]').textContent='Enter the clinical angle and the instrument or method used.';return;}preview({value:Number(raw),source:{kind:'clinical',device,method:'Unsigned knee bend entered from clinical assessment'},context:context()});};
  const selectedTrends={bend:'',straighten:''};
  function drawPrimaryTrends(current){
-  q('[data-recovery-graphs]').innerHTML=['bend','straighten'].map(motion=>{
-   const available=current.filter(r=>r.motion===motion),groups=new Map(available.map(r=>[measurementSeriesKey(r),r]));
-   if(!groups.has(selectedTrends[motion]))selectedTrends[motion]=available.length?measurementSeriesKey(available.at(-1)):'';
-   const {points,best}=maximumMovementTrend(current,motion,selectedTrends[motion],operationDate);
-   return `<section class="rs-primary-trend"><h2>Maximum achieved knee ${motion==='bend'?'bending':'straightening'}</h2><div class="rs-trend-best"><strong>${best?degrees(best.value):'Not measured'}</strong><span>${motion==='bend'?'Best recorded comfortable bend':'Least bend remaining · 0° means straight'}${best?`<small>Day ${best.day} · ${esc(shortDate(best.date))}</small>`:''}</span></div><label class="rs-trend-setup">Measurement setup<select data-trend-motion="${motion}"${groups.size?'':' disabled'}>${[...groups].map(([key,r])=>`<option value="${esc(key)}"${key===selectedTrends[motion]?' selected':''}>${esc(note(r))} · ${esc(r.source.device)}</option>`).join('')||'<option>No measurements yet</option>'}</select></label>${movementChart(points,motion,postOpDay(summaryDate.value,operationDate))}${operationDate?'':'<p><a href="./#opdate">Enter your operation date</a> to place measurements on the graph.</p>'}<p class="rs-chart-note">${motion==='bend'?'Highest':'Lowest'} recorded average on each measured day, using the selected setup. Missing days have no plotted value.</p><details class="rs-chart-values"><summary>View graph values</summary><ul>${points.map(r=>`<li>Day ${r.day} · ${esc(shortDate(r.date))}: ${degrees(r.value)}${motion==='straighten'?' bend remaining':''}</li>`).join('')||'<li>No measured values yet.</li>'}</ul></details><button type="button" data-start-motion="${motion}">Measure ${motion==='bend'?'bending':'straightening'} →</button></section>`;
-  }).join('');
-  q('[data-recovery-graphs]').querySelectorAll('[data-trend-motion]').forEach(select=>select.onchange=()=>{selectedTrends[select.dataset.trendMotion]=select.value;drawPrimaryTrends(chosenRows());});
+  const trends={},groups={};
+  for(const motion of ['bend','straighten']){
+   const available=current.filter(r=>r.motion===motion);groups[motion]=new Map(available.map(r=>[measurementSeriesKey(r),r]));
+   if(!groups[motion].has(selectedTrends[motion]))selectedTrends[motion]=available.length?measurementSeriesKey(available.at(-1)):'';
+   trends[motion]=maximumMovementTrend(current,motion,selectedTrends[motion],operationDate);
+  }
+  const points=[...trends.bend.points,...trends.straighten.points].sort((a,b)=>a.day-b.day||a.motion.localeCompare(b.motion));
+  q('[data-recovery-graphs]').innerHTML=`<section class="rs-primary-trend rs-combined-trend"><h2>Knee bending and straightening</h2>
+   <div class="rs-combined-stats">${['bend','straighten'].map(motion=>{const best=trends[motion].best;return `<div class="rs-combined-stat" data-trend-stat="${motion}"><span class="rs-series-label"><i class="rs-series-marker ${motion}" aria-hidden="true"></i>${motion==='bend'?'Maximum knee bending':'Maximum knee straightening'}</span><div class="rs-trend-best"><strong>${best?degrees(best.value):'Not measured'}</strong><span>${motion==='bend'?'Best recorded comfortable bend':'Least bend remaining'}${best?`<small>Day ${best.day} · ${esc(shortDate(best.date))}</small>`:''}</span></div></div>`;}).join('')}</div>
+   ${combinedMovementChart({bend:trends.bend.points,straighten:trends.straighten.points},postOpDay(summaryDate.value,operationDate))}
+   <p class="rs-chart-note">Both use the same scale: 0° means a straight knee. Bending shows the highest recorded average each day; straightening shows the lowest bend remaining. Missing days have no plotted value.</p>
+   ${operationDate?'':'<p><a href="./#opdate">Enter your operation date</a> to place measurements on the graph.</p>'}
+   <details class="rs-chart-values"><summary>Measurement setup and graph values</summary><div class="rs-combined-setups">${['bend','straighten'].map(motion=>`<label class="rs-trend-setup">${motion==='bend'?'Bending':'Straightening'} measurement setup<select data-trend-motion="${motion}"${groups[motion].size?'':' disabled'}>${[...groups[motion]].map(([key,r])=>`<option value="${esc(key)}"${key===selectedTrends[motion]?' selected':''}>${esc(note(r))} · ${esc(r.source.device)}</option>`).join('')||'<option>No measurements yet</option>'}</select></label>`).join('')}</div><ul>${points.map(r=>`<li>${r.motion==='bend'?'Bending':'Straightening'} · Day ${r.day} · ${esc(shortDate(r.date))}: ${degrees(r.value)}${r.motion==='straighten'?' bend remaining':''}</li>`).join('')||'<li>No measured values yet.</li>'}</ul></details>
+   <div class="rs-measure-choices"><button type="button" data-start-motion="bend">Measure bending →</button><button type="button" data-start-motion="straighten">Measure straightening →</button></div></section>`;
+  q('[data-recovery-graphs]').querySelectorAll('[data-trend-motion]').forEach(select=>select.onchange=()=>{selectedTrends[select.dataset.trendMotion]=select.value;drawPrimaryTrends(chosenRows());q('.rs-chart-values').open=true;});
   q('[data-recovery-graphs]').querySelectorAll('[data-start-motion]').forEach(button=>button.onclick=()=>chooseMotion(button.dataset.startMotion));
  }
  function chooseMotion(motion){invalidate();field('motion').value=motion;field('side').value=operatedSide||'';q('#recoveryCheck').scrollIntoView({block:'start'});field('motion').focus({preventScroll:true});}

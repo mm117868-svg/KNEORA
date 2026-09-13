@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {maximumMovementTrend,movementChart} from '../recovery-trends.mjs';
+import {maximumMovementTrend,combinedMovementChart} from '../recovery-trends.mjs';
 import {measurementSeriesKey} from '../recovery-measurements.mjs';
 const operationDate='2026-09-01';
 const base={patient_id:'TEST',operation_date:operationDate,side:'left',motion:'bend',mode:'active',position:'supine',source:{kind:'mediapipe_2d',device:'SYNTHETIC camera',method:'TEST',calibration:''},version:'endpoint-2'};
@@ -14,7 +14,7 @@ test('straightening plots lowest bend remaining and retains a real zero',()=>{
  const rows=[row('2026-09-03',8,{motion:'straighten'}),row('2026-09-03',5,{motion:'straighten'}),row('2026-09-07',0,{motion:'straighten'})];
  const result=maximumMovementTrend(rows,'straighten','',operationDate);
  assert.deepEqual(result.points.map(p=>p.value),[5,0]);assert.equal(result.best.value,0);
- assert.match(movementChart(result.points,'straighten',12),/0° bend remaining/);
+ assert.match(combinedMovementChart({bend:[],straighten:result.points},12),/0° bend remaining/);
 });
 test('separate knee, patient, assistance, source and method never enter the selected graph',()=>{
  const first=row('2026-09-03',90),key=measurementSeriesKey(first);
@@ -24,5 +24,11 @@ test('separate knee, patient, assistance, source and method never enter the sele
 });
 test('without surgery date no invented x coordinates or measurement value is plotted',()=>{
  const result=maximumMovementTrend([row('2026-09-03',90)],'bend','','');assert.deepEqual(result.points,[]);
- const svg=movementChart([],'bend',null);assert.match(svg,/No measurements yet/);assert.doesNotMatch(svg,/NaN|<circle/);
+ const svg=combinedMovementChart({bend:[],straighten:[]},null);assert.match(svg,/No measurements yet/);assert.doesNotMatch(svg,/NaN|<circle/);
+});
+
+test('both movements share one set of axes and retain distinct labels and shapes',()=>{
+ const svg=combinedMovementChart({bend:[{day:12,date:'2026-09-13',value:90}],straighten:[{day:12,date:'2026-09-13',value:0}]},12);
+ assert.equal((svg.match(/<svg/g)||[]).length,1);assert.equal((svg.match(/Days after surgery · surgery = day 0/g)||[]).length,1);
+ assert.match(svg,/data-graph-series="bend"/);assert.match(svg,/data-graph-series="straighten"/);assert.match(svg,/Straightening · Day 12/);assert.match(svg,/Bending · Day 12/);assert.match(svg,/0° bend remaining/);assert.doesNotMatch(svg,/NaN/);
 });
