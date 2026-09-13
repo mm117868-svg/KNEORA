@@ -1,5 +1,6 @@
 import {cycleSensitivity} from './sensitivity.mjs';
-import {analyse, summarise, slrAssessment} from './analysis.mjs?v=high-five-small-1';
+import {analyse, summarise, slrAssessment} from './analysis.mjs?v=full-breakdown-1';
+import {distribution} from './statistics.mjs';
 
 export const EXERCISES = Object.freeze({
   straight_leg_raise: {name: 'Straight leg raise', motion: 'Hip lift above the observed lowered position', outward: 'Lifting', returning: 'Lowering'},
@@ -21,7 +22,7 @@ function enrich(r, exercise) {
   r.exercise = exercise;
   r.exerciseName = EXERCISES[exercise].name;
   r.ruleVersion = 'exercise-prototype-11';
-  r.metricSchemaVersion = 2;
+  r.metricSchemaVersion = 3;
   for (const rep of r.reps) {
     const frames = r.trace.filter(s=>s.t>=rep.start && s.t<=rep.end);
     const knees = frames.map(s=>s.bend).filter(finite), hips = frames.map(s=>s.hipFlexion).filter(finite);
@@ -32,6 +33,24 @@ function enrich(r, exercise) {
     rep.kneeExcursion = knees.length ? Math.max(...knees)-Math.min(...knees) : null;
     rep.peakHipFlexion = hips.length ? Math.max(...hips) : null;
     rep.hipExcursion = hips.length ? Math.max(...hips)-Math.min(...hips) : null;
+    rep.kneeBend = distribution(knees);
+    rep.hipFlexion = distribution(hips);
+    rep.startKneeBend = finite(frames[0]?.bend) ? frames[0].bend : null;
+    rep.startHipFlexion = finite(frames[0]?.hipFlexion) ? frames[0].hipFlexion : null;
+    rep.returnHipFlexion = finite(endpoint?.hipFlexion) ? endpoint.hipFlexion : null;
+    // Three consecutive phases around the first observed maximum. This hold
+    // describes the peak zone, independently of a clinician-entered target.
+    const motion=frames.map(s=>s.lift).filter(finite);
+    if(motion.length===frames.length && motion.length){
+      const peak=Math.max(...motion),peakIndex=motion.indexOf(peak),band=r.config.cycleSensitivity?.band??3;
+      let first=peakIndex,last=peakIndex;
+      while(first>0 && motion[first-1]>=peak-band)first--;
+      while(last<frames.length-1 && motion[last+1]>=peak-band)last++;
+      rep.peakTime=frames[peakIndex].t;
+      rep.phaseTiming={outward:frames[first].t-rep.start,hold:frames[last].t-frames[first].t,return:rep.end-frames[last].t,bandDegrees:band};
+      rep.outwardSpeed=rep.phaseTiming.outward>0?Math.abs(motion[first]-motion[0])/rep.phaseTiming.outward:null;
+      rep.returnSpeed=rep.phaseTiming.return>0?Math.abs(motion[last]-motion.at(-1))/rep.phaseTiming.return:null;
+    }
     rep.cycleDuration = rep.end-rep.start;
     rep.returnDuration = rep.lower;
     if (!finite(rep.outwardDuration)) {

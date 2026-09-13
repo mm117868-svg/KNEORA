@@ -2,6 +2,7 @@ import {recordedCount} from './patient-progress.js?v=high-five-small-1';
 import {EXERCISE_NAMES,METRICS,finite,postOpDay,measurementSeries} from './progress-data.mjs?v=high-five-small-1';
 import {esc,shortDate,dayLabel} from './progress-shared.mjs';
 import {MIN_COUNT_COVERAGE,trackingCoverage,videoRepetitionCount,trackingFeedback} from './measurement-quality.mjs?v=high-five-small-1';
+import {renderDetailedExerciseSummary} from './exercise-details.mjs?v=full-breakdown-1';
 const positive=n=>finite(n)!==null&&n>0?n:null;
 const nonnegative=n=>finite(n)!==null&&n>=0?n:null;
 const round=n=>Math.round(n*10)/10;
@@ -64,7 +65,8 @@ export function basicExerciseSummary(record,history=[]) {
    {label:'How far your knee moved',value:angle(get('slideRange'))}];
   if(peaks.length>=2)movement.push({label:'Repeating the bend',value:`Your deepest bends ranged from ${Math.round(Math.min(...peaks))}° to ${Math.round(Math.max(...peaks))}°`});
  }
- const outward=report?nonnegative(metrics.meanOutwardDuration):null,hold=report?nonnegative(metrics.meanHold):null,back=report?nonnegative(metrics.meanReturnDuration??metrics.meanLowering):null;
+ const phaseMean=key=>reps.length&&reps.every(rep=>nonnegative(rep.phaseTiming?.[key])!==null)?average(reps.map(rep=>rep.phaseTiming[key])):null;
+ const outward=report?phaseMean('outward')??nonnegative(metrics.meanOutwardDuration):null,hold=report?phaseMean('hold')??nonnegative(metrics.meanHold):null,back=report?phaseMean('return')??nonnegative(metrics.meanReturnDuration??metrics.meanLowering):null;
  const verbs=record.exercise==='straight_leg_raise'?['Lift','Lower']:record.exercise==='seated_extension'?['Straighten','Bend back']:['Bend','Straighten back'];
  const stages=report&&reps.length?[[verbs[0],outward],['Hold',hold],[verbs[1],back]].filter(([,v])=>v!==null).map(([label,value])=>`${label}: ${timingWords(value)}`).join(' · '):'';
  const metric=METRICS[record.exercise]?.find(m=>m.id===info.key),previous=report&&metric?previousMeasurement(record,history,metric):null;
@@ -78,7 +80,7 @@ export function basicExerciseSummary(record,history=[]) {
  return {title:info.title,day,date:String(record.started_at||'').slice(0,10),side:report?.config?.side||record.measurement?.side,count,countNote,duration:timeWords(record.duration_s),tempo,cadence,stages,movement,focus:info.focus,source:info.source,comparison,quality,analysed:!!report,
   symptoms:[pain!==null?`Pain afterwards: ${pain}/10`:null,difficulty!==null?`Effort: ${difficulty}/5`:null].filter(Boolean).join(' · ')};
 }
-export function renderBasicExerciseSummary(record,history=[]) {
+export function renderBasicExerciseSummary(record,history=[],{details=true}={}) {
  const s=basicExerciseSummary(record,history);
  const card=(label,value,note)=>`<div class="exercise-simple-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(note)}</small></div>`;
  return `<section class="exercise-simple" aria-label="Your exercise summary"><div class="eyebrow">Exercise finished</div><h2 tabindex="-1">${esc(s.title)}</h2><p class="exercise-simple-date">${esc(shortDate(s.date))} · ${esc(dayLabel(s.day))}${s.side?` · ${esc(s.side)} leg`:''}</p>
@@ -86,5 +88,5 @@ export function renderBasicExerciseSummary(record,history=[]) {
  <dl class="exercise-simple-movement">${s.movement.map(m=>`<div><dt>${esc(m.label)}</dt><dd>${esc(m.value)}</dd></div>`).join('')}</dl>
  ${s.stages?`<p class="exercise-simple-tempo"><strong>Your timing, on average</strong><br>${esc(s.stages)}</p>`:''}
  <div class="exercise-simple-context"><h3>For your recovery${s.day!==null&&s.day>=0?` on day ${s.day}`:''}</h3><p>${esc(s.focus)}</p>${s.comparison?`<p>${esc(s.comparison)}</p>`:''}<p class="exercise-simple-note">Follow your own plan. Recovery has no single daily pass mark.</p><a href="?view=progress-to-date">See your progress and recovery references</a>${s.source?` · <a href="${esc(s.source)}" target="_blank" rel="noopener">Exercise reference</a>`:''}</div>
- ${s.symptoms?`<p class="exercise-simple-symptoms">${esc(s.symptoms)}</p>`:''}<p class="exercise-simple-note">${esc(s.quality)}</p></section>`;
+ ${s.symptoms?`<p class="exercise-simple-symptoms">${esc(s.symptoms)}</p>`:''}<p class="exercise-simple-note">${esc(s.quality)}</p>${details?renderDetailedExerciseSummary(record):''}</section>`;
 }

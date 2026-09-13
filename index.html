@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="progress-to-date.css?v=1">
-<link rel="stylesheet" href="exercise-summary.css?v=1">
+<link rel="stylesheet" href="exercise-summary.css?v=full-breakdown-1">
 <link rel="stylesheet" href="recovery-timeline.css?v=1">
 <link rel="stylesheet" href="recovery-summary.css?v=large-graph-1">
 <style>
@@ -681,12 +681,13 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 <script type="module">
 import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=high-five-small-1";
-import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=high-five-small-1";
+import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=full-breakdown-1";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js?v=wide-smooth-1";
 import { ageYears, loadProfile, saveProfile } from "./patient-profile.mjs";
 import { bindShortDate } from "./short-date.mjs";
 import { AppVoice, completionNotice } from "./app-voice.mjs";
-import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=high-five-small-1";
+import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=full-breakdown-1";
+import { renderDetailedExerciseSummary } from "./exercise-details.mjs?v=full-breakdown-1";
 import { renderRecoverySummary } from "./recovery-summary.mjs?v=large-graph-1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
 import { renderProgressToDate } from "./progress-to-date.mjs?v=high-five-small-1";
@@ -874,6 +875,7 @@ function renderHome() {
   if (!PROGRESS_VIEW) { renderHomeActivity($("progress"), recs, $("patient").value, $("opdate").value); return; }
   const reviewSession = (record, records) => {
     $("patientReviewContent").innerHTML = sessionSummary(record, records);
+    $("patientReviewContent").insertAdjacentHTML('beforeend', renderDetailedExerciseSummary(record));
     if (record.exercise_analysis) $("patientReviewContent").append(savedAnalysisSummary(record.exercise_analysis));
     $("patientReview").showModal();
   };
@@ -1367,10 +1369,11 @@ async function finish(abandon = false) {
   const done = $("done");
   setExerciseSidebar(false);
   done.classList.add("show");
-  done.innerHTML = `<div class="inner"><p role="status" class="recording-stopped">${esc(confirmation.text)}${confirmationSpoken ? "" : '<small style="display:block">Marin audio is unavailable. The recording has stopped.</small>'}</p><div id="simpleExerciseSummary"></div><div id="exerciseAnalysis"></div><div class="q" id="q"></div></div>`;
+  done.innerHTML = `<div class="inner"><p role="status" class="recording-stopped">${esc(confirmation.text)}${confirmationSpoken ? "" : '<small style="display:block">Marin audio is unavailable. The recording has stopped.</small>'}</p><div id="simpleExerciseSummary"></div><div id="exerciseAnalysis"></div><div class="q" id="q"></div><div id="fullExerciseSummary"></div></div>`;
   const updateExerciseSummary = () => {
     const history = patientRecords(loadRecords(), rec.patient_id, rec.operation_date);
-    $("simpleExerciseSummary").innerHTML = renderBasicExerciseSummary(rec, history);
+    $("simpleExerciseSummary").innerHTML = renderBasicExerciseSummary(rec, history, {details:false});
+    $("fullExerciseSummary").innerHTML = renderDetailedExerciseSummary(rec);
   };
   updateExerciseSummary();
   disposeAnalysis();

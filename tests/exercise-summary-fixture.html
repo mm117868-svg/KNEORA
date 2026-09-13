@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="progress-to-date.css?v=1">
-<link rel="stylesheet" href="exercise-summary.css?v=1">
+<link rel="stylesheet" href="exercise-summary.css?v=full-breakdown-1">
 <style>
 :root{
   --paper:#efeee9;--paper2:#e7e5dd;--bone:#fbfaf7;--line:#dad7ce;--ink:#1a1918;--muted:#55524c;
@@ -393,11 +393,23 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 @media(max-width:600px){.analysis-dialog-header{font-size:12px;padding:8px}.analysis-dialog-header button{font-size:12px;padding:8px}}
 </style>
 </head><body><div class="done show"><div class="inner"><p style="padding:12px;background:#1a1918;color:white">SOFTWARE PREVIEW ONLY. Synthetic values, no patient records.</p><div class="pt-controls"><label>Preview exercise<select id="exercise"><option value="straight_leg_raise">Straight leg raise</option><option value="seated_extension">Seated knee extension</option><option value="heel_slide">Heel slides</option></select></label><label>Preview state<select id="state"><option value="analysed">After video analysis</option><option value="live">Before video analysis</option><option value="poor">Video not tracked</option></select></label></div><div id="simple"></div></div></div><script type="module">
-import {renderBasicExerciseSummary} from './exercise-summary.mjs';
+import {renderBasicExerciseSummary} from './exercise-summary.mjs?v=full-breakdown-1';
+import {analyseExercise,compactReport} from './video-analysis/exercises.mjs?v=full-breakdown-1';
 const $=id=>document.getElementById(id);
-function render(){const exercise=$('exercise').value,state=$('state').value;
-const rec={patient_id:'SYNTHETIC PREVIEW',operation_date:'2026-09-01',started_at:'2026-09-13T10:00:00+01:00',exercise,count_source:'monitoring',duration_s:90,prescribed_reps:10,monitoring:{repetitions:10,tempo_s_per_rep:6},measurement:{side:'left',peak_flexion_deg:95,p95_flexion_deg:93,min_extension_deg:5},patient:{pain_0_10:2,difficulty_1_5:2}};
-if(state!=='live')rec.exercise_analysis={exercise,exerciseName:$('exercise').selectedOptions[0].textContent,config:{side:'left',minVisibility:.5},reps:state==='poor'?[]:Array.from({length:10},()=>({maxAdditionalBend:5,peakLift:30,kneeExcursion:80,maximumKneeBend:95,returnKneeBend:5})),metrics:{repetitionTrackingCoverage:state==='poor'?0:1,maximumObservedBend:state==='poor'?null:95,bestObservedStraightening:state==='poor'?null:5,hipFlexion:state==='poor'?null:{maximum:35},kneeBend:state==='poor'?null:{minimum:5,maximum:95},meanCycleDuration:6,meanOutwardDuration:2,meanHold:1,meanReturnDuration:3,analysedDuration:90}};
+function render(){
+const exercise=$('exercise').value,state=$('state').value;
+const samples=[];let elapsed=0;
+for(const [n,length] of [5,7,9,6].entries()){
+ const hold=[.5,1,2,0][n],outward=1.5,returning=length-1-outward-hold;
+ for(let i=0;i<length*10;i++){
+  const t=i/10,v=t<.5?0:t<.5+outward?(t-.5)/outward:t<.5+outward+hold?1:t<length-.5?(length-.5-t)/returning:0;
+  const hip=exercise==='straight_leg_raise'?(25+n*3)*v:80+2*v;
+  samples.push({t:elapsed+t,bend:state==='poor'?null:exercise==='straight_leg_raise'?4+3*v:exercise==='seated_extension'?90-(75+n*2)*v:5+(80+n*4)*v,hipFlexion:state==='poor'?null:hip,hipAngle:state==='poor'?null:180-hip,valid:state!=='poor',frameStatus:state==='poor'?'rejected':'accepted',visibility:state==='poor'?null:.95,rejectionReasons:state==='poor'?'ankle:outside_frame':''});
+ }
+ elapsed+=length;
+}
+const rec={patient_id:'SYNTHETIC PREVIEW',operation_date:'2026-09-01',started_at:'2026-09-13T10:00:00+01:00',exercise,count_source:'monitoring',duration_s:elapsed,prescribed_reps:4,monitoring:{repetitions:4,tempo_s_per_rep:6},measurement:{side:'left',peak_flexion_deg:95,p95_flexion_deg:93,min_extension_deg:5},patient:{pain_0_10:2,difficulty_1_5:2}};
+if(state!=='live')rec.exercise_analysis=compactReport(analyseExercise(samples,{exercise,start:0,duration:elapsed,side:'left',minVisibility:.2,bendTolerance:10,targetLift:null,targetHold:null,targetLower:null}));
 $('simple').innerHTML=renderBasicExerciseSummary(rec);}
 $('exercise').onchange=render;$('state').onchange=render;render();
 </script></body></html>

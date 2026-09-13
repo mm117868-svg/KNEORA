@@ -1,4 +1,5 @@
 import {cycleSensitivity} from './sensitivity.mjs';
+import {distribution} from './statistics.mjs';
 // Pure measurement and segmentation functions. All thresholds are prototype rules.
 export const RULE_VERSION = 'slr-prototype-10';
 const median = xs => {const s = [...xs].sort((a,b)=>a-b); return s[Math.floor(s.length/2)];};
@@ -43,8 +44,8 @@ export function summarise(trace,reps,config,baseline){
   function stats(key){
     const points=trace.filter(s=>Number.isFinite(s[key]));
     if(!points.length)return null;
-    const values=points.map(s=>s[key]);const minimum=Math.min(...values),maximum=Math.max(...values);
-    return {minimum,maximum,mean:values.reduce((a,b)=>a+b,0)/values.length,median:median(values),range:maximum-minimum,peakTime:points.find(s=>s[key]===maximum).t,frames:values.length,coverage:values.length/trace.length};
+    const values=points.map(s=>s[key]),result=distribution(values);
+    return {...result,peakTime:points.find(s=>s[key]===result.maximum).t,minimumTime:points.find(s=>s[key]===result.minimum).t,frames:values.length,coverage:values.length/trace.length};
   }
   const tracked=trace.filter(s=>s.valid).length;
   const rejectionCounts={};

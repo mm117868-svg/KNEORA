@@ -1,5 +1,5 @@
-import {assessPose, clinicalQAB, slrAssessment} from './analysis.mjs?v=high-five-small-1';
-import {EXERCISES, analyseExercise, chooseSide, compactReport} from './exercises.mjs?v=high-five-small-1';
+import {assessPose, clinicalQAB, slrAssessment} from './analysis.mjs?v=full-breakdown-1';
+import {EXERCISES, analyseExercise, chooseSide, compactReport} from './exercises.mjs?v=full-breakdown-1';
 import {recoveryContext} from './evidence.mjs';
 import {videoRepetitionCount,trackingFeedback} from '../measurement-quality.mjs?v=high-five-small-1';
 const $=id=>document.getElementById(id),video=$('video');

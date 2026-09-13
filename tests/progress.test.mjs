@@ -27,7 +27,7 @@ test('shoulder loss and absent old return endpoints stay missing',()=>{
 });
 test('new heel-slide reports retain the actual return endpoint',()=>{
  const samples=Array.from({length:81},(_,i)=>{const t=i/10,bend=t<=1?5:t<=3?5+(t-1)*40:t<=4?85:t<=6?85-(t-4)*40:5;return {t,bend,valid:true,hipFlexion:0,hipAngle:180,visibility:1};});
- const r=analyseExercise(samples,{exercise:'heel_slide',start:0,duration:8,minVisibility:.5});assert.equal(r.reps.length,1);assert.ok(r.reps[0].returnKneeBend<=8);assert.equal(r.metricSchemaVersion,2);
+ const r=analyseExercise(samples,{exercise:'heel_slide',start:0,duration:8,minVisibility:.5});assert.equal(r.reps.length,1);assert.ok(r.reps[0].returnKneeBend<=8);assert.equal(r.metricSchemaVersion,3);
 });
 test('longer hold is not labelled best; entered target selects closest result',()=>{
  const records=[2,5,10].map((n,i)=>{const r=make(`2026-09-0${i+2}T10:00:00Z`,90,'left','straight_leg_raise');r.exercise_analysis.metrics.meanHold=n;return r;});

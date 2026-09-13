@@ -1,2 +1,22 @@
 .exercise-simple h2{font-size:32px;margin:10px 0!important;letter-spacing:-.02em}.exercise-simple-date{margin:0 0 20px!important}.exercise-simple-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);background:var(--bone);margin:22px 0}.exercise-simple-stat{min-width:0;padding:18px;border-right:1px solid var(--line)}.exercise-simple-stat:last-child{border-right:0}.exercise-simple-stat span,.exercise-simple-stat small{display:block;font-size:12px;line-height:1.5;color:var(--muted)}.exercise-simple-stat strong{display:block;font-size:27px;line-height:1.2;letter-spacing:-.025em;margin:8px 0;overflow-wrap:anywhere}.exercise-simple-movement{margin:0}.exercise-simple-movement>div{display:flex;justify-content:space-between;gap:22px;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5}.exercise-simple-movement dt{color:var(--muted)}.exercise-simple-movement dd{font-weight:700;text-align:right;margin:0;max-width:55%}.exercise-simple-tempo{padding:16px 0;margin:0!important;line-height:1.8!important}.exercise-simple-context{padding:18px 20px;background:var(--brand-soft);border-left:3px solid var(--brand);margin:20px 0}.exercise-simple-context h3{font-size:17px;margin:0 0 8px}.exercise-simple-context p{margin:8px 0}.exercise-simple-context a{font-size:12px;line-height:1.7}.exercise-simple-note{font-size:12px!important;color:var(--muted);line-height:1.6!important}.exercise-simple-symptoms{font-weight:600}.exercise-more{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:20px 0;padding:16px 0}.exercise-more>summary{cursor:pointer;font-weight:700;min-height:32px;padding:4px 0;font-size:15px}.exercise-more[open]>summary{margin-bottom:18px}.exercise-more :focus-visible,.exercise-simple :focus-visible{outline:3px solid var(--brand);outline-offset:3px}
 @media(max-width:520px){.exercise-simple-stat{padding:12px 10px}.exercise-simple-stat strong{font-size:22px}.exercise-simple-stat small{font-size:11px}.exercise-simple-movement>div{display:block}.exercise-simple-movement dd{max-width:none;text-align:left;margin-top:5px}.exercise-simple-context{padding:16px}.exercise-simple h2{font-size:29px}.exercise-simple-stat strong{overflow-wrap:normal}}
+.done .inner:has(.exercise-details){max-width:1080px}
+.exercise-details{margin-top:32px;padding-top:24px;border-top:2px solid var(--ink);min-width:0}
+.exercise-details h3{font-size:25px;margin:0 0 12px;letter-spacing:-.02em}
+.exercise-details h4{font-size:17px;margin:28px 0 12px}
+.exercise-details p{font-size:13px;line-height:1.7;margin:12px 0!important;max-width:90ch}
+.exercise-detail-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px;margin:12px 0 20px}
+.exercise-detail-facts>div{display:flex;justify-content:space-between;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5;min-width:0}
+.exercise-detail-facts dt{color:var(--muted)}
+.exercise-detail-facts dd{font-weight:700;margin:0;text-align:right;min-width:85px;max-width:58%;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.exercise-table-scroll{max-width:100%;overflow-x:auto;border:1px solid var(--line);margin:16px 0 22px;background:var(--bone);overscroll-behavior-x:contain}
+.exercise-table-scroll table{width:100%;min-width:710px;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;text-align:right}
+.exercise-table-scroll caption{text-align:left;padding:12px 14px;font-weight:700;background:var(--paper2);color:var(--ink)}
+.exercise-table-scroll th,.exercise-table-scroll td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5;min-width:90px}
+.exercise-table-scroll thead th{background:var(--paper);font-size:11px;white-space:normal}
+.exercise-table-scroll tbody tr:last-child>*{border-bottom:0}
+.exercise-table-scroll tr>:first-child{position:sticky;left:0;text-align:left;min-width:130px;max-width:210px;background:var(--bone);border-right:1px solid var(--line);z-index:1}
+.exercise-table-scroll thead tr>:first-child{background:var(--paper)}
+.exercise-table-scroll td{white-space:nowrap}
+.exercise-details :focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+@media(max-width:600px){.exercise-detail-facts{grid-template-columns:1fr}.exercise-details h3{font-size:23px}.exercise-details p{font-size:12px}.exercise-table-scroll th,.exercise-table-scroll td{padding:10px}.exercise-table-scroll tr>:first-child{min-width:108px;max-width:150px}}
