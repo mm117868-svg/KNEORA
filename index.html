@@ -598,7 +598,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 
   <section class="phasepick">
     <span class="eyebrow">Your programme, week by week</span>
-    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. Position recognition counts straight-leg raises and seated knee extensions during recording. The heel-slide position model is not yet trained. You can request separate movement analysis after recording. Your full report shows repetitions, joint angles, cadence, fastest and slowest repetitions, hold times, movement speeds and total time, with a breakdown of each repetition. You can also replay or download your video. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
+    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. Position recognition uses a separate prototype model for each of these three exercises. You can request separate movement analysis after recording. Your full report shows repetitions, joint angles, cadence, fastest and slowest repetitions, hold times, movement speeds and total time, with a breakdown of each repetition. You can also replay or download your video. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
     <nav class="weeknav" id="weeknav" aria-label="Jump to a week"></nav>
   </section>
 
@@ -609,7 +609,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
   <div class="safety">
     <b>Listen to your knee.</b> Mild discomfort is normal; sharp pain is not. Stop and contact your surgeon if you notice fever, calf pain, spreading numbness or wound drainage. This programme supports your physiotherapist's plan; it does not replace it.
   </div>
-  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. The experimental position model counts straight-leg raises and seated knee extensions; it does not yet confirm which leg moved. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: full-breakdown-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
+  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. The experimental position model counts straight-leg raises, seated knee extensions and heel slides; it does not yet confirm which leg moved. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: full-breakdown-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
   <footer class="app-footer" aria-label="Company and app information">
     <div class="footer-heading"><div><span class="eyebrow">Cambridge Kinematics</span><h2>Supporting your recovery,<br>one day at a time.</h2></div><span class="footer-status">In development</span></div>
     <div class="footer-company"><strong>Cambridge Kinematics Limited</strong><p>A private limited company registered in England and Wales.</p><p>Cambridge, England</p></div>
@@ -683,7 +683,7 @@ import {LivePositionCounter,readPositionFrame} from './tools/position-recogniser
 let positionModel=null,positionCounter=null;
 const positionCanvas=document.createElement('canvas');positionCanvas.width=positionCanvas.height=128;
 const positionCtx=positionCanvas.getContext('2d',{willReadFrequently:true});
-async function preparePositionModel(exercise){positionModel=null;if(!['straight_leg_raise','seated_extension'].includes(exercise))return;try{const r=await fetch(exercise==='seated_extension'?'/position-recogniser/seated_extension/model.json':'/position-recogniser/model.json');if(!r.ok)throw Error('Model unavailable');positionModel=await r.json();}catch(e){console.warn('Position model unavailable');}}
+async function preparePositionModel(exercise){positionModel=null;if(!['straight_leg_raise','seated_extension','heel_slide'].includes(exercise))return;try{const r=await fetch(exercise==='straight_leg_raise'?'/position-recogniser/model.json':'/position-recogniser/'+exercise+'/model.json');if(!r.ok)throw Error('Model unavailable');positionModel=await r.json();}catch(e){console.warn('Position model unavailable');}}
 
 import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=high-five-small-1";
@@ -804,7 +804,7 @@ localStorage.setItem(prefs.countby, "position");
 for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => {localStorage.setItem(flags[k], $(k).checked ? "1" : "0"); updateSettingsSummary();}); }
 
 if (!["left", "right"].includes($("side").value)) $("side").value = "";
-const countDescriptions = {position: "Counts resting, raised and returned positions. Straight-leg raises and seated knee extensions. Heel slides can be recorded, but their position model is not yet trained. Use the same side-on lower-limb framing as the prototype; working-leg identity and small movements are not validated."};
+const countDescriptions = {position: "Counts movement away from rest and back using exercise-specific positions. Separate prototype models for straight-leg raises, seated knee extensions and heel slides. Use the same side-on lower-limb framing as the prototype; working-leg identity and small movements are not validated."};
 function updateSettingHelp() { $("countDescription").textContent = countDescriptions.position; }
 $("countby").addEventListener("change", updateSettingHelp); updateSettingHelp();
 

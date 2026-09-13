@@ -35,3 +35,9 @@ The development page reports model results, not prescribed exercise completion. 
 Run `train.py --exercise seated_extension` with the same private Python environment. The separate model and predictions are written under `knee-dis-evaluation/position-recogniser/seated_extension/`. No video or trained weights are committed. Open `index.html?exercise=seated_extension` in the local recogniser.
 
 The programme now offers only position recognition. It loads the matching local model for straight-leg raises or seated extensions, requests three seconds at rest, and saves its result under `position_recognition`. Missing models and heel slides show an unavailable count, not zero. The overlay and recording remain available. Old session records remain readable. Browser video analysis is optional and does not replace the position count in the headline summary. This still needs a real camera session check.
+
+## Heel-slide model
+
+Run `train.py --exercise heel_slide` after caching the supplied `11.49.20` recording in the private evaluation manifest. It writes a separate model under `position-recogniser/heel_slide/`. Open `index.html?exercise=heel_slide` for replay.
+
+The heel-slide cycle accepts either a confidently intermediate or bent position, then requires a stable return to rest. This counts smaller attempts without requiring the deepest bend shown in training. It does not measure therapeutic range, identify the operated leg, or confirm that the heel stayed on the surface. Existing straight-leg and seated-extension cycle rules remain unchanged. All three exercises now have separate local models.

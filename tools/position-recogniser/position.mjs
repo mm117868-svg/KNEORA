@@ -1,5 +1,5 @@
 export class PositionCycle {
- constructor(){this.reset();}
+ constructor({acceptIntermediate=false}={}){this.acceptIntermediate=acceptIntermediate;this.reset();}
  reset(){this.reps=0;this.state='find_rest';this.lastT=null;this.since=null;this.lastLabel=null;this.awayAt=null;this.unknownAt=null;this.events=[];}
  update(probabilities,t){
   if(!Number.isFinite(t)||(this.lastT!==null&&t<=this.lastT))return;
@@ -11,7 +11,7 @@ export class PositionCycle {
   if(label!==this.lastLabel){this.since=t;this.lastLabel=label;}
   const settled=t-this.since>=.12;
   if(this.state==='find_rest'){if(label===0&&settled)this.state='rest';return;}
-  if(this.state==='rest'){if(label===2&&settled){this.awayAt=t;this.state='raised';}return;}
+  if(this.state==='rest'){if((label===2||(this.acceptIntermediate&&label===1))&&settled){this.awayAt=t;this.state='raised';}return;}
   if(label===0&&settled){
    if(t-this.awayAt>=.35){this.reps++;this.events.push({t,status:'accepted'});}
    this.awayAt=null;this.state='rest';

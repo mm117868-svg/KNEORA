@@ -31,3 +31,13 @@ The classifier has not been trained on a representative patient dataset. It does
 Full original-video playback in Chrome counted 5/5 in the training clip and 4/5 in the second clip, matching cached-frame evaluation. The fifth return in the second clip remained pending at the end: the stable-rest dwell was not satisfied before the recording stopped. The initial five-count assertion failed and the result was inspected; no threshold was reduced to force the fifth count. There were no browser JavaScript errors. This is a documented limitation, not a perfect-count pass.
 
 Eight unit checks passed, including calibration/reset, mismatched and missing models, and saved-count reading. Browser programme inspection confirmed exactly one counting option, migration from an old saved option, and no JavaScript errors. Physical webcam, different people, small ranges, and unrelated movement rejection remain unvalidated.
+
+## Heel slides, supplied recording 11.49.20
+
+Manual inspection identified 10 bend-and-return movements in 31.79 seconds. Fifteen frame labels at or before 15.33 seconds fitted the image classifier. Later frames were excluded from fitting but inspected during development, so this is not independent validation.
+
+The initial deepest-position rule counted only 5/10: later smaller bends were classified as intermediate. The heel-slide cycle was changed to accept a confident intermediate or bent excursion followed by a stable return. Cached-frame replay then counted 10/10. This is an observed movement-attempt count, not a form or range assessment. The original recording starts moving soon after the first frame; replay uses that first frame as its reference, while live camera sessions require a separate three-second rest period.
+
+Nine unit tests passed, including a smaller intermediate excursion and return in heel-slide mode while preserving the original raised-position rule for the other exercises. Different patients, new recordings, lighting, occlusion, unrelated movement and very small ranges still need testing.
+
+Full original-video playback in Chrome also counted 10/10, with no JavaScript errors. A uniform static-image control and two uniform brightness offsets each produced zero counts; these are limited synthetic controls, not real-world false-positive validation.

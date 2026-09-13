@@ -6,3 +6,13 @@ test('raised hold and recording starting raised do not count',()=>{const c=new P
 test('long loss abandons a cycle but fresh rest resumes without recalibration',()=>{const c=new PositionCycle();feed(c,0,0,.5);feed(c,2,.55,1);for(let t=1.05;t<2;t+=.05)c.update([.34,.33,.33],t);feed(c,0,2,2.5);assert.equal(c.reps,0);feed(c,2,2.55,3.5);feed(c,0,3.55,4);assert.equal(c.reps,1);});
 test('brief uncertainty and duplicated timestamps cannot add a cycle',()=>{const c=new PositionCycle();feed(c,0,0,.5);feed(c,2,.55,1);c.update([.34,.33,.33],1.05);feed(c,2,1.1,1.5);feed(c,0,1.55,2);for(let i=0;i<100;i++)c.update(p(2),2);assert.equal(c.reps,1);});
 test('an unfinished final raise remains unconfirmed',()=>{const c=new PositionCycle();feed(c,0,0,.5);feed(c,2,.55,2);c.finish(2);assert.equal(c.reps,0);assert.equal(c.events.at(-1).status,'unconfirmed');});
+
+test('heel-slide mode counts a smaller excursion and return without changing the raised-position default',()=>{
+ const heel=new PositionCycle({acceptIntermediate:true}),raised=new PositionCycle();
+ for(const c of [heel,raised]){
+  for(let i=0;i<5;i++)c.update([1,0,0],i*.1);
+  for(let i=5;i<12;i++)c.update([0,1,0],i*.1);
+  for(let i=12;i<18;i++)c.update([1,0,0],i*.1);
+ }
+ assert.equal(heel.reps,1);assert.equal(raised.reps,0);
+});
