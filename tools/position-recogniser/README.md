@@ -29,3 +29,9 @@ Set `KNEE_TRACKER_HOME` to the private evaluation directory if needed. It contai
 Model weights, sparse labels, predictions and synthetic-control outputs are written to `KNEE_TRACKER_HOME/position-recogniser/`, outside git. The recordings are never copied into the app repository or published.
 
 The development page reports model results, not prescribed exercise completion. This work does not establish clinical validity, unsupervised home reliability, Raspberry Pi throughput, or performance at 3 to 5 metres. Broader labelled data and independent participant testing are still required before patient deployment.
+
+## Seated extension and programme integration
+
+Run `train.py --exercise seated_extension` with the same private Python environment. The separate model and predictions are written under `knee-dis-evaluation/position-recogniser/seated_extension/`. No video or trained weights are committed. Open `index.html?exercise=seated_extension` in the local recogniser.
+
+The programme now offers only position recognition. It loads the matching local model for straight-leg raises or seated extensions, requests three seconds at rest, and saves its result under `position_recognition`. Missing models and heel slides show an unavailable count, not zero. The overlay and recording remain available. Old session records remain readable. Browser video analysis is optional and does not replace the position count in the headline summary. This still needs a real camera session check.

@@ -23,3 +23,11 @@ Training used 24 manually inspected frames from one recording, with geometric an
 The browser initially learned a blank starting image because `loadeddata` fired before a drawable frame was presented. It now waits for `requestVideoFrameCallback` before capturing the resting reference. Model inference and the full playback flow were then retested.
 
 The classifier has not been trained on a representative patient dataset. It does not establish working-leg identity, exercise quality, tiny-range sensitivity, new-room accuracy or Raspberry Pi 5 throughput. The live-camera button is a preview only, and creates no patient session record.
+
+## Seated extension, 13 September 2026
+
+25 manually inspected position labels from `01.39.45` were used for training, with the same paired augmentations and network architecture. `02.04.36` was not used for fitting weights. Both recordings show the same person and room.
+
+Full original-video playback in Chrome counted 5/5 in the training clip and 4/5 in the second clip, matching cached-frame evaluation. The fifth return in the second clip remained pending at the end: the stable-rest dwell was not satisfied before the recording stopped. The initial five-count assertion failed and the result was inspected; no threshold was reduced to force the fifth count. There were no browser JavaScript errors. This is a documented limitation, not a perfect-count pass.
+
+Eight unit checks passed, including calibration/reset, mismatched and missing models, and saved-count reading. Browser programme inspection confirmed exactly one counting option, migration from an old saved option, and no JavaScript errors. Physical webcam, different people, small ranges, and unrelated movement rejection remain unvalidated.

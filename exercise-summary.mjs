@@ -27,7 +27,7 @@ const facts={
  seated_extension:{title:'Seated knee extension',focus:'The useful things to follow are how far you can straighten your knee and how steadily you bend it back. Keep to the range and pace in your exercise plan.',key:'leastBend',direction:'bend at your straightest position',source:'https://doi.org/10.1093/ptj/pzag058'},
  heel_slide:{title:'Heel slides',focus:'The useful things to follow are how far your knee bends and how well you straighten it again. Build range within your exercise plan, alongside how your knee feels.',key:'greatestBend',direction:'bend at your furthest point',source:'https://doi.org/10.1186/s12891-020-03493-x'}
 };
-const counterLabel=r=>({pose_gated_optical:'Camera count confirmed in the selected leg',patient_voice:'Your spoken count',knee_tracker:'Live knee tracker count',monitoring:'Live camera count',timer:'Completed holds'}[r.count_source||'monitoring']||'Recorded count');
+const counterLabel=r=>({position_recognition:'Position recognition prototype',pose_gated_optical:'Camera count confirmed in the selected leg',patient_voice:'Your spoken count',knee_tracker:'Live knee tracker count',monitoring:'Live camera count',timer:'Completed holds'}[r.count_source||'monitoring']||'Recorded count');
 function previousMeasurement(record,history,metric) {
  const current=finite(metric.get(record));if(current===null)return null;
  const earlier=history.filter(r=>Date.parse(r.started_at)<Date.parse(record.started_at)&&measurementSeries(r,metric)===measurementSeries(record,metric)&&finite(metric.get(r))!==null).sort((a,b)=>Date.parse(a.started_at)-Date.parse(b.started_at)).at(-1);
@@ -40,7 +40,7 @@ export function basicExerciseSummary(record,history=[]) {
  const report=record.exercise_analysis?.exercise===record.exercise?record.exercise_analysis:null,metrics=report?.metrics||{},reps=Array.isArray(report?.reps)?report.reps:[];
  const day=postOpDay(String(record.started_at||'').slice(0,10),record.operation_date);
  const coverage=trackingCoverage(report);
- const videoCount=videoRepetitionCount(report),liveCount=recordedCount(record);
+ const videoCount=record.count_source==='position_recognition'?null:videoRepetitionCount(report),liveCount=recordedCount(record);
  const count=videoCount??liveCount;
  const partial=!!report&&((positive(report.config?.start)??0)>0 || (positive(metrics.analysedDuration)!==null&&positive(record.duration_s)!==null&&metrics.analysedDuration<record.duration_s-1));
  let countNote=count===null?'Tracking was not clear enough to measure repetitions. This does not mean you performed none.':videoCount!==null?`Complete repetitions seen${partial?' in the analysed part':' in the video'}${coverage<MIN_COUNT_COVERAGE?'; more may have been missed':''}${liveCount!==null&&liveCount!==videoCount?`. ${counterLabel(record)}: ${liveCount}.`:'.'}`:`${counterLabel(record)}${report?'; video count unavailable':''}`;
