@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="robots" content="noindex"><title>Recovery narration check</title><h1>Recovery narration check</h1><p>This loads the actual Marin assets. No camera or patient records are used.</p><button id="check">Check Marin recovery audio</button><pre id="result" role="status">Ready</pre><script type="module">
+import {AppVoice} from '../app-voice.mjs';
+const voice=new AppVoice(),status=document.querySelector('#result');
+document.querySelector('#check').onclick=async()=>{status.textContent='Loading…';const keys=['countdown','recovery_bend','recovery_straighten','recovery_complete'];const ready=await Promise.all(keys.map(key=>voice.prepare(key)));status.textContent=(ready.every(Boolean)?'PASS':'FAIL')+'\n'+keys.map((key,i)=>`${key}: ${ready[i]?'ready':'unavailable'}; ${voice.buffers.get(key)?.duration??'unknown'} seconds`).join('\n');};
+</script></html>

@@ -43,22 +43,27 @@ function setup(t,{missingKnee=false,handFailure=false}={}){
 }
 test('open palm captures an averaged burst without a button and never repeats while held',async t=>{
  const h=setup(t);await h.camera.start('right');h.frames(21);assert.equal(h.starts.length,1);assert.equal(h.starts[0].trigger,'open_palm');
- assert.equal(h.camera.capture(),false);h.frames(20);t.mock.timers.tick(1999);assert.equal(h.results.length,0);t.mock.timers.tick(1);
+ assert.equal(h.camera.capture(),false);h.frames(60);t.mock.timers.tick(5999);assert.equal(h.results.length,0);t.mock.timers.tick(1);
  assert.equal(h.results.length,1);assert.equal(h.results[0].summary.mean,0);assert.equal(h.results[0].summary.accepted,10);
  h.frames(40);assert.equal(h.starts.length,1);
  h.setHand('absent');h.frames(6);h.setHand('open');h.frames(21);assert.equal(h.starts.length,2);
- h.camera.stop();t.mock.timers.tick(2000);assert.equal(h.results.length,1);assert.equal(h.closed(),2);assert.equal(h.stopped(),1);
+ h.camera.stop();t.mock.timers.tick(6000);assert.equal(h.results.length,1);assert.equal(h.closed(),2);assert.equal(h.stopped(),1);
 });
 test('button capture uses the same sequence and works without the hand model',async t=>{
  const h=setup(t,{handFailure:true});await h.camera.start('left');assert.equal(h.ready.at(-1),true);assert.match(h.status.at(-1),/unavailable/);
- assert.equal(h.camera.capture(),true);assert.equal(h.starts[0].trigger,'button');h.frames(12);t.mock.timers.tick(2000);
+ assert.equal(h.camera.capture(),true);assert.equal(h.starts[0].trigger,'button');h.frames(60);t.mock.timers.tick(6000);
  assert.equal(h.results[0].summary.mean,90);h.camera.stop();
 });
 test('hand recognition never substitutes for missing knee landmarks',async t=>{
- const h=setup(t,{missingKnee:true});await h.camera.start('right');h.frames(21);assert.equal(h.starts.length,1);h.frames(12);t.mock.timers.tick(2000);
+ const h=setup(t,{missingKnee:true});await h.camera.start('right');h.frames(21);assert.equal(h.starts.length,1);h.frames(60);t.mock.timers.tick(6000);
  assert.equal(h.results[0],null);assert.match(h.status.at(-1),/Not enough clear pictures/);h.camera.stop();
 });
 test('frozen video and cancelled camera cannot produce a capture',async t=>{
  const h=setup(t);await h.camera.start('left');h.frames(10);h.video.readyState=1;h.frames(40);assert.equal(h.starts.length,0);
  h.camera.stop();h.frames(25);assert.equal(h.starts.length,0);
+});
+test('a patient can finish early with three pictures, without a later duplicate result',async t=>{
+ const h=setup(t,{handFailure:true});await h.camera.start('left');h.camera.capture();h.frames(13);
+ assert.equal(h.camera.finish(),true);assert.equal(h.results.length,1);assert.equal(h.results[0].summary.accepted,3);
+ assert.equal(h.camera.finish(),false);t.mock.timers.tick(6000);assert.equal(h.results.length,1);h.camera.stop();
 });

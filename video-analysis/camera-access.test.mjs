@@ -7,11 +7,11 @@ import vm from 'node:vm';
 // This checks permission recovery without needing or granting webcam access.
 const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const openSource=html.slice(html.indexOf('async function openCamera(gen)'),html.indexOf('/* ---------------- repetition-count layer'));
-const errorSource=html.slice(html.indexOf('function cameraFailed(e)'),html.indexOf('/* live picture behind the instructions'));
+const errorSource=html.slice(html.indexOf('function cameraFailed(e)'),html.indexOf('function preview()',html.indexOf('function cameraFailed(e)')));
 function setup(getUserMedia){
   const elements=new Map();
   const $=id=>{if(!elements.has(id))elements.set(id,{style:{},textContent:'',hidden:false,value:'',className:'',classList:{add(){},remove(){},contains(){return true;}}});return elements.get(id);};
-  const context=vm.createContext({$,openGen:1,stream:null,location:{origin:'http://localhost:8767',pathname:'/'},navigator:{mediaDevices:{getUserMedia}},video:{videoWidth:1280,videoHeight:720,srcObject:null,play:async()=>{}},canvas:{},listCams:async()=>{},stopCamera(){},refreshHint(){},startTracker(){},preview(){}});
+  const context=vm.createContext({$,openGen:1,stream:null,location:{origin:'http://localhost:8767',pathname:'/'},navigator:{mediaDevices:{getUserMedia}},video:{videoWidth:1280,videoHeight:720,srcObject:null,play:async()=>{}},canvas:{},listCams:async()=>{},stopCamera(){},refreshHint(){},startTracker(){},fitCameraView(){},preview(){}});
   vm.runInContext('const screenOpen = gen => gen === openGen && $("ex").classList.contains("open");\n'+openSource+'\n'+errorSource,context);
   return {context,$};
 }

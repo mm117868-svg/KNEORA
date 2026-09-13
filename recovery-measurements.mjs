@@ -2,8 +2,10 @@ import {dayNumber,localDate,postOpDay,finite} from './progress-data.mjs';
 import {assessPose} from './video-analysis/analysis.mjs';
 
 export const RECOVERY_KEY='kr_recovery_measurements_v1';
-export const MEASUREMENT_VERSION='endpoint-2';
-export const CAPTURE_RULES=Object.freeze({minimumFrames:5,minimumCoverage:.5,maximumSpread:8,minVisibility:.5});
+export const MEASUREMENT_VERSION='endpoint-3-flexible';
+export const CAPTURE_RULES=Object.freeze({minimumFrames:3,minimumCoverage:.2,maximumSpread:null,noticeSpread:20,minVisibility:.2});
+// Imported depth measurements keep their existing acceptance rules.
+export const DEPTH_CAPTURE_RULES=Object.freeze({minimumFrames:5,minimumCoverage:.5,maximumSpread:8,minVisibility:.5});
 export const SOURCE_NAMES={mediapipe_2d:'MediaPipe 2D',depth_3d:'Imported depth camera',clinical:'Clinical measurement entered'};
 export const MOTION_NAMES={bend:'Knee bending',straighten:'Knee straightening'};
 export const MODE_NAMES={active:'Without assistance',assisted:'With assistance',passive:'Clinician-assessed passive range'};
@@ -18,16 +20,19 @@ export function kneeFrame(poses,width,height,side){
  // The shoulder is not needed for a dedicated hip-knee-ankle range measurement.
  return {angle:validAngle(r.bend)?r.bend:null,reason:r.bend===null?r.rejectionReasons:''};
 }
-export function summariseEndpoint(frames){
+export function summariseEndpoint(frames,{rules=CAPTURE_RULES}={}){
  if(!Array.isArray(frames)||frames.length>600)throw Error('Use a short sequence of at most 600 frames.');
  const valid=frames.filter(f=>validAngle(f.angle)),angles=valid.map(f=>f.angle);
- if(angles.length<CAPTURE_RULES.minimumFrames)throw Error('Not enough clear pictures (at least 5 needed). Keep the hip, knee and ankle visible and try again.');
+ if(angles.length<rules.minimumFrames)throw Error(`Not enough clear pictures (at least ${rules.minimumFrames} needed). Keep the hip, knee and ankle in view and try again. You do not need to be perfectly still.`);
  const coverage=valid.length/frames.length;
- if(coverage<CAPTURE_RULES.minimumCoverage)throw Error('Too much of this sequence could not be measured. Reposition the camera and try again.');
+ if(coverage<rules.minimumCoverage)throw Error('Too little of this sequence could be measured. Keep the hip, knee and ankle in view and try again.');
  const minimum=Math.min(...angles),maximum=Math.max(...angles),average=mean(angles);
- if(maximum-minimum>CAPTURE_RULES.maximumSpread)throw Error('The readings changed too much during this check. Rest, then repeat at one comfortable end position.');
+ if(Number.isFinite(rules.maximumSpread)&&maximum-minimum>rules.maximumSpread)throw Error('The readings changed too much during this check. Rest, then repeat at one comfortable end position.');
+ const warnings=[];
+ if(rules.noticeSpread!==undefined&&maximum-minimum>rules.noticeSpread)warnings.push('Your knee angle varied during capture. You can save this approximate average; it may not represent your furthest bend or straightest position.');
+ if(coverage<.5||angles.length<5)warnings.push('This result uses only a few clear pictures. You can save it, or repeat for a clearer comparison.');
  return {mean:average,minimum,maximum,sd:Math.sqrt(mean(angles.map(a=>(a-average)**2))),accepted:valid.length,sampled:frames.length,coverage,
-  frames:frames.map(f=>({time_ms:finite(f.time_ms),angle:validAngle(f.angle)?f.angle:null,reason:String(f.reason||'').slice(0,150)})),rules:{...CAPTURE_RULES}};
+  warnings,frames:frames.map(f=>({time_ms:finite(f.time_ms),angle:validAngle(f.angle)?f.angle:null,reason:String(f.reason||'').slice(0,150)})),rules:{...rules}};
 }
 export function kneeAngle3D(hip,knee,ankle){
  if(![hip,knee,ankle].every(p=>Array.isArray(p)&&p.length===3&&p.every(v=>finite(v)!==null)))return null;
@@ -61,7 +66,7 @@ export function saveMeasurement(input,options={}){
   if(input.value===''||input.value===null||input.value===undefined||typeof input.value==='boolean')throw Error('Enter the measured angle.');
   value=Number(input.value);if(!validAngle(value))throw Error('Use degrees of knee bend from 0 to 180, where 0 means straight.');
   if(!String(input.source.device||'').trim())throw Error('Record the clinical instrument or assessment method.');
- }else{summary=summariseEndpoint(input.frames);value=summary.mean;}
+ }else{summary=summariseEndpoint(input.frames,input.source.kind==='depth_3d'?{rules:DEPTH_CAPTURE_RULES}:{});value=summary.mean;}
  if(input.source.kind==='depth_3d'&&(!input.source.device||!input.source.calibration))throw Error('The depth-camera device and calibration reference are required.');
  const record={schema_version:1,version:MEASUREMENT_VERSION,id:idFactory(),...context,value,summary,
   source:{kind:input.source.kind,device:String(input.source.device||'').slice(0,160),method:String(input.source.method||'').slice(0,160),calibration:String(input.source.calibration||'').slice(0,160)},
@@ -70,6 +75,13 @@ export function saveMeasurement(input,options={}){
  rows.push(record);storage.setItem(RECOVERY_KEY,JSON.stringify(rows));return record;
 }
 export function measurementSeriesKey(r){return JSON.stringify([r.patient_id,r.operation_date,r.side,r.motion,r.mode,r.position,r.source.kind,r.source.device,r.source.method,r.source.calibration,r.version]);}
+export function saveMeasurementSet(inputs,options={}){
+ if(!Array.isArray(inputs)||inputs.length<1||inputs.length>2)throw Error('Save one measurement or a bending and straightening pair.');
+ const storage=options.storage||localStorage;let staged=storage.getItem(RECOVERY_KEY);
+ const temporary={getItem:()=>staged,setItem:(_,value)=>{staged=value;}};
+ const records=inputs.map(input=>saveMeasurement(input,{...options,storage:temporary}));
+ storage.setItem(RECOVERY_KEY,staged);return records;
+}
 export function endpointOverview(rows,motion){
  const latest=rows.filter(r=>r.motion===motion).at(-1);if(!latest)return {latest:null,previous:null,change:null};
  const comparable=rows.filter(r=>r.motion===motion&&measurementSeriesKey(r)===measurementSeriesKey(latest)),previous=comparable.at(-2)||null;
@@ -87,7 +99,7 @@ export function depthImport(data,context){
   const angle=f.valid===true&&lengths.length===2&&lengths.every(n=>n>=.1&&n<=.8)?kneeAngle3D(...pts):null;
   return {time_ms:f.time_ms,angle,reason:angle===null?'Depth frame invalid or joint geometry unusable':''};
  });
- const summary=summariseEndpoint(frames);
+ const summary=summariseEndpoint(frames,{rules:DEPTH_CAPTURE_RULES});
  if(typeof data.captured_at!=='string'||!Number.isFinite(Date.parse(data.captured_at)))throw Error('The depth export needs its actual capture timestamp.');
  return {frames,summary,source:{kind:'depth_3d',device:data.source.device,calibration:data.source.calibration,method:'3D unsigned knee bend from imported joint centres'},captured_at:data.captured_at,capture_group:String(data.capture_group||'')};
 }

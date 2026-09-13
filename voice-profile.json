@@ -6,7 +6,10 @@
   "policy": "Use this voice and delivery for every new spoken communication from the app. Use local generated audio, disclose that the voice is AI-generated, and retain written prompts when audio is unavailable. Do not substitute browser speech synthesis or another voice.",
   "prompts": {
     "repetitions_complete": "Your repetitions are now complete. The recording has stopped. You may now move from your exercise position when you are ready.",
-    "session_ended": "Your exercise session has ended. The recording has stopped. You may now move from your exercise position when you are ready."
+    "session_ended": "Your exercise session has ended. The recording has stopped. You may now move from your exercise position when you are ready.",
+    "recovery_bend": "First, we will measure bending of your operated knee. Move only as far as feels comfortable. Show your open palm when you are ready. After the countdown, stay as still as comfortable. Small movements are fine. Relax if you need to.",
+    "recovery_straighten": "Relax your operated leg and take your time. Next, we will measure straightening. Straighten your operated knee only as far as feels comfortable. Show your open palm when you are ready. After the countdown, stay as still as comfortable. Small movements are fine.",
+    "recovery_complete": "Recording has finished. You can relax your operated leg now. Your measurements are ready to review."
   },
   "wording_policy": "When a script refers to the treated knee or leg, say \"your operated knee\" or \"your operated leg\". \"Your replaced knee\" may be used when knee replacement is established. Do not call the treated limb \"the exercise leg\". Keep references to the other leg and to both knees explicit and correct. Use left or right only from the saved operated-leg setting. Apply this wording when writing the script; the speech model must read the approved script exactly."
 }

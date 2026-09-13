@@ -32,3 +32,11 @@ test('both movements share one set of axes and retain distinct labels and shapes
  assert.equal((svg.match(/<svg/g)||[]).length,1);assert.equal((svg.match(/Days after surgery · surgery = day 0/g)||[]).length,1);
  assert.match(svg,/data-graph-series="bend"/);assert.match(svg,/data-graph-series="straighten"/);assert.match(svg,/Straightening · Day 12/);assert.match(svg,/Bending · Day 12/);assert.match(svg,/0° bend remaining/);assert.doesNotMatch(svg,/NaN/);
 });
+test('the vertical axis shows 0 to 150 degrees even with no data or a small early range',()=>{
+ for(const bend of [[],[{day:1,date:'2026-09-02',value:30}]]){
+  const svg=combinedMovementChart({bend,straighten:[]},1);
+  for(const tick of [0,30,60,90,120,150])assert.match(svg,new RegExp(`>${tick}°</text>`));
+  assert.match(svg,/Y · Knee bend/);assert.match(svg,/X · Days after surgery/);
+ }
+ const beyond=combinedMovementChart({bend:[{day:1,date:'2026-09-02',value:160}],straighten:[]},1);assert.match(beyond,/>180°<\/text>/);
+});

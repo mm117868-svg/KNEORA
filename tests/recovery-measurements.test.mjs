@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CAPTURE_RULES,RECOVERY_KEY,kneeFrame,kneeAngle3D,summariseEndpoint,saveMeasurement,readMeasurements,scopedMeasurements,endpointOverview,measurementSeriesKey,depthImport,compareSources} from '../recovery-measurements.mjs';
+import {CAPTURE_RULES,DEPTH_CAPTURE_RULES,RECOVERY_KEY,kneeFrame,kneeAngle3D,summariseEndpoint,saveMeasurement,saveMeasurementSet,readMeasurements,scopedMeasurements,endpointOverview,measurementSeriesKey,depthImport,compareSources} from '../recovery-measurements.mjs';
 import {recoveryExerciseContext} from '../recovery-summary.mjs';
 import {createEndpointCamera,cameraMessage} from '../recovery-camera.mjs';
 const frames=(n=90)=>Array.from({length:12},(_,i)=>({angle:n+i%2,time_ms:i*100}));
@@ -17,8 +17,22 @@ test('occluded joints, offscreen joints and multiple people are rejected',()=>{
 test('endpoint averaging excludes failed frames, preserves zero and exposes spread',()=>{
  const r=summariseEndpoint([...frames(0),{angle:null}]);assert.equal(r.mean,.5);assert.equal(r.accepted,12);assert.equal(r.sampled,13);assert.equal(r.minimum,0);assert.equal(r.maximum,1);assert.equal(r.sd,.5);assert.equal(r.frames.at(-1).angle,null);
 });
-test('short, poorly tracked and moving sequences do not produce a saved endpoint',()=>{
- assert.throws(()=>summariseEndpoint(frames().slice(0,4)),/Not enough/);assert.throws(()=>summariseEndpoint([...frames(),...Array(20).fill({angle:null})]),/Too much/);assert.throws(()=>summariseEndpoint([...frames(),{angle:130}]),/changed too much/);assert.throws(()=>summariseEndpoint(Array(601).fill({angle:90})),/600/);
+test('sparse or empty evidence still fails, but movement can be saved with an honest note',()=>{
+ assert.throws(()=>summariseEndpoint(frames().slice(0,2)),/Not enough/);assert.throws(()=>summariseEndpoint([...frames(),...Array(60).fill({angle:null})]),/Too little/);assert.throws(()=>summariseEndpoint(Array(601).fill({angle:90})),/600/);
+ const moving=[{angle:80},{angle:95},{angle:115},...Array(7).fill({angle:null})];
+ const summary=summariseEndpoint(moving);assert.equal(summary.accepted,3);assert.equal(summary.warnings.length,2);assert.equal(summary.minimum,80);assert.equal(summary.maximum,115);
+ const r=saveMeasurement({...base,frames:moving},options());assert.equal(r.summary.warnings.length,2);assert.equal(r.version,'endpoint-3-flexible');
+ assert.throws(()=>summariseEndpoint([...frames(),{angle:130}],{rules:DEPTH_CAPTURE_RULES}),/changed too much/);
+});
+test('lower-confidence visible joints are usable, while untracked joints remain excluded',()=>{
+ const points=pose();for(const p of points.filter(Boolean))p.visibility=.25;
+ assert.equal(kneeFrame([points],1000,500,'left').angle,90);points[25].visibility=.19;assert.equal(kneeFrame([points],1000,500,'left').angle,null);
+});
+test('a bending and straightening pair saves together or leaves storage untouched',()=>{
+ const opts=options(),second={...base,motion:'straighten',frames:frames(2)};
+ const pair=saveMeasurementSet([base,second],opts);assert.deepEqual(pair.map(r=>r.motion),['bend','straighten']);assert.equal(readMeasurements(opts.storage).length,2);
+ const before=opts.storage.getItem(RECOVERY_KEY);assert.throws(()=>saveMeasurementSet([base,{...second,confirmed:false}],opts));assert.equal(opts.storage.getItem(RECOVERY_KEY),before);
+ assert.throws(()=>saveMeasurementSet([base,second],{...opts,storage:{getItem:()=>before,setItem:()=>{throw Error('Quota');}}}),/Quota/);
 });
 test('3D angle is translation and scale invariant and rejects degenerate joints',()=>{
  assert.equal(kneeAngle3D([0,.4,0],[0,0,0],[.4,0,0]),90);assert.equal(kneeAngle3D([5,9,5],[5,5,5],[9,5,5]),90);assert.equal(kneeAngle3D([0,.4,0],[0,0,0],[0,-.4,0]),0);assert.equal(kneeAngle3D([0,0,0],[0,0,0],[1,0,0]),null);assert.equal(kneeAngle3D([0,'1',0],[0,0,0],[1,0,0]),null);
@@ -70,6 +84,6 @@ test('live endpoint capture measures unique frames and cancellation discards inc
  const video={srcObject:null,readyState:2,currentTime:0,videoWidth:1000,videoHeight:500,play:async()=>{}};
  const ctx={drawImage(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},arc(){},fill(){}};
  const camera=createEndpointCamera({video,canvas:{getContext:()=>ctx},onResult:r=>results.push(r),getStream:async()=>({getTracks:()=>[{stop:()=>stopped++}]}),handLoader:async()=>null,modelLoader:async()=>({model:'TEST model',landmarker:{setOptions:async()=>{},detect:()=>({landmarks:[pose()]}),close:()=>closed++}})});
- await camera.start('left');assert.equal(camera.capture(),true);for(let i=0;i<20;i++){video.currentTime+=.1;nextFrame(100+i*100);}t.mock.timers.tick(2000);assert.equal(results.length,1);assert.equal(results[0].summary.mean,90);assert.equal(results[0].summary.accepted,10);assert.equal(results[0].source.kind,'mediapipe_2d');
- camera.capture();camera.stop();t.mock.timers.tick(2000);assert.equal(results.length,1);assert.equal(stopped,1);assert.equal(closed,1);
+ await camera.start('left');assert.equal(camera.capture(),true);for(let i=0;i<60;i++){video.currentTime+=.1;nextFrame(100+i*100);}t.mock.timers.tick(6000);assert.equal(results.length,1);assert.equal(results[0].summary.mean,90);assert.equal(results[0].summary.accepted,10);assert.equal(results[0].source.kind,'mediapipe_2d');
+ camera.capture();camera.stop();t.mock.timers.tick(6000);assert.equal(results.length,1);assert.equal(stopped,1);assert.equal(closed,1);
 });

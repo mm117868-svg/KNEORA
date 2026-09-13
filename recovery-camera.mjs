@@ -1,11 +1,11 @@
 import {loadPose} from './kneerec.js?v=endpoint-heavy-images-1';
-import {kneeFrame,summariseEndpoint} from './recovery-measurements.mjs?v=endpoint-2';
+import {kneeFrame,summariseEndpoint} from './recovery-measurements.mjs?v=endpoint-3-flexible';
 import {loadHighFive,highFiveState,drawHands} from './high-five.mjs';
 import {EndpointGesture} from './endpoint-gesture.mjs';
 import {EndpointPreviewAverage} from './endpoint-smoothing.mjs';
-export const ENDPOINT_CAPTURE_MS=2000;
+export const ENDPOINT_CAPTURE_MS=6000;
 export const ENDPOINT_PICTURES=10;
-const PICTURE_INTERVAL_MS=150;
+const PICTURE_INTERVAL_MS=550;
 
 export function cameraMessage(error){
  if(error?.name==='NotAllowedError'||error?.name==='SecurityError')return 'Camera access is blocked. Allow this site in your browser and, on a Mac, allow the browser under System Settings > Privacy & Security > Camera. You can also open this page in Chrome or Safari, or use a sequence of photos below.';
@@ -13,9 +13,9 @@ export function cameraMessage(error){
  if(error?.name==='NotReadableError')return 'The camera is busy or unavailable. Close other apps using it, then try again.';
  return error?.message||'The camera could not start. Try again or use a sequence of photos.';
 }
-export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>{},onReady=()=>{},onCaptureStart=()=>{},onGesture=()=>{},onAngle=()=>{},modelLoader=loadPose,handLoader=loadHighFive,getStream=()=>navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}},audio:false})}){
+export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>{},onReady=()=>{},onCaptureStart=()=>{},onGesture=()=>{},onAngle=()=>{},onTrigger=null,modelLoader=loadPose,handLoader=loadHighFive,getStream=()=>navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}},audio:false})}){
  let generation=0,stream=null,model=null,hands=null,raf=null,timer=null,bucket=null,lastVideo=-1,lastInference=0,side='left',modelName='';
- const gesture=new EndpointGesture();
+ const gesture=new EndpointGesture();let gesturePaused=false;
  const smoother=new EndpointPreviewAverage();
  const ctx=canvas.getContext('2d');
  function stop(){generation++;cancelAnimationFrame(raf);clearTimeout(timer);bucket=null;gesture.reset();smoother.reset();onAngle(null);stream?.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;model?.close();model=null;hands?.close();hands=null;onReady(false);onGesture({stage:'off',progress:0});}
@@ -31,7 +31,7 @@ export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>
   try{return await Promise.race([promise,new Promise((_,reject)=>{timeout=setTimeout(()=>{expired=true;reject(Error('The pose model took too long to load. Try again.'));},20000);})]);}finally{clearTimeout(timeout);}
  }
  async function start(chosenSide){
-  stop();const token=generation;side=chosenSide;lastVideo=-1;lastInference=0;onStatus('Opening the camera. Allow access when your browser asks.');
+  stop();const token=generation;side=chosenSide;lastVideo=-1;lastInference=0;gesturePaused=false;onStatus('Opening the camera. Allow access when your browser asks.');
   try{
    const incoming=await getStream();if(token!==generation){incoming.getTracks().forEach(t=>t.stop());return;}
    stream=incoming;video.srcObject=stream;await video.play();if(token!==generation)return;onStatus('Loading the movement model.');
@@ -40,7 +40,7 @@ export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>
    let loadedHands=null;try{loadedHands=await loadHands(token);}catch{}
    if(token!==generation){loadedHands?.close();return;}hands=loadedHands;
    onReady(true);onGesture({stage:hands?'ready':'unavailable',progress:0});
-   onStatus(hands?'Camera ready. At your comfortable limit, show your open palm towards the camera for two seconds.':'Open-palm detection is unavailable. Use the capture button below or reopen the camera to try again.');
+   onStatus(hands?'Camera ready. Once positioned, show your open palm towards the camera for two seconds. Use the countdown to settle comfortably.':'Open-palm detection is unavailable. Use the capture button below or reopen the camera to try again.');
    function tick(now){
     if(token!==generation||!model)return;raf=requestAnimationFrame(tick);
     if(video.readyState<2||video.currentTime===lastVideo){if(now-lastInference>500){smoother.reset();onAngle(null);}return;}
@@ -58,10 +58,10 @@ export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>
     }catch(error){smoother.reset();onAngle(null);samplePicture({angle:null,reason:'Pose inference failed'},now);}
     // The hand signal is independent of body-pose visibility. A poor knee view
     // can still trigger capture, but cannot produce a falsely usable result.
-    if(hands&&!bucket){
+    if(hands&&!bucket&&!gesturePaused){
      let handResult=null;try{handResult=hands.recognizeForVideo(video,now);drawHands(ctx,handResult,canvas.width,canvas.height);}catch{}
      const signal=gesture.update(highFiveState(handResult),now,video.currentTime);
-     if(signal.trigger)capture('open_palm');
+     if(signal.trigger)requestCapture('open_palm');
      else onGesture({stage:signal.progress>0?'holding':signal.armed?'ready':'release',progress:signal.progress});
     }
    }
@@ -77,17 +77,21 @@ export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>
   if(!model||!stream||bucket)return false;
   gesture.disarm();onCaptureStart({trigger});onGesture({stage:'capturing',progress:0});
   const token=generation;bucket={start:performance.now(),captured_at:new Date().toISOString(),frames:[],lastSample:-Infinity};
-  onStatus('Taking up to 10 pictures of your operated knee over two seconds. Keep this position only while comfortable.');
-  timer=setTimeout(()=>{
-   if(token!==generation||!bucket)return;
-   const result=bucket;bucket=null;gesture.disarm();onGesture({stage:'complete',progress:1});
-   try{const summary=summariseEndpoint(result.frames);onResult({frames:result.frames,summary,captured_at:result.captured_at,source:{kind:'mediapipe_2d',device:modelName,method:'Side-view live endpoint images (IMAGE mode, 10-picture sequence)'}});onStatus('Capture ready to review. You can relax your leg.');}
-   catch(error){onStatus(error.message);onResult(null);}
-  },ENDPOINT_CAPTURE_MS);return true;
+  onStatus('Taking pictures for six seconds. Small movements are fine. Stay near your comfortable limit; you do not need to be perfectly still.');
+  timer=setTimeout(()=>{if(token===generation)finish();},ENDPOINT_CAPTURE_MS);return true;
  }
+ function finish(){
+   if(!bucket)return false;clearTimeout(timer);
+   const result=bucket;bucket=null;resumeGesture();onGesture({stage:'complete',progress:1});
+   try{const summary=summariseEndpoint(result.frames);onResult({frames:result.frames,summary,captured_at:result.captured_at,source:{kind:'mediapipe_2d',device:modelName,method:'Side-view live endpoint images (IMAGE mode, flexible six-second sequence)'}});onStatus('Capture ready to review. You can relax your leg.');}
+   catch(error){onStatus(error.message);onResult(null);}
+   return true;
+ }
+ function resumeGesture(){gesturePaused=false;gesture.disarm();}
+ function requestCapture(trigger='button'){if(!model||!stream||bucket||gesturePaused)return false;if(!onTrigger)return capture(trigger);gesturePaused=true;gesture.disarm();onTrigger(trigger);return true;}
  async function images(files,chosenSide){
   stop();const token=generation;
-  if(files.length<5||files.length>10){onStatus('Choose between 5 and 10 images of the same comfortable end position.');return;}
+  if(files.length<3||files.length>10){onStatus('Choose between 3 and 10 images from the same comfortable end-position attempt. Small movements are fine.');return;}
   if(files.some(f=>!f.type.startsWith('image/')||f.size>20*1024*1024)){onStatus('Use image files smaller than 20 MB each.');return;}
   onStatus('Analysing the selected images on this device.');
   try{
@@ -103,5 +107,5 @@ export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>
    onResult({frames,summary,captured_at:null,source:{kind:'mediapipe_2d',device:result.model,method:'Side-view uploaded endpoint images (IMAGE mode)'}});onStatus('Image sequence ready. Confirm its assessment date and end position before saving.');
   }catch(error){if(token===generation){stop();onStatus(cameraMessage(error));onResult(null);}}
  }
- return {start,stop,capture,images};
+ return {start,stop,capture,requestCapture,resumeGesture,finish,images};
 }

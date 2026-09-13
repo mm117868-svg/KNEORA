@@ -33,6 +33,30 @@
       "file": "repetitions_complete-5830be8782b1.wav",
       "duration_s": 8.16,
       "text": "Your repetitions are now complete. The recording has stopped. You may now move from your exercise position when you are ready."
+    },
+    "recovery_bend": {
+      "file": "recovery_bend-6a63346f8e6a.wav",
+      "duration_s": 16.512,
+      "text": "First, we will measure bending of your operated knee. Move only as far as feels comfortable. Show your open palm when you are ready. After the countdown, stay as still as comfortable. Small movements are fine. Relax if you need to.",
+      "instructions": "Voice: A warm adult British woman with a soft, rounded tone and a natural contemporary British English accent. Delivery: Speak gently and conversationally, as if reassuring one person sitting beside you. Keep the volume even and soften the ends of phrases. Pacing: Calm and unhurried. Style: Kind, clear and quietly encouraging. Read only the supplied script, exactly as written.",
+      "provenance": "Generated with selected Marin voice through OpenAI.fm; converted from downloaded MP3 to mono 24 kHz WAV locally.",
+      "generated_at": "2026-09-13T07:16:25.256973+00:00"
+    },
+    "recovery_straighten": {
+      "file": "recovery_straighten-df8ecd8b46bd.wav",
+      "duration_s": 15.312,
+      "text": "Relax your operated leg and take your time. Next, we will measure straightening. Straighten your operated knee only as far as feels comfortable. Show your open palm when you are ready. After the countdown, stay as still as comfortable. Small movements are fine.",
+      "instructions": "Voice: A warm adult British woman with a soft, rounded tone and a natural contemporary British English accent. Delivery: Speak gently and conversationally, as if reassuring one person sitting beside you. Keep the volume even and soften the ends of phrases. Pacing: Calm and unhurried. Style: Kind, clear and quietly encouraging. Read only the supplied script, exactly as written.",
+      "provenance": "Generated with selected Marin voice through OpenAI.fm; converted from downloaded MP3 to mono 24 kHz WAV locally.",
+      "generated_at": "2026-09-13T07:16:25.258360+00:00"
+    },
+    "recovery_complete": {
+      "file": "recovery_complete-89a241bf306d.wav",
+      "duration_s": 7.008,
+      "text": "Recording has finished. You can relax your operated leg now. Your measurements are ready to review.",
+      "instructions": "Voice: A warm adult British woman with a soft, rounded tone and a natural contemporary British English accent. Delivery: Speak gently and conversationally, as if reassuring one person sitting beside you. Keep the volume even and soften the ends of phrases. Pacing: Calm and unhurried. Style: Kind, clear and quietly encouraging. Read only the supplied script, exactly as written.",
+      "provenance": "Generated with selected Marin voice through OpenAI.fm; converted from downloaded MP3 to mono 24 kHz WAV locally.",
+      "generated_at": "2026-09-13T07:16:25.258878+00:00"
     }
   }
 }
