@@ -592,7 +592,7 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
   <div class="safety">
     <b>Listen to your knee.</b> Mild discomfort is normal; sharp pain is not. Stop and contact your surgeon if you notice fever, calf pain, spreading numbness or wound drainage. This programme supports your physiotherapist's plan; it does not replace it.
   </div>
-  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. Camera repetitions require both optical movement and confirmation in your selected leg. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: recording-voice-2 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
+  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. Camera repetitions require both optical movement and confirmation in your selected leg. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: automatic-summary-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
   <footer class="app-footer" aria-label="Company and app information">
     <div class="footer-heading"><div><span class="eyebrow">Cambridge Kinematics</span><h2>Supporting your recovery,<br>one day at a time.</h2></div><span class="footer-status">In development</span></div>
     <div class="footer-company"><strong>Cambridge Kinematics Limited</strong><p>A private limited company registered in England and Wales.</p><p>Cambridge, England</p></div>
@@ -664,10 +664,10 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
 <script type="module">
 import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=recording-voice-2";
-import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=recording-voice-2";
+import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=automatic-summary-1";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js";
 import { AppVoice, completionNotice } from "./app-voice.mjs";
-import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=recording-voice-2";
+import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=automatic-summary-1";
 import { renderRecoverySummary } from "./recovery-summary.mjs?v=followups-1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
 import { renderProgressToDate } from "./progress-to-date.mjs?v=recording-voice-2";
@@ -1269,19 +1269,17 @@ async function finish(abandon = false) {
     measurement: summarise(trace, duration, target), monitoring: mon, patient_count: null, tracking: tr, pose_validation: pv, count_source: source, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
     recording: { captured: !!videoBlob?.size, bytes: videoBlob?.size || 0, mime_type: videoBlob?.type || null },
 
-    software_version: SOFTWARE, app: { page: "index.html", build: "recording-voice-2", phase, aim: current.aim } };
+    software_version: SOFTWARE, app: { page: "index.html", build: "automatic-summary-1", phase, aim: current.aim } };
   if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles };
   rec.measurement.trace_preview = tracePreview(trace.rows);
   const slot = storeRecord(rec) - 1;   // stored now, before the questions, so walking away from the laptop loses nothing
 
   const done = $("done");
   done.classList.add("show");
-  done.innerHTML = `<div class="inner"><p role="status" class="recording-stopped">${esc(confirmation.text)}${confirmationSpoken ? "" : '<small style="display:block">Marin audio is unavailable. The recording has stopped.</small>'}</p><div id="simpleExerciseSummary"></div><div id="exerciseAnalysis"></div><details class="exercise-more"><summary>More detail</summary><div id="detailedExerciseSummary"></div><div id="detailedVideoAnalysis"></div></details><div class="q" id="q"></div></div>`;
+  done.innerHTML = `<div class="inner"><p role="status" class="recording-stopped">${esc(confirmation.text)}${confirmationSpoken ? "" : '<small style="display:block">Marin audio is unavailable. The recording has stopped.</small>'}</p><div id="simpleExerciseSummary"></div><div id="exerciseAnalysis"></div><div class="q" id="q"></div></div>`;
   const updateExerciseSummary = () => {
     const history = patientRecords(loadRecords(), rec.patient_id, rec.operation_date);
     $("simpleExerciseSummary").innerHTML = renderBasicExerciseSummary(rec, history);
-    $("detailedExerciseSummary").innerHTML = sessionSummary(rec, history);
-    if (rec.exercise_analysis) $("detailedExerciseSummary").append(savedAnalysisSummary(rec.exercise_analysis));
   };
   updateExerciseSummary();
   disposeAnalysis();

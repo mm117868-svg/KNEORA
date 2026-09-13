@@ -63,7 +63,7 @@ function fakePage(){
 }
 test('first completed analysis returns to the simple summary, later detailed reanalysis stays open',()=>{
  const page=fakePage();try{
-  let saved=0;const dispose=mountExerciseAnalysis(page.host,{blob:new Blob(['fixture']),metadata:{exercise:'heel_slide'},returnToSummary:true,onReport:()=>saved++});
+  let saved=0;const dispose=mountExerciseAnalysis(page.host,{blob:new Blob(['fixture']),metadata:{exercise:'heel_slide'},returnToSummary:true,autoStart:false,onReport:()=>saved++});
   const button=page.elements.find(e=>e.textContent==='Analyse exercise');button.onclick();const dialog=page.elements.find(e=>e.tag==='dialog'),iframe=page.elements.find(e=>e.tag==='iframe');
   page.send({origin:location.origin,source:iframe.contentWindow,data:{type:'exercise-analysis-ready'}});const complete={type:'exercise-analysis-complete',token:iframe.sent.token,report:report(record()).exercise_analysis};
   page.send({origin:'https://other.invalid',source:iframe.contentWindow,data:complete});assert.equal(saved,0);assert.equal(dialog.open,true);
@@ -84,4 +84,44 @@ test('automatic analysis starts without a modal, reports progress and retains a 
   assert.ok(page.elements.some(e=>e.textContent==='Analysing 5 / 10 seconds…'));
   dispose();page.send({origin:location.origin,source:iframe.contentWindow,data:{type:'exercise-analysis-complete',token:iframe.sent.token,report:report(record()).exercise_analysis}});assert.equal(saved,0);
  }finally{page.restore();}
+});
+for(const exercise of ['straight_leg_raise','seated_extension','heel_slide'])test(`${exercise}: automatic analysis is the default, with no analysis button or full-report step`,()=>{
+ const page=fakePage();try{
+  let result=null;const dispose=mountExerciseAnalysis(page.host,{blob:new Blob(['fixture']),metadata:{exercise},onReport:r=>result=r});
+  const iframe=page.elements.find(e=>e.tag==='iframe'),dialog=page.elements.find(e=>e.tag==='dialog'),button=page.elements.find(e=>e.textContent==='Analyse exercise');
+  assert.ok(iframe);assert.ok(!dialog.open);assert.equal(button.hidden,true);
+  page.send({origin:location.origin,source:iframe.contentWindow,data:{type:'exercise-analysis-ready'}});
+  assert.equal(iframe.sent.metadata.exercise,exercise);
+  const measured=report(record(exercise)).exercise_analysis;
+  page.send({origin:location.origin,source:iframe.contentWindow,data:{type:'exercise-analysis-complete',token:iframe.sent.token,report:measured}});
+  assert.equal(result,measured);assert.equal(button.hidden,true);assert.ok(!dialog.open);
+  assert.ok(page.elements.some(e=>e.textContent==='Your exercise summary is ready'));dispose();
+ }finally{page.restore();}
+});
+test('failed automatic analysis offers a retry using the retained video and rejects old messages',()=>{
+ const page=fakePage();try{
+  let saved=0;const dispose=mountExerciseAnalysis(page.host,{blob:new Blob(['fixture']),metadata:{exercise:'heel_slide'},onReport:()=>saved++});
+  const oldFrame=page.elements.find(e=>e.tag==='iframe'),button=page.elements.find(e=>e.textContent==='Analyse exercise');
+  page.send({origin:location.origin,source:oldFrame.contentWindow,data:{type:'exercise-analysis-ready'}});
+  page.send({origin:location.origin,source:oldFrame.contentWindow,data:{type:'exercise-analysis-error',token:'invalid',text:'Bad error'}});assert.equal(button.hidden,true);
+  page.send({origin:location.origin,source:oldFrame.contentWindow,data:{type:'exercise-analysis-error',token:oldFrame.sent.token,text:'Model loading failed'}});
+  assert.equal(button.textContent,'Retry analysis');assert.equal(button.hidden,false);assert.equal(saved,0);
+  button.onclick();const newFrame=page.elements.filter(e=>e.tag==='iframe').at(-1);assert.notEqual(newFrame,oldFrame);assert.equal(button.hidden,true);
+  page.send({origin:location.origin,source:oldFrame.contentWindow,data:{type:'exercise-analysis-error',token:oldFrame.sent.token,text:'Stale failure'}});assert.equal(button.hidden,true);
+  page.send({origin:location.origin,source:newFrame.contentWindow,data:{type:'exercise-analysis-ready'}});assert.notEqual(newFrame.sent.token,oldFrame.sent.token);
+  page.send({origin:location.origin,source:newFrame.contentWindow,data:{type:'exercise-analysis-complete',token:newFrame.sent.token,report:report(record()).exercise_analysis}});
+  assert.equal(saved,1);assert.ok(page.elements.some(e=>e.textContent==='Your exercise summary is ready'));dispose();
+ }finally{page.restore();}
+});
+test('unavailable recordings do not start an empty automatic analysis',()=>{
+ const page=fakePage();try{
+  const dispose=mountExerciseAnalysis(page.host,{blob:null,metadata:{exercise:'heel_slide'},onReport:()=>assert.fail('No recording')});
+  assert.ok(!page.elements.some(e=>e.tag==='iframe'));assert.ok(page.elements.some(e=>e.textContent==='Recording unavailable'));dispose();
+ }finally{page.restore();}
+});
+test('confirmed live cadence uses only accepted leg events, not raw background motion',()=>{
+ const r=record();r.count_source='pose_gated_optical';r.pose_validation={repetitions:3,count_status:'observed',events:[
+  {status:'accepted',confirmedAt:3},{status:'rejected',confirmedAt:4},{status:'accepted',confirmedAt:9},{status:'unconfirmed',confirmedAt:10},{status:'accepted',confirmedAt:17}]};
+ const s=basicExerciseSummary(r);assert.equal(s.tempo,7);assert.equal(s.cadence,60/7);
+ r.pose_validation.events=[{status:'accepted',confirmedAt:3}];assert.equal(basicExerciseSummary(r).tempo,null);
 });

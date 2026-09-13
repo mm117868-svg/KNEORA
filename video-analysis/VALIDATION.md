@@ -39,3 +39,9 @@ Remaining verification: live webcam use through the complete patient workflow on
 The retry handler now supplies a fresh camera-attempt identifier. Previously it called `openCamera()` without an identifier, so a granted stream was immediately treated as stale and a repeated denial could leave the spinner active. Permission denials now show Mac/browser guidance and an existing-video alternative; fallback to the default camera occurs only for an unavailable or overconstrained selected device.
 
 Five targeted regression tests passed in `camera-access.test.mjs`, exercising the actual inline camera functions with controlled permission outcomes: deny then grant, repeated denial, a late grant after leaving, missing preferred device, and unavailable media API. The in-app browser reproduced system denial on both initial request and retry; each returned a visible retry button and no spinner. Chrome was opened at the local app and its page was verified. Actual camera permission in Chrome has not been granted or verified by these tests.
+# Automatic patient summary, 13 September 2026
+
+- The finished exercise screen starts analysis automatically for straight leg raises, seated knee extensions and heel slides. It shows the short patient summary without the detailed report panel or an analysis button.
+- All 138 Node software tests passed, including automatic start, report delivery, missing recordings, retry after failure, rejection of stale messages and cadence from confirmed leg events.
+- A browser integration check used a generated two-second canvas recording containing no person. The stopped recording was analysed in the background without a click or modal, returning 18 sampled frames and unavailable knee/hip measurements. No patient record was created.
+- The simple summary was inspected at 390 pixels wide. These checks verify software behaviour and layout, not live patient tracking or clinical accuracy.
