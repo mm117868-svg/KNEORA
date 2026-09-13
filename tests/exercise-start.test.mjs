@@ -19,7 +19,7 @@ function previewHarness() {
     return elements.get(id);
   };
   let now = 0, starts = 0, spoken = 0, stopped = 0, detects = 0, landmarks = pose();
-  const context = vm.createContext({$, stream: {}, running: false, current:{kind:'reps'}, skeletonAverage:new SkeletonAverage(), inspectExerciseLeg, highFiveState, HIGH_FIVE_SETTINGS, drawHands(){}, performance: {now: () => now},
+  const context = vm.createContext({setExerciseSidebar(){},$, stream: {}, running: false, current:{kind:'reps'}, skeletonAverage:new SkeletonAverage(), inspectExerciseLeg, highFiveState, HIGH_FIVE_SETTINGS, drawHands(){}, performance: {now: () => now},
     appVoice: {play(){spoken++; return true;}, stop(){stopped++;}}, refreshHint(){},
     video: {readyState: 4, currentTime: 0, videoWidth: 1280}, canvas: {width: 1280, height: 720}, ctx: {drawImage(){}},
     requestAnimationFrame(){return 1;}, cancelAnimationFrame(){}, pickSide(){return null;}, drawSkeleton(){},
@@ -111,7 +111,7 @@ function finishHarness(count = 10) {
   const recorder = new Recorder();
   const elements = new Map();
   const $ = id => {if (!elements.has(id)) elements.set(id, {textContent: '', classList: {remove(){}}}); return elements.get(id);};
-  const context = vm.createContext({$, running: true, rafId: 0, t0: 0, openGen: 1, recorder, chunks: [],
+  const context = vm.createContext({setExerciseSidebar(){},$, running: true, rafId: 0, t0: 0, openGen: 1, recorder, chunks: [],
     performance: {now: () => 10000}, cancelAnimationFrame(){}, finishRecording, console,
     stopCamera(){events.push('camera stopped');}, current: {kind: 'reps', count: 10},
     monitor: {summary: () => ({repetitions: count})}, legGate: {finish: () => ({repetitions: count})}, trackWanted: () => false,

@@ -506,6 +506,24 @@ body:not(.progress-view) #home>.patient-details{grid-column:1;grid-row:2;margin:
 .patient-facts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px;border-top:1px solid var(--line);padding-top:18px}.patient-facts span{display:block;color:var(--muted);font-size:12px}.patient-facts strong{display:block;font-size:22px;line-height:1.35;margin-top:5px}.patient-details .dayline{font-size:12px}.profile-message{font-size:12px;color:var(--muted);line-height:1.5;margin:8px 0 0}.profile-message:empty{display:none}
 body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron{font-size:24px;line-height:1;transition:transform .15s}.camera-options[open] .settings-chevron{transform:rotate(180deg)}
 @media(max-width:759px){.patient-header-nav{grid-template-columns:repeat(2,minmax(0,1fr))}body:not(.progress-view) #home>.patient-details{margin-bottom:24px}.patient-fields{grid-template-columns:1fr}.patient-details h1{font-size:26px}.patient-facts strong{font-size:20px}}
+
+/* Keep the camera clear, with measurements over the picture and optional help at the side. */
+#ex{grid-template-columns:minmax(0,1fr) 280px}
+#ex.camera-expanded{grid-template-columns:minmax(0,1fr)}
+#ex.camera-expanded>.panel{display:none}
+.camera-view{position:relative;flex:none;max-width:100%;max-height:100%}
+.stage .camera-view canvas{display:block;width:100%;height:100%;max-width:none;max-height:none}
+.video-metrics{position:absolute;right:12px;top:72px;pointer-events:none;display:flex;flex-direction:column;gap:8px;max-width:calc(100% - 24px)}
+.video-metrics .two{gap:8px}.video-metrics .tile{padding:10px 12px;background:rgba(5,10,20,.8);border-color:rgba(255,255,255,.3);border-radius:8px;min-width:105px}
+.video-metrics .tile .lab{color:#e0e5eb;font-size:10px;letter-spacing:.06em}.video-metrics .tile .val{font-size:40px}.video-metrics .tile .val small{color:#e0e5eb}
+.video-metrics .tile .sub,.video-metrics .tile.angle .bar{display:none}
+#ex>.panel{padding:16px;gap:14px}.panel .brief{position:static;display:none;transform:none;transition:none;max-height:none;overflow:visible;border-radius:6px;padding:16px;box-shadow:none;flex:none}
+.panel .brief.up{display:block}.panel .brief h3{font-size:19px}.panel .brief .hands{background:none;padding:0;margin-top:12px;font-size:15px;line-height:1.5;border-radius:0}.panel .brief .gesture-retry{font:inherit;font-size:12px;padding:9px;min-height:40px;border-radius:4px}
+.sound-help{margin-top:14px;font-size:12px}.sound-help summary{cursor:pointer}.panel .tile.instr{display:block}.tile.instr summary{cursor:pointer;font-size:13px;font-weight:700;min-height:32px;display:flex;align-items:center;justify-content:space-between}.tile.instr summary::after{content:'+'}.tile.instr[open] summary::after{content:'−'}.tile.instr #briefSetup{font-size:12px;line-height:1.55;color:var(--dkmuted)}
+.exercise-toolbar{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:end;gap:12px;z-index:7;pointer-events:none}.exercise-toolbar .status{font-size:13px;line-height:1.4;background:rgba(5,10,20,.85);border:1px solid var(--dkline);border-radius:8px;padding:10px 12px;max-width:440px}.exercise-toolbar .status.ok{border-color:var(--green)}
+.exercise-toolbar .actions{display:flex;gap:8px;margin-left:auto;pointer-events:auto;flex-shrink:0}.exercise-toolbar .btn{background:rgba(5,10,20,.85);min-height:44px}.exercise-toolbar .btn.finish{background:var(--green)}.stage .track{bottom:80px}
+@media(max-width:879px),(orientation:portrait){#ex.open{display:flex;flex-direction:column}#ex>.stage{flex:1 0 58%;min-height:0}#ex>.panel{flex:0 1 auto;max-height:42%;border-left:0;border-top:1px solid var(--dkline)}#ex.camera-expanded>.stage{flex:1 1 100%}#ex>.panel .brief{padding:14px}.video-metrics{right:8px;top:60px}.video-metrics .tile{min-width:90px;padding:8px 10px}.video-metrics .tile .val{font-size:30px}.exercise-toolbar .status{display:none}.stage .track{bottom:70px;font-size:11px}.stage .top{padding:10px;gap:8px}.stage .top .iconbtn{width:36px;height:36px}.stage .clockwrap{padding:6px;font-size:11px}.stage .title h2{font-size:16px}.stage .title .eyebrow{font-size:10px}}
+
 </style>
 </head>
 <body>
@@ -607,11 +625,18 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 <section id="ex" aria-hidden="true">
   <div class="stage">
     <video id="video" playsinline muted></video>
-    <canvas id="canvas"></canvas>
+    <div class="camera-view" id="cameraView"><canvas id="canvas" aria-label="Live exercise camera"></canvas><div class="video-metrics" aria-label="Live exercise measurements">
+    <div class="two">
+      <div class="tile reps" id="repsTile"><div class="lab" id="repsLab">Repetitions</div><div class="val num"><span id="reps">0</span><small id="repsOf"></small></div><div class="sub" id="repsSub">&nbsp;</div></div>
+      <div class="tile angle" id="angleTile"><div class="lab">Knee bend</div><div class="val num"><span id="angle">—</span><small>°</small></div><div class="bar"><div class="zone" id="zone"></div><div class="fill" id="fill"></div></div><div class="sub" id="angleSub">0° is straight</div></div>
+    </div>
+    <div class="tile hold" id="holdTile" style="display:none"><div class="lab">Hold timer</div><div class="ring"><div class="cue" id="holdCue">Get ready</div><div class="count num" id="holdCount"></div></div><div class="sub" id="holdSub"></div></div>
+    </div></div>
     <div class="top">
       <button class="iconbtn" id="back" aria-label="Back">‹</button>
       <div class="title"><span class="eyebrow" id="exPhase"></span><h2 id="exTitle"></h2></div>
       <div class="clockwrap"><span class="rec" id="rec" title="recording"></span><span class="num" id="clock">00:00</span></div>
+      <button class="iconbtn" id="instructionToggle" aria-label="Hide instructions" aria-controls="exercisePanel" aria-expanded="true" title="Exercise instructions">☰</button>
       <button class="iconbtn" id="boxbtn" title="Draw the counting box: drag on the picture" aria-label="Adjust counting box" disabled>▭</button>
     </div>
     <div class="track off" id="track">camera off</div>
@@ -625,36 +650,28 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       <a id="cameraUpload" href="video-analysis/" hidden style="color:var(--dkink);margin-top:12px">Analyse an existing video instead</a>
     </div>
 
-    <div class="brief" id="brief">
-      <div class="grip"></div>
-      <h3 id="briefTitle"></h3>
-      <div class="meta" id="briefMeta"></div>
-      <ol id="briefSteps"></ol>
-      <div class="setup" id="briefSetup"></div>
-      <div class="hands" id="hands"><span id="handtext" role="status"></span><div class="bar" aria-hidden="true"><div class="fill" id="handfill"></div></div></div>
-      <button type="button" class="gesture-retry" id="poseRetry" hidden>Retry leg tracking</button>
-      <button type="button" class="gesture-retry" id="handRetry" hidden>Retry hand recognition</button>
-      <button type="button" class="gesture-retry" id="voiceTest">Test Marin voice</button>
-      <p id="voiceStatus" class="small-note" role="status"></p>
-    </div>
     <div class="handring" id="handring" hidden><div class="htext" id="htext"></div><div class="hbar"><div class="hfill" id="hfill"></div></div></div>
     <div class="countdown" id="countdown" hidden></div>
 
-    <div class="done" id="done"></div>
-  </div>
-
-  <aside class="panel">
-    <div class="two">
-      <div class="tile reps" id="repsTile"><div class="lab" id="repsLab">Repetitions</div><div class="val num"><span id="reps">0</span><small id="repsOf"></small></div><div class="sub" id="repsSub">&nbsp;</div></div>
-      <div class="tile angle" id="angleTile"><div class="lab">Knee bend</div><div class="val num"><span id="angle">—</span><small>°</small></div><div class="bar"><div class="zone" id="zone"></div><div class="fill" id="fill"></div></div><div class="sub" id="angleSub">0° is straight</div></div>
-    </div>
-    <div class="tile hold" id="holdTile" style="display:none"><div class="lab">Hold timer</div><div class="ring"><div class="cue" id="holdCue">Get ready</div><div class="count num" id="holdCount"></div></div><div class="sub" id="holdSub"></div></div>
-    <div class="tile instr"><div class="lab">Exercise</div><ol id="instr"></ol></div>
+    <div class="exercise-toolbar">
     <div class="status" id="status">Getting ready…</div>
     <div class="actions">
       <button class="btn small" id="reset" disabled>Reset count</button>
       <button class="btn finish" id="finish" disabled>Finish</button>
     </div>
+    </div>
+    <div class="done" id="done"></div>
+  </div>
+
+  <aside class="panel" id="exercisePanel" aria-label="Exercise instructions">
+    <div class="brief" id="brief">
+      <h3>Ready to begin?</h3>
+      <div class="hands" id="hands"><span id="handtext" role="status"></span><div class="bar" aria-hidden="true"><div class="fill" id="handfill"></div></div></div>
+      <button type="button" class="gesture-retry" id="poseRetry" hidden>Retry leg tracking</button>
+      <button type="button" class="gesture-retry" id="handRetry" hidden>Retry hand recognition</button>
+      <details class="sound-help"><summary>Check the countdown sound</summary><button type="button" class="gesture-retry" id="voiceTest">Test Marin voice</button><p id="voiceStatus" class="small-note" role="status"></p></details>
+    </div>
+    <details class="tile instr" id="exerciseInstructions"><summary>Exercise instructions</summary><ol id="instr"></ol><p id="briefSetup"></p></details>
   </aside>
 </section>
 
@@ -909,6 +926,20 @@ listCams();
 
 /* ---------------- exercise screen ---------------- */
 const video = $("video"), canvas = $("canvas"), ctx = canvas.getContext("2d");
+function fitCameraView() {
+  const stage=$("ex").querySelector('.stage'),scale=Math.min(stage.clientWidth/canvas.width,stage.clientHeight/canvas.height);
+  if(!Number.isFinite(scale)||scale<=0)return;
+  $("cameraView").style.width=`${canvas.width*scale}px`;$("cameraView").style.height=`${canvas.height*scale}px`;
+  const pictureTop=(stage.clientHeight-canvas.height*scale)/2;
+  stage.querySelector('.video-metrics').style.top=`${Math.max(8,stage.querySelector('.top').offsetHeight+8-pictureTop)}px`;
+}
+new ResizeObserver(fitCameraView).observe($("ex").querySelector('.stage'));
+function setExerciseSidebar(visible) {
+  $("ex").classList.toggle("camera-expanded",!visible);
+  $("instructionToggle").setAttribute("aria-expanded",String(visible));
+  $("instructionToggle").setAttribute("aria-label",visible?"Hide instructions":"Show instructions");
+}
+$("instructionToggle").onclick=()=>{const visible=$("ex").classList.contains("camera-expanded");setExerciseSidebar(visible);if(visible&&!$("brief").classList.contains("up"))$("exerciseInstructions").open=true;};
 let disposeAnalysis = () => {}, pendingAnswer = null;
 let current = null, stream = null, running = false, recorder = null, chunks = [], openGen = 0;
 let trace, monitor, t0, frameNo, lastVideoTime = -1, rafId = 0, startedAt, dragging = null, boxMode = false;
@@ -944,8 +975,7 @@ async function openExercise(ex) {
   appVoice.prepare();
   appVoice.prepare("repetitions_complete"); appVoice.prepare("session_ended");
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
-  $("briefTitle").textContent = ex.title; $("briefMeta").textContent = `${PHASES[phase]} · ${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}`;
-  $("briefSteps").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join(""); $("briefSetup").textContent = SETUP;
+  $("briefSetup").textContent = SETUP; $("exerciseInstructions").open=false; setExerciseSidebar(true);
   $("instr").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
   $("repsLab").textContent = ex.kind === "hold" ? "Holds" : "Repetitions"; $("reps").textContent = "0"; $("repsOf").textContent = ` / ${ex.count}`; $("repsSub").innerHTML = ex.kind === "hold" ? `${ex.hold} s hold, ${ex.rest} s rest` : "movements confirmed in your selected leg";
 
@@ -987,7 +1017,7 @@ async function openCamera(gen) {
   if (!screenOpen(gen)) return stopCamera();
   video.srcObject = stream; await video.play();
   if (!screenOpen(gen)) return stopCamera();
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight; fitCameraView();
   $("veil").classList.add("hide"); $("brief").classList.add("up");
   $("track").textContent = "camera on"; $("track").className = "track";
   refreshHint();
@@ -1023,7 +1053,7 @@ function refreshHint() {
   $("handRetry").hidden = handModelState !== "failed";
   let text;
   if (handRecognizer) {
-    text = "Show an open palm towards the camera anywhere in the picture. Hold your high five for 2 seconds to start. Your head and upper body do not need to be visible. Lower your hand during the countdown.";
+    text = "When ready, hold up a high five for 2 seconds. Lower your hand during the countdown, then begin your exercise.";
     $("status").textContent = "Show an open palm for 2 seconds to start recording.";
   } else if (handModelState === "failed") {
     text = "Hand recognition could not load. Select Retry hand recognition to continue.";
@@ -1033,7 +1063,7 @@ function refreshHint() {
     $("status").textContent = "Loading hand recognition. Recording has not started.";
   }
   if (!landmarker) text += " Leg tracking is not ready yet; repetition confirmation will wait for it.";
-  text += appVoice.state === "ready" ? " Marin will count down: five, four, three, two, one." : " The countdown stays visible if audio is unavailable.";
+  if(appVoice.state !== "ready") text += " Watch the countdown on screen if audio is unavailable.";
   $("handtext").textContent = text;
 }
 
@@ -1085,7 +1115,7 @@ function beginCountdown() {
   if (countdownStart !== null || running || !stream || !handRecognizer) return;
   countdownStart = performance.now(); resetHand(); showHand(0, false);
   const audioStarted = appVoice.play();
-  $("brief").classList.remove("up"); $("countdown").hidden = false;
+  $("brief").classList.remove("up"); setExerciseSidebar(false); $("countdown").hidden = false;
   $("status").textContent = "Lower your hand and get ready. Recording starts after the countdown." + (audioStarted ? "" : " Visual countdown only.");
   tickCountdown(countdownStart);
 }
@@ -1098,7 +1128,7 @@ function tickCountdown(now) {
 function cancelCountdown(backToBrief = false) {
   appVoice.stop();
   countdownStart = null; $("countdown").hidden = true; $("countdown").innerHTML = ""; resetHand(); $("handfill").style.width = "0"; $("handring").hidden = true;
-  if (backToBrief && stream && !running) { $("brief").classList.add("up"); refreshHint(); }
+  if (backToBrief && stream && !running) { setExerciseSidebar(true); $("brief").classList.add("up"); refreshHint(); }
 }
 $("countdown").addEventListener("pointerdown", () => cancelCountdown(true));
 
@@ -1121,7 +1151,7 @@ function cameraFailed(e) {
     return openCamera(++openGen);
   };
 }
-/* live picture behind the instructions so the patient can get into position; nothing is measured or recorded yet.
+/* Live picture beside optional instructions while the patient gets into position; no session is recorded yet.
    Body overlays are display only. The independent hand model watches for an open palm. */
 let previewId = 0, previewLastVideoTime = -1, previewLastFrameAt = null, previewAll = null, previewSkeleton = null, previewPoseAt = -Infinity;
 function preview() { skeletonAverage.reset(); previewSkeleton = null; cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; previewStep(); }
@@ -1189,7 +1219,7 @@ function startSession() {
   legGate = new LegMotionGate(current.id, $("side").value, tracker ? "knee_tracker" : "monitoring", {smallMovement:smallMovement()});
   gateBoxReference = null; manualCountingBox = false; monitor.locked = true;
   monitor.box = [canvas.width*.075,canvas.height*.075,canvas.width*.85,canvas.height*.85].map(Math.round);
-  running = true; $("brief").classList.remove("up"); $("finish").disabled = false; $("reset").disabled = current.kind === "hold"; $("boxbtn").disabled = false;
+  running = true; setExerciseSidebar(false); $("brief").classList.remove("up"); $("finish").disabled = false; $("reset").disabled = current.kind === "hold"; $("boxbtn").disabled = false;
   $("status").textContent = current.kind === "hold" ? "Follow the timer." : "Keep going."; $("status").className = "status";
   loop();
 }
@@ -1330,6 +1360,7 @@ async function finish(abandon = false) {
   const slot = storeRecord(rec) - 1;   // stored now, before the questions, so walking away from the laptop loses nothing
 
   const done = $("done");
+  setExerciseSidebar(false);
   done.classList.add("show");
   done.innerHTML = `<div class="inner"><p role="status" class="recording-stopped">${esc(confirmation.text)}${confirmationSpoken ? "" : '<small style="display:block">Marin audio is unavailable. The recording has stopped.</small>'}</p><div id="simpleExerciseSummary"></div><div id="exerciseAnalysis"></div><div class="q" id="q"></div></div>`;
   const updateExerciseSummary = () => {
