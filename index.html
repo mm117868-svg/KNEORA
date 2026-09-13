@@ -379,7 +379,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
 .patient-header-nav{display:flex;align-items:center;gap:24px}
 .patient-header-nav a{font-size:12px;font-weight:700;text-decoration:none;padding:11px 14px;border:1px solid var(--ink);color:var(--ink)}
 .patient-header-nav a:hover{background:var(--ink);color:var(--bone)}
-.progress-view #home>.hero,.progress-view #home>.details,.progress-view #home>.phasepick,.progress-view #weeks,.progress-view #home>.safety,.progress-view #home>.foot{display:none}
+.progress-view #home>.camera-options,.progress-view #home>.hero,.progress-view #home>.details,.progress-view #home>.phasepick,.progress-view #weeks,.progress-view #home>.safety,.progress-view #home>.foot{display:none}
 @media(max-width:759px){.patient-header-nav{gap:8px}.patient-header-nav .product-name{display:none}.patient-header-nav a{font-size:10px;padding:10px}.progress-view .patient-progress{margin-bottom:0}}
 
 /* A compact activity calendar on home; detailed recovery tools live in the tracker. */
@@ -406,6 +406,25 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
 .progress .mini-calendar-note{font-size:10px;line-height:1.5;margin-top:8px}
 .mini-tracker-link{display:inline-block;margin-top:7px;padding:7px 0;font-size:12px;font-weight:700;text-decoration:none}
 @media(max-width:759px){body:not(.progress-view) #progress{max-width:290px;margin:0 0 26px}.mini-calendar{padding:18px}.mini-calendar button{min-height:34px}}
+
+.camera-options{grid-column:1/-1;margin-top:18px}
+.settings-intro{font-size:13px;color:var(--muted);margin:0 0 20px;line-height:1.6}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.setting-box{margin:0;padding:20px;border:1px solid var(--line);min-width:0}
+.setting-box legend{font-size:14px;font-weight:700;padding:0 7px}
+.setting-box>.f+.f{margin-top:16px}
+.setting-box .small-note{max-width:none;font-size:12px;line-height:1.6;margin-top:12px}
+.setting-check{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.5;cursor:pointer}
+.setting-check+.setting-check{margin-top:18px}
+.setting-check input{accent-color:var(--brand);width:18px;height:18px;flex:0 0 18px;margin:2px 0 0}
+.setting-check small{display:block;color:var(--muted);font-size:12px;font-weight:400;line-height:1.6;margin-top:4px}
+.required-label{font-size:10px;color:var(--brand);margin-left:6px}
+.session-settings{grid-column:1/-1}
+.session-settings>.small-note{margin:0 0 18px}
+.session-choice{padding:16px;background:var(--paper)}
+.voice-words{margin-top:16px}
+.countdown-choice{margin-top:20px}
+@media(max-width:759px){.settings-grid{grid-template-columns:1fr}.setting-box{padding:16px}.camera-options{margin-top:18px}.session-settings{grid-column:auto}}
 </style>
 </head>
 <body>
@@ -430,42 +449,51 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
 
   <section class="progress patient-progress" id="progress" aria-label="Your recovery progress"></section>
 
-  <section class="card details">
-    <h2>Your details</h2>
+  <section class="card details" aria-labelledby="detailsTitle">
+    <h2 id="detailsTitle">Your details</h2>
+    <p class="settings-intro">Personalise your recovery record. Your details and preferences are saved on this device.</p>
     <div class="grid2">
-      <label class="f">Patient id<input id="patient" value="P001" autocomplete="off"></label>
+      <label class="f">Patient ID or name<input id="patient" value="P001" autocomplete="off"></label>
       <label class="f">Operation date<input id="opdate" type="date"></label>
     </div>
     <div class="dayline" id="dayline"></div>
-    <details class="more">
-      <summary>Camera and options</summary>
-      <div class="grid2" style="margin-top:8px">
-        <label class="f">Operated leg<select id="side"><option value="auto">auto (more visible)</option><option value="left">left</option><option value="right">right</option></select></label>
-        <label class="f">Camera<select id="camsel"><option value="">default camera</option></select></label>
-      </div>
-      <div class="toggles">
-        <label><input type="checkbox" id="showangle" checked> Show my knee angle</label>
-        <label><input type="checkbox" id="skeleton" checked> Show the skeleton</label>
-        <label><input type="checkbox" id="savevideo" checked> Keep the video</label>
-        <label><input type="checkbox" id="savefiles" checked> Save session files to Downloads</label>
-      </div>
-      <div class="toggles" style="margin-top:12px">
-        <label><input type="checkbox" id="handstart" checked> Start and finish by raising a hand above my head</label>
-        <label><input type="checkbox" id="voice"> Start and finish by voice</label>
-        <label><input type="checkbox" id="speak" checked> Speak the countdown out loud</label>
-      </div>
-      <div class="grid2" style="margin-top:8px">
-        <label class="f">Count repetitions by<select id="countby">
-          <option value="motion">movement in the box</option>
-          <option value="track">following the knee in the picture</option>
-          <option value="voice">saying each number out loud</option>
-        </select></label>
-        <label class="f">Code word to start<input id="codeword" value="start" autocomplete="off"></label>
-        <label class="f">Word to finish<input id="stopword" value="finish" autocomplete="off"></label>
-      </div>
-      <p class="small-note" style="margin-top:8px">The hand gesture is read from the pose model on this device. Voice control for start and finish uses the browser's own speech recognition, which may send the sound to Google or Apple while it listens, so it is off unless you turn it on.</p>
-      <p class="small-note" style="margin-top:8px">Three ways to count, all of them on this device. <b>Movement in the box</b> counts from how the changed pixels move. <b>Following the knee</b> lays points on the knee and follows them from frame to frame, counting one repetition for each full swing; it holds up better when the movement is slow or small. <b>Saying each number out loud</b> puts the count in the patient's hands: say "one, two, three" and a small word spotter running on this device hears it, with the sound staying here. Whichever is chosen, movement in the box is still counted underneath as a cross-check, and both numbers go to the physiotherapist.</p>
-    </details>
+  </section>
+
+  <section class="card camera-options" aria-labelledby="optionsTitle">
+    <h2 id="optionsTitle">Camera and options</h2>
+    <p class="settings-intro">Set up your camera and choose how you want each session to work.</p>
+    <div class="settings-grid">
+      <fieldset class="setting-box"><legend>Camera setup</legend>
+        <label class="f">Operated leg <span class="required-label">Required</span><select id="side" required><option value="">Select your operated leg</option><option value="left">Left leg</option><option value="right">Right leg</option></select></label>
+        <label class="f">Camera<select id="camsel"><option value="">Default camera</option></select></label>
+        <p class="small-note">Choose the leg that was operated on before opening an exercise.</p>
+      </fieldset>
+      <fieldset class="setting-box"><legend>Live camera display</legend>
+        <label class="setting-check"><input type="checkbox" id="showangle" checked><span>Show my live knee angle<small>Display the MediaPipe knee angle while positioning, during the countdown and throughout the session.</small></span></label>
+        <label class="setting-check"><input type="checkbox" id="skeleton" checked><span>Show the MediaPipe skeleton<small>Overlay the detected body points on the live camera picture.</small></span></label>
+        <p class="small-note">These displays need the pose model and a clear view of your leg. An unavailable angle is shown as a dash.</p>
+      </fieldset>
+      <fieldset class="setting-box"><legend>Video and session files</legend>
+        <label class="setting-check"><input type="checkbox" id="savevideo" checked><span>Keep the video<small>Record video during the exercise session.</small></span></label>
+        <label class="setting-check"><input type="checkbox" id="savefiles" checked><span>Save session files to Downloads<small>Download the session files when you finish. Your browser controls where downloads are saved.</small></span></label>
+      </fieldset>
+      <fieldset class="setting-box"><legend>Repetition counting</legend>
+        <label class="f">Count repetitions by<select id="countby"><option value="motion">Movement in the box</option><option value="track">Following the knee in the picture</option><option value="voice">Saying each number out loud</option></select></label>
+        <p class="small-note" id="countDescription" aria-live="polite"></p>
+        <p class="small-note">Counting runs on this device. A separate movement count is kept as a cross-check.</p>
+      </fieldset>
+      <fieldset class="setting-box session-settings"><legend>Start and finish sessions</legend>
+        <p class="small-note">Get into position, then use a hands-free control below or the on-screen Start and Finish buttons. Recording starts after the countdown.</p>
+        <div class="grid2">
+          <div class="session-choice"><label class="setting-check"><input type="checkbox" id="handstart" checked><span>Raise a hand above my head<small>Hold for 2 seconds to start the countdown, or 3 seconds to finish. Lower your hand between commands.</small></span></label><p class="small-note">MediaPipe shows “Hand seen” and a progress bar when it detects your raised hand.</p></div>
+          <div class="session-choice"><label class="setting-check"><input type="checkbox" id="voice"><span>Use voice commands<small>Say your start word to begin the countdown, or your stop word to finish.</small></span></label>
+            <div class="grid2 voice-words"><label class="f">Code word to start<input id="codeword" value="start" autocomplete="off"></label><label class="f">Code word to stop<input id="stopword" value="stop" autocomplete="off"></label></div>
+            <p class="small-note">Voice commands use browser speech recognition, which may send audio to its speech service. Availability depends on your browser.</p>
+          </div>
+        </div>
+        <label class="setting-check countdown-choice"><input type="checkbox" id="speak" checked><span>Speak the countdown and hand-detection prompts</span></label>
+      </fieldset>
+    </div>
   </section>
 
   <section class="phasepick">
@@ -538,7 +566,7 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
 <dialog id="patientReview" class="patient-review" aria-labelledby="patientReviewTitle"><div class="patient-review-header"><span id="patientReviewTitle">Your exercise summary</span><button type="button" id="closePatientReview">Close</button></div><div id="patientReviewContent"></div></dialog>
 
 <script type="module">
-import { SOFTWARE, pickSide, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
+import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js";
 import { VoiceCount, voiceAvailable, VOICE_VERSION } from "./voicecount.js";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js";
@@ -626,6 +654,12 @@ const flags = { showangle: "kr_app_angle", skeleton: "kr_skeleton", savevideo: "
 for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); renderHome(); }); }
 for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => localStorage.setItem(flags[k], $(k).checked ? "1" : "0")); }
 
+if (!["left", "right"].includes($("side").value)) $("side").value = "";
+if ($("stopword").value === "finish") { $("stopword").value = "stop"; localStorage.setItem(prefs.stopword, "stop"); }
+const countDescriptions = { motion: "Counts repetitions from changes in pixels inside the movement box.", track: "Follows points inside the knee's movement box from frame to frame using optical flow.", voice: 'Counts the numbers you say aloud, such as “one, two, three”, using an on-device word spotter.' };
+function updateSettingHelp() { $("countDescription").textContent = countDescriptions[$("countby").value] || countDescriptions.motion; $("codeword").disabled = $("stopword").disabled = !$("voice").checked; }
+$("countby").addEventListener("change", updateSettingHelp); $("voice").addEventListener("change", updateSettingHelp); updateSettingHelp();
+
 /* ---------------- home: every exercise on one page, grouped by week ---------------- */
 let phase = 1;   // the week section the open exercise came from; written into the record
 function currentPhase() { const d = daysPostOp($("opdate").value, new Date()); return d === null || d < 0 ? null : phaseForDay(d); }
@@ -682,6 +716,7 @@ let jsfeatLib = null;
 
 async function openExercise(ex) {
   if (!isExerciseAvailable(ex)) return;
+  if (!["left", "right"].includes($("side").value)) { $("side").scrollIntoView({block:"center",behavior:"smooth"}); $("side").focus(); $("side").reportValidity(); return; }
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; handSince = null; handArmed = false; statusBefore = null;
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
   $("briefTitle").textContent = ex.title; $("briefMeta").textContent = `${PHASES[phase]} · ${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}`;
@@ -692,7 +727,7 @@ async function openExercise(ex) {
   $("angle").textContent = "—"; $("fill").style.width = "0"; $("angleTile").classList.remove("inzone");
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
   else { z.style.left = "0"; z.style.right = (100 - pct(ex.aim.deg)) + "%"; z.style.borderLeft = "none"; z.style.borderRight = "2px solid var(--green)"; $("angleSub").innerHTML = `straight is <b>0°</b>`; }
-  $("angleTile").style.display = $("showangle").checked && poseState !== "off" && poseState !== "failed" ? "block" : "none";
+  $("angleTile").style.display = $("showangle").checked ? "block" : "none";
   $("status").textContent = "Get into position, then press start."; $("status").className = "status";
   $("finish").disabled = true; $("reset").disabled = true; $("boxbtn").disabled = true; $("clock").textContent = "00:00";
   $("track").textContent = "camera starting"; $("track").className = "track off";
@@ -776,7 +811,7 @@ function showCounts() {
 }
 
 const codeWord = () => ($("codeword").value.trim() || "start").toLowerCase();
-const stopWord = () => ($("stopword").value.trim() || "finish").toLowerCase();
+const stopWord = () => ($("stopword").value.trim() || "stop").toLowerCase();
 /* what the brief sheet promises must be what can actually fire right now */
 function refreshHint() {
   if (!stream || running) return;
@@ -895,20 +930,31 @@ function cameraFailed(e) {
   $("veilMsg").textContent = "This exercise uses the camera to count repetitions and measure the knee. Allow camera access for this page in the browser, then try again. (" + e.message + ")";
   $("veilBtn").style.display = "inline-block"; $("veilBtn").onclick = () => { $("veil").classList.remove("hide"); $("veilBtn").style.display = "none"; $("spin").style.display = "block"; openCamera(); };
 }
-/* live picture behind the instructions so the patient can get into position; nothing is measured or recorded yet.
-   The pose model runs on every third frame here only to watch for a raised hand. */
-let previewId = 0;
-function preview() { cancelAnimationFrame(previewId); handSince = null; previewN = 0; previewStep(); }
+/* Live preview overlays are display only. Session measurements begin in startSession. */
+let previewId = 0, previewAll = null;
+function preview() { cancelAnimationFrame(previewId); handSince = null; previewN = 0; previewAll = null; previewStep(); }
 function previewStep() {
   if (running || !stream) return;
   previewId = requestAnimationFrame(previewStep);
   if (video.readyState < 2) return;
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   const now = performance.now();
-  if (countdownStart !== null) { if (tickCountdown(now)) startSession(); return; }
-  if (landmarker && $("handstart").checked && ++previewN % 3 === 0 && video.videoWidth > 0) {
+  if (landmarker && ($("handstart").checked || $("showangle").checked || $("skeleton").checked) && ++previewN % 3 === 0 && video.videoWidth > 0) {
     let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
-    const f = handHold(handRaised(res && res.landmarks && res.landmarks[0]), HAND_HOLD_START_S, now);
+    previewAll = res?.landmarks?.[0] || null;
+  }
+  const leg = previewAll ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.5) : null;
+  if ($("skeleton").checked && previewAll) drawSkeleton(ctx, previewAll, canvas.width, canvas.height, { line:"rgba(61,220,132,.85)", lineWidth:Math.max(2,canvas.width/400), radius:Math.max(3,canvas.width/220) });
+  if ($("showangle").checked) {
+    $("angleTile").style.display = "block";
+    const angle = leg ? kneeFlexionDeg(leg.hip, leg.knee, leg.ankle) : NaN;
+    $("angle").textContent = Number.isFinite(angle) ? angle.toFixed(0) : "–";
+    $("fill").style.width = Number.isFinite(angle) ? pct(angle)+"%" : "0";
+    if (leg) drawLeg(ctx,leg,{thigh:"#3ddc84",shank:"#3ddc84",label:false});
+  }
+  if (countdownStart !== null) { if (tickCountdown(now)) startSession(); return; }
+  if (landmarker && $("handstart").checked) {
+    const f = handHold(handRaised(previewAll), HAND_HOLD_START_S, now);
     $("handfill").style.width = (f * 100) + "%"; showHand(f, false);
     if (f >= 1) beginCountdown();
   }
