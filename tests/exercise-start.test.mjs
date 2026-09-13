@@ -19,7 +19,7 @@ function previewHarness() {
   const context = vm.createContext({$, stream: {}, running: false, performance: {now: () => now},
     appVoice: {play(){spoken++; return true;}, stop(){stopped++;}}, refreshHint(){},
     video: {readyState: 4, currentTime: 0, videoWidth: 1280}, canvas: {width: 1280, height: 720}, ctx: {drawImage(){}},
-    requestAnimationFrame(){return 1;}, cancelAnimationFrame(){},
+    requestAnimationFrame(){return 1;}, cancelAnimationFrame(){}, pickSide(){return null;},
     landmarker: {detectForVideo(){detects++; return {landmarks: landmarks ? [landmarks] : []};}},
     startSession(){starts++; context.running = true;}});
   vm.runInContext(source, context);
