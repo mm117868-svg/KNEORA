@@ -4,7 +4,7 @@ const number = value => typeof value === 'number' && Number.isFinite(value) && v
 export function recordedCount(record) {
   if (record.hold) return number(record.hold.cycles_completed);
   const source = record.count_source || 'monitoring';
-  return number((source === 'patient_voice' ? record.patient_count : source === 'knee_tracker' ? record.tracking : source === 'monitoring' ? record.monitoring : null)?.repetitions);
+  return number((source === 'patient_voice' ? record.patient_count : source === 'knee_tracker' ? record.tracking : source === 'monitoring' ? record.monitoring : source === 'pose_gated_optical' ? record.pose_validation : null)?.repetitions);
 }
 export function patientRecords(records, patient, operationDate) {
   return records.filter(r => r && r.patient_id === patient && (r.operation_date || '') === (operationDate || '') && Number.isFinite(Date.parse(r.started_at)))
@@ -12,13 +12,13 @@ export function patientRecords(records, patient, operationDate) {
 }
 export function comparableRecords(records, record, metric = 'bend') {
   return records.filter(r => r.exercise === record.exercise && r.patient_id === record.patient_id && (r.operation_date || '') === (record.operation_date || '') &&
-    (r.measurement?.side || '') === (record.measurement?.side || '') &&
-    (metric !== 'reps' || ((r.count_source || 'monitoring') === (record.count_source || 'monitoring') && !!r.hold === !!record.hold)));
+    (r.pose_validation?.side || r.measurement?.side || '') === (record.pose_validation?.side || record.measurement?.side || '') &&
+    (metric !== 'reps' || ((r.count_source || 'monitoring') === (record.count_source || 'monitoring') && (r.pose_validation?.version || '') === (record.pose_validation?.version || '') && (r.pose_validation?.raw_source || '') === (record.pose_validation?.raw_source || '') && !!r.hold === !!record.hold)));
 }
 const bend = r => number(r.measurement?.p95_flexion_deg);
 const date = r => new Date(r.started_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 const name = r => ({heel_slide:'Heel slides',straight_leg_raise:'Straight leg raise',seated_extension:'Seated knee extension',standing_flexion:'Standing knee bend',quad_set:'Quad sets',mini_squat:'Mini squat',sit_to_stand:'Sit to stand',squat:'Squat',single_leg_stance:'Single-leg balance'}[r.exercise] || String(r.exercise || 'Exercise').replace(/_/g,' '));
-const sourceLabel = r => ({patient_voice:'Your spoken count',knee_tracker:'Camera knee tracker',monitoring:'Camera movement counter',timer:'Timed holds'}[r.count_source || 'monitoring'] || 'Count unavailable');
+const sourceLabel = r => ({pose_gated_optical:'Camera count confirmed in the selected leg',patient_voice:'Your spoken count',knee_tracker:'Camera knee tracker',monitoring:'Camera movement counter',timer:'Timed holds'}[r.count_source || 'monitoring'] || 'Count unavailable');
 const duration = r => {const s=number(r.duration_s);return s === null ? 'Not recorded' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;};
 const display = n => n === null ? 'Not recorded' : Math.round(n).toLocaleString('en-GB');
 function tile(label,value,note='') { return `<div class="patient-metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></div>`; }

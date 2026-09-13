@@ -5,7 +5,8 @@
    Monitoring: frame differencing in a box -> hysteresis counter -> repetitions, tempo, active time.
      Receives pixels and the clock only; never sees landmarks, joints or angles.
 
-   The two results meet only in the session record, side by side. Nothing here joins them. */
+   These primitives remain separate. The patient app's pose-gate.js now checks optical
+   candidates against selected-leg movement before updating its accepted count. */
 
 export const SOFTWARE = "browser-0.2.0";
 
@@ -15,8 +16,9 @@ const LEFT = { hip: 23, knee: 25, ankle: 27 }, RIGHT = { hip: 24, knee: 26, ankl
 export function pickSide(lms, w, h, side, minVis) {
   const leg = idx => {
     const pts = ["hip", "knee", "ankle"].map(k => lms[idx[k]]);
-    const vis = Math.min(...pts.map(p => p.visibility ?? 0));
-    return { pts: pts.map(p => [p.x * w, p.y * h]), vis };            // x, y only; z is never read
+    const vis = pts.every(p => p && Number.isFinite(p.x) && Number.isFinite(p.y) && p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1)
+      ? Math.min(...pts.map(p => p.visibility ?? 0)) : 0;
+    return { pts: pts.map(p => [p?.x * w, p?.y * h]), vis };            // x, y only; z is never read
   };
   let chosen, s;
   if (side === "left") { chosen = leg(LEFT); s = "left"; }
@@ -143,13 +145,21 @@ export function angleChartSvg(rows, w = 900, h = 260, dark = true) {
 
 export const POSE_CONNECTIONS = [[0,1],[1,2],[2,3],[3,7],[0,4],[4,5],[5,6],[6,8],[9,10],[11,12],[11,13],[13,15],[15,17],[15,19],[15,21],[17,19],[12,14],[14,16],[16,18],[16,20],[16,22],[18,20],[11,23],[12,24],[23,24],[23,25],[24,26],[25,27],[26,28],[27,29],[28,31],[29,31],[27,31],[30,32],[28,30],[28,32]];
 
-/* draws every landmark MediaPipe found; a display of the measurement, nothing more */
+export function visiblePosePoint(p, minVisibility = .4) {
+  return !!p && Number.isFinite(p.x) && Number.isFinite(p.y) && p.x >= 0 && p.x <= 1 &&
+    p.y >= 0 && p.y <= 1 && Number.isFinite(p.visibility) && p.visibility >= minVisibility &&
+    (p.presence === undefined || (Number.isFinite(p.presence) && p.presence >= .5));
+}
+
+/* Draw each visible segment independently. The face, torso and opposite limb are
+   not prerequisites for a lower-leg outline. Missing joints are never invented. */
 export function drawSkeleton(ctx, all, W, H, opts = {}) {
+  if (!Array.isArray(all)) return;
   const line = opts.line || "rgba(80,220,120,.9)", dot = opts.dot || "rgba(255,255,255,.95)", lw = opts.lineWidth || 3, r = opts.radius || 4;
   ctx.lineWidth = lw; ctx.strokeStyle = line;
-  for (const [a, b] of POSE_CONNECTIONS) { const p = all[a], q = all[b]; if (!p || !q || (p.visibility ?? 1) < 0.4 || (q.visibility ?? 1) < 0.4) continue;
+  for (const [a, b] of POSE_CONNECTIONS) { const p = all[a], q = all[b]; if (!visiblePosePoint(p) || !visiblePosePoint(q)) continue;
     ctx.beginPath(); ctx.moveTo(p.x * W, p.y * H); ctx.lineTo(q.x * W, q.y * H); ctx.stroke(); }
-  for (const p of all) { if ((p.visibility ?? 1) < 0.4) continue; ctx.fillStyle = dot; ctx.beginPath(); ctx.arc(p.x * W, p.y * H, r, 0, 7); ctx.fill(); }
+  for (const p of all) { if (!visiblePosePoint(p)) continue; ctx.fillStyle = dot; ctx.beginPath(); ctx.arc(p.x * W, p.y * H, r, 0, 7); ctx.fill(); }
 }
 
 /* the hip, knee and ankle of the measured leg with the live angle; bench view */

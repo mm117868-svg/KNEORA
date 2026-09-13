@@ -51,7 +51,7 @@ The [interactive model viewer](model.html) supports playback and scrubbing. The 
 
 The root `index.html` imports `guide-player.js` and presents the optional guide after the operated leg has been selected and before opening the camera. Existing exercise availability, counting, targets and recording code are preserved.
 
-This branch is a local preview and has not been published. If merging into a generated site, apply the same small integration to the template that generates the root page, and copy this `exercise-guides/` directory as static assets. `source/app-integration.patch` records the root-page change. The underlying source generator is maintained outside this repository.
+The guides are served alongside the patient app in GitHub Pages. If rebuilding from a generated site, preserve the integration in the template that generates the root page and copy this `exercise-guides/` directory as static assets. `source/app-integration.patch` records the initial root-page change. The underlying source generator is maintained outside this repository.
 
 ## Rebuilding
 

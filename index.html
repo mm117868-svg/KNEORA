@@ -538,7 +538,7 @@ html{scrollbar-gutter:stable;scroll-padding-top:116px}
       </fieldset>
       <fieldset class="setting-box"><legend>Live camera display</legend>
         <label class="setting-check"><input type="checkbox" id="showangle" checked><span>Show my live knee angle<small>Display the MediaPipe knee angle while positioning, during the countdown and throughout the session.</small></span></label>
-        <label class="setting-check"><input type="checkbox" id="skeleton" checked><span>Show the MediaPipe skeleton<small>Overlay the detected body points on the live camera picture.</small></span></label>
+        <p class="small-note">The skeleton outline is always shown for visible joints, including when only the lower limb is in view.</p>
         <p class="small-note">These displays need the pose model and a clear view of your leg. An unavailable angle is shown as a dash.</p>
       </fieldset>
       <fieldset class="setting-box"><legend>Video and session files</legend>
@@ -546,7 +546,7 @@ html{scrollbar-gutter:stable;scroll-padding-top:116px}
         <label class="setting-check"><input type="checkbox" id="savefiles" checked><span>Save session files to Downloads<small>Download the session files when you finish. Your browser controls where downloads are saved.</small></span></label>
       </fieldset>
       <fieldset class="setting-box"><legend>Repetition counting</legend>
-        <label class="f">Count repetitions by<select id="countby"><option value="motion">Movement in the box</option><option value="track">Following the knee in the picture</option><option value="voice">Saying each number out loud</option></select></label>
+        <label class="f">Count repetitions by<select id="countby"><option value="motion">Camera movement with leg confirmation</option><option value="track">Optical tracking with leg confirmation</option><option value="voice">Saying each number out loud</option></select></label>
         <p class="small-note" id="countDescription" aria-live="polite"></p>
         <p class="small-note">Counting runs on this device. A separate movement count is kept as a cross-check.</p>
       </fieldset>
@@ -645,11 +645,12 @@ import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js";
 import { VoiceCount, voiceAvailable, VOICE_VERSION } from "./voicecount.js";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js";
-import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary, renderPatientOverview } from "./patient-progress.js?v=settings-page-1";
+import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary, renderPatientOverview } from "./patient-progress.js?v=pose-gate-1";
 import { showExerciseGuide } from "./exercise-guides/guide-player.js";
+import { LegMotionGate } from "./pose-gate.js";
 
 /* ---------------- Exercise library ----------------
-   kind 'reps': repetitions come from the pixel-motion counter in kneerec.js.
+   kind 'reps': optical events need selected-leg confirmation from pose-gate.js.
    kind 'hold': a plain timer cycles squeeze/relax; the count is timer cycles. The timer is not driven by the video.
    aim: what the live angle display marks. bend = flexion at or above deg; straight = flexion at or below deg.
    target: flexion in degrees for the whole-session "time above target" statistic in the record.
@@ -713,7 +714,7 @@ const ICONS = {
 const PHASES = { 1: "Week 0–1", 2: "Week 1–4", 3: "Week 4–8", 4: "Week 8+" };
 const PHASE_DAYS = { 1: "days 0 to 6 after the operation", 2: "days 7 to 27", 3: "days 28 to 55", 4: "day 56 onwards" };
 const phaseForDay = d => d === null ? null : d < 7 ? 1 : d < 28 ? 2 : d < 56 ? 3 : 4;
-const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. Shorts or bare legs help. The counting box sets itself after six seconds of movement.";
+const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. Shorts or bare legs help. Hold briefly at the starting position while the counting box is placed around your selected leg. Include the complete leg movement in the picture.";
 
 const $ = id => document.getElementById(id);
 $("copyrightYear").textContent = new Date().getFullYear();
@@ -731,13 +732,13 @@ const NOPOSE = SETTINGS_VIEW || PROGRESS_VIEW || new URLSearchParams(location.se
 
 /* ---------------- settings ---------------- */
 const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", codeword: "kr_app_codeword", stopword: "kr_app_stopword", countby: "kr_app_countby" };
-const flags = { showangle: "kr_app_angle", skeleton: "kr_skeleton", savevideo: "kr_app_video", savefiles: "kr_app_files", handstart: "kr_app_handstart", voice: "kr_app_voice", speak: "kr_app_speak" };
+const flags = { showangle: "kr_app_angle", savevideo: "kr_app_video", savefiles: "kr_app_files", handstart: "kr_app_handstart", voice: "kr_app_voice", speak: "kr_app_speak" };
 for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); renderHome(); }); }
 for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => {localStorage.setItem(flags[k], $(k).checked ? "1" : "0"); updateSettingsSummary();}); }
 
 if (!["left", "right"].includes($("side").value)) $("side").value = "";
 if ($("stopword").value === "finish") { $("stopword").value = "stop"; localStorage.setItem(prefs.stopword, "stop"); }
-const countDescriptions = { motion: "Counts repetitions from changes in pixels inside the movement box.", track: "Follows points inside the knee's movement box from frame to frame using optical flow.", voice: 'Counts the numbers you say aloud, such as “one, two, three”, using an on-device word spotter.' };
+const countDescriptions = { motion: "Finds movement in the box and counts it only when the selected leg completes a matching movement. A clear view of the leg is needed.", track: "Follows image points using optical flow, then checks that the selected leg completed the movement.", voice: 'Counts the numbers you say aloud, such as “one, two, three”, using an on-device word spotter.' };
 function updateSettingHelp() { $("countDescription").textContent = countDescriptions[$("countby").value] || countDescriptions.motion; $("codeword").disabled = $("stopword").disabled = !$("voice").checked; }
 $("countby").addEventListener("change", updateSettingHelp); $("voice").addEventListener("change", updateSettingHelp); updateSettingHelp();
 
@@ -794,9 +795,9 @@ $("closePatientReview").onclick = () => $("patientReview").close();
 
 /* ---------------- pose model: load once, in the background ---------------- */
 let landmarker = null, poseState = NOPOSE ? "off" : "loading", poseInfo = "";
-if (NOPOSE) $("engine").textContent = "Pose model off (?nopose): repetitions only.";
+if (NOPOSE) $("engine").textContent = "Pose model off: camera repetitions cannot be confirmed. Spoken counts remain available.";
 else loadPose({ log: s => console.log(s) }).then(r => { landmarker = r.landmarker; poseState = "ready"; poseInfo = `${r.library}, ${r.model}`; $("engine").textContent = `Pose model ready (${poseInfo}).`; refreshHint(); })
-  .catch(e => { poseState = "failed"; $("engine").textContent = "Pose model failed to load; sessions record repetitions only."; console.warn("MediaPipe: " + e.message); refreshHint(); });
+  .catch(e => { poseState = "failed"; $("engine").textContent = "Pose model failed to load; camera repetitions cannot be confirmed. Spoken counts remain available."; console.warn("MediaPipe: " + e.message); refreshHint(); });
 $("voice").addEventListener("change", renderHome);
 
 async function listCams() {
@@ -812,11 +813,15 @@ listCams();
 const video = $("video"), canvas = $("canvas"), ctx = canvas.getContext("2d");
 let current = null, stream = null, running = false, recorder = null, chunks = [], openGen = 0;
 let trace, monitor, t0, frameNo, lastVideoTime = -1, rafId = 0, startedAt, dragging = null, boxMode = false;
+let lastPoseAt = -Infinity;
 let poseMs = 0, poseSkip = 1, lastLm = null, lastAngle = NaN, lastAll = null, peak = NaN, low = NaN, prescribedDone = false;
 let hold = null;   // { phase: 'hold'|'rest', until, cycles }
 let voice = null;    // the patient-count layer: what the patient counted out loud. Never sees the picture.
 let tracker = null;  // the knee tracker: points followed in the box. Pixels and the clock only.
 let jsfeatLib = null;
+let gateBoxReference = null;
+let manualCountingBox = false;
+let legGate = null; // Accepts optical candidates only after the selected leg completes its movement.
 
 async function chooseExercise(ex) {
   if (!isExerciseAvailable(ex) || !["left", "right"].includes($("side").value)) return openExercise(ex);
@@ -831,7 +836,7 @@ async function openExercise(ex) {
   $("briefTitle").textContent = ex.title; $("briefMeta").textContent = `${PHASES[phase]} · ${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}`;
   $("briefSteps").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join(""); $("briefSetup").textContent = SETUP;
   $("instr").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
-  $("repsLab").textContent = ex.kind === "hold" ? "Holds" : "Repetitions"; $("reps").textContent = "0"; $("repsOf").textContent = ` / ${ex.count}`; $("repsSub").innerHTML = ex.kind === "hold" ? `${ex.hold} s hold, ${ex.rest} s rest` : voiceWanted() ? "say each number out loud" : trackWanted() ? "following your knee in the picture" : "counted from movement in the box";
+  $("repsLab").textContent = ex.kind === "hold" ? "Holds" : "Repetitions"; $("reps").textContent = "0"; $("repsOf").textContent = ` / ${ex.count}`; $("repsSub").innerHTML = ex.kind === "hold" ? `${ex.hold} s hold, ${ex.rest} s rest` : voiceWanted() ? "say each number out loud" : "movements confirmed in your selected leg";
   $("holdTile").style.display = ex.kind === "hold" ? "block" : "none"; $("holdCue").textContent = "Get ready"; $("holdCount").textContent = ""; $("holdSub").textContent = "";
   $("angle").textContent = "—"; $("fill").style.width = "0"; $("angleTile").classList.remove("inzone");
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
@@ -916,7 +921,7 @@ function stopVoiceCount() { if (voice) voice.stop(); }
 function showCounts() {
   if (!monitor) return;
   if (voiceCounting()) $("repsSub").textContent = `your count \u00b7 movement counted ${monitor.counter.reps}`;
-  else if (trackCounting()) $("repsSub").textContent = `following your knee \u00b7 movement counted ${monitor.counter.reps}`;
+  else $("repsSub").textContent = "movements confirmed in your selected leg";
 }
 
 const codeWord = () => ($("codeword").value.trim() || "start").toLowerCase();
@@ -1040,20 +1045,20 @@ function cameraFailed(e) {
   $("veilBtn").style.display = "inline-block"; $("veilBtn").onclick = () => { $("veil").classList.remove("hide"); $("veilBtn").style.display = "none"; $("spin").style.display = "block"; openCamera(); };
 }
 /* Live preview overlays are display only. Session measurements begin in startSession. */
-let previewId = 0, previewAll = null;
-function preview() { cancelAnimationFrame(previewId); handSince = null; previewN = 0; previewAll = null; previewStep(); }
+let previewId = 0, previewAll = null, previewPoseAt = -Infinity;
+function preview() { cancelAnimationFrame(previewId); handSince = null; previewN = 0; previewAll = null; previewPoseAt = -Infinity; previewStep(); }
 function previewStep() {
   if (running || !stream) return;
   previewId = requestAnimationFrame(previewStep);
   if (video.readyState < 2) return;
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   const now = performance.now();
-  if (landmarker && ($("handstart").checked || $("showangle").checked || $("skeleton").checked) && ++previewN % 3 === 0 && video.videoWidth > 0) {
+  if (landmarker && ++previewN % 3 === 0 && video.videoWidth > 0) {
     let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
-    previewAll = res?.landmarks?.[0] || null;
+    previewAll = res?.landmarks?.[0] || null; previewPoseAt = now;
   }
-  const leg = previewAll ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.5) : null;
-  if ($("skeleton").checked && previewAll) drawSkeleton(ctx, previewAll, canvas.width, canvas.height, { line:"rgba(61,220,132,.85)", lineWidth:Math.max(2,canvas.width/400), radius:Math.max(3,canvas.width/220) });
+  const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.5) : null;
+  if (previewAll && now-previewPoseAt <= 450) drawSkeleton(ctx, previewAll, canvas.width, canvas.height, { line:"rgba(61,220,132,.85)", lineWidth:Math.max(2,canvas.width/400), radius:Math.max(3,canvas.width/220) });
   if ($("showangle").checked) {
     $("angleTile").style.display = "block";
     const angle = leg ? kneeFlexionDeg(leg.hip, leg.knee, leg.ankle) : NaN;
@@ -1084,6 +1089,8 @@ function startSession() {
   if (voice) voice.reset();
   tracker = null;
   if (trackWanted() && jsfeatLib) { tracker = new KneeTracker(canvas.width, canvas.height, fps); tracker.attach(jsfeatLib); }
+  legGate = new LegMotionGate(current.id, $("side").value, tracker ? "knee_tracker" : "monitoring");
+  gateBoxReference = null; manualCountingBox = false; monitor.locked = true;
   running = true; $("brief").classList.remove("up"); $("finish").disabled = false; $("reset").disabled = current.kind === "hold"; $("boxbtn").disabled = false;
   $("status").textContent = current.kind === "hold" ? "Follow the timer." : "Keep going."; $("status").className = "status";
   loop();
@@ -1107,7 +1114,9 @@ function step() {
     const t1 = performance.now();
     let res = null;
     try { res = landmarker.detectForVideo(video, Math.round(t1)); } catch (e) { console.warn("pose: " + e.message); }
+    legGate?.observe(res?.landmarks?.[0] || null, t, canvas.width, canvas.height);
     poseMs += 0.2 * ((performance.now() - t1) - poseMs); poseSkip = Math.max(1, Math.min(60, Math.ceil(poseMs / 25)));
+    lastPoseAt = now;
     lastAll = (res && res.landmarks && res.landmarks[0]) ? res.landmarks[0] : null;
     if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.5);
     angle = trace.add(frameNo, t, lm); lastLm = lm; lastAngle = angle;
@@ -1115,12 +1124,19 @@ function step() {
   peak = trace.quantile(0.95);   // "best today" is the 95th percentile of the trusted frames so far, not the single highest frame
 
   // monitoring layer: frame -> repetitions. Gets the frame and the clock only.
-  monitor.update(video, frameNo, t);
-  // the knee tracker, when it is the chosen counter. Also pixels and the clock only, and the same box.
-  if (tracker) tracker.update(video, frameNo, t, monitor.box);
+  if (!manualCountingBox && legGate?.reference && legGate.reference !== gateBoxReference) {
+    monitor.box = legGate.countingBox(canvas.width, canvas.height);
+    monitor.pc = [NaN, NaN];
+    if (tracker) tracker.n = 0;
+    gateBoxReference = legGate.reference;
+  }
+  const flowCandidate = monitor.update(video, frameNo, t);
+  const trackCandidate = tracker ? tracker.update(video, frameNo, t, monitor.box) : 0;
+  legGate?.advance(t);
+  if (tracker ? trackCandidate : flowCandidate) legGate?.candidate(t);
 
   // screen
-  const count = current.kind === "hold" ? hold.cycles : voiceCounting() ? voice.count : trackCounting() ? tracker.counter.reps : monitor.counter.reps;
+  const count = current.kind === "hold" ? hold.cycles : voiceCounting() ? voice.count : legGate?.reps ?? 0;
   if (count >= current.count && !prescribedDone) { prescribedDone = true; $("status").textContent = `That's your ${current.count}. Finish when you're ready, or carry on.`; $("status").className = "status ok"; }
 
   // hands-free finish: a hand held high above the head for three seconds. It arms only after the hand that
@@ -1136,8 +1152,11 @@ function step() {
   }
   if (current.kind !== "hold") { $("reps").textContent = count; if ((voiceCounting() || trackCounting()) && frameNo % 15 === 0) showCounts(); }
   const m = Math.floor(t / 60), s = Math.floor(t % 60); $("clock").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  if (landmarker) { $("track").textContent = lm ? "leg in view" : "move so your whole leg is in the picture"; $("track").className = "track " + (lm ? "ok" : ""); }
-  else { $("track").textContent = poseState === "loading" ? "movement model loading" : "counting movement only"; $("track").className = "track " + (monitor.moving ? "ok" : ""); }
+  if (current.kind !== "hold" && !voiceCounting()) {
+    $("track").textContent = legGate?.message() || "Waiting for a clear view of your exercise leg.";
+    $("track").className = "track " + (legGate?.quality && legGate?.reference ? "ok" : "");
+    $("repsSub").textContent = "movements confirmed in your selected leg";
+  } else { $("track").textContent = lm ? "leg in view" : "keep the exercise leg in view"; }
   if ($("angleTile").style.display !== "none") {
     $("angle").textContent = Number.isNaN(angle) ? "—" : angle.toFixed(0);
     $("fill").style.width = Number.isNaN(angle) ? "0" : pct(angle) + "%";
@@ -1146,8 +1165,8 @@ function step() {
     if (!Number.isNaN(peak)) $("angleSub").innerHTML = (current.aim.kind === "bend" ? `bend towards <b>${current.aim.deg}°</b>` : `straight is <b>0°</b>`) + ` · best today <b>${peak.toFixed(0)}°</b>`;
   }
 
-  if ($("skeleton").checked && lastAll) drawSkeleton(ctx, lastAll, canvas.width, canvas.height, { line: "rgba(61,220,132,.85)", lineWidth: Math.max(2, canvas.width / 400), radius: Math.max(3, canvas.width / 220) });
-  if ($("showangle").checked && trace.lastLm) drawLeg(ctx, trace.lastLm, { thigh: "#3ddc84", shank: "#3ddc84", radius: Math.max(5, canvas.width / 120), lineWidth: Math.max(4, canvas.width / 200), label: false });
+  if (lastAll && now-lastPoseAt <= 450) drawSkeleton(ctx, lastAll, canvas.width, canvas.height, { line: "rgba(61,220,132,.85)", lineWidth: Math.max(2, canvas.width / 400), radius: Math.max(3, canvas.width / 220) });
+  if ($("showangle").checked && lm && now-lastPoseAt <= 450 && trace.lastLm) drawLeg(ctx, trace.lastLm, { thigh: "#3ddc84", shank: "#3ddc84", radius: Math.max(5, canvas.width / 120), lineWidth: Math.max(4, canvas.width / 200), label: false });
   const [bx, by, bw, bh] = monitor.box; ctx.strokeStyle = "rgba(255,255,255,.3)"; ctx.lineWidth = 2; ctx.strokeRect(bx, by, bw, bh);
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
 }
@@ -1178,14 +1197,15 @@ async function finish(abandon = false) {
   const mon = monitor.summary(duration);
   const vc = voiceWanted() && voice && voice.recognizer ? Object.assign(voice.summary(), { version: VOICE_VERSION }) : null;
   const tr = trackWanted() && tracker ? tracker.summary(duration) : null;
-  const source = current.kind === "hold" ? "timer" : vc ? "patient_voice" : tr ? "knee_tracker" : "monitoring";
-  const count = current.kind === "hold" ? hold.cycles : vc ? vc.repetitions : tr ? tr.repetitions : mon.repetitions;
+  const pv = current.kind === "hold" ? null : legGate?.finish(duration);
+  const source = current.kind === "hold" ? "timer" : vc ? "patient_voice" : "pose_gated_optical";
+  const count = current.kind === "hold" ? hold.cycles : vc ? vc.repetitions : pv?.repetitions ?? 0;
   mon.early_stop = count < current.count;
   const op = $("opdate").value || null;
   const rec = { schema_version: 1, patient_id: $("patient").value, operation_date: op, days_post_op: daysPostOp(op, startedAt),
     exercise: current.id, prescribed_reps: current.count, prescribed_minutes: null, started_at: localIso(startedAt), duration_s: +duration.toFixed(1),
     fps: +(frameNo / Math.max(1, duration)).toFixed(1), video_file: videoBlob ? (videoBlob.type.includes("mp4") ? "video.mp4" : "video.webm") : "",
-    measurement: summarise(trace, duration, target), monitoring: mon, patient_count: vc, tracking: tr, count_source: source, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
+    measurement: summarise(trace, duration, target), monitoring: mon, patient_count: vc, tracking: tr, pose_validation: pv, count_source: source, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
     software_version: SOFTWARE, app: { page: "app.html", phase, aim: current.aim } };
   if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles };
   rec.measurement.trace_preview = tracePreview(trace.rows);
@@ -1234,15 +1254,15 @@ function closeExercise() {
 $("boxbtn").onclick = () => { boxMode = true; $("status").textContent = "Drag a box round the leg on the picture."; };
 canvas.addEventListener("pointerdown", e => { if (!running || !boxMode) return; const p = pos(e); dragging = [p[0], p[1], 0, 0]; });
 canvas.addEventListener("pointermove", e => { if (!dragging) return; const p = pos(e); dragging[2] = p[0] - dragging[0]; dragging[3] = p[1] - dragging[1]; });
-canvas.addEventListener("pointerup", () => { if (!dragging) return; let [x, y, w, h] = dragging; if (w < 0) { x += w; w = -w; } if (h < 0) { y += h; h = -h; } if (w > 20 && h > 20) { monitor.setBox([x, y, w, h]); $("status").textContent = "Counting box set. The count starts again from 0."; } dragging = null; boxMode = false; });
+canvas.addEventListener("pointerup", () => { if (!dragging) return; let [x, y, w, h] = dragging; if (w < 0) { x += w; w = -w; } if (h < 0) { y += h; h = -h; } if (w > 20 && h > 20) { monitor.setBox([x, y, w, h]); manualCountingBox = true; if (tracker) tracker.reset(); legGate?.reset(); prescribedDone = false; $("reps").textContent = "0"; $("status").textContent = "Counting box set. The count starts again from 0."; } dragging = null; boxMode = false; });
 function pos(e) { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) * canvas.width / r.width, (e.clientY - r.top) * canvas.height / r.height]; }
 
 /* ?debug exposes the live objects for bench checks; nothing in the app reads this */
-if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor() { return monitor; }, get trace() { return trace; }, get frameNo() { return frameNo; }, get current() { return current; }, get running() { return running; }, get poseMs() { return poseMs; }, get poseSkip() { return poseSkip; }, get poseInfo() { return poseInfo; }, get countingDown() { return countdownStart !== null; }, video, step, previewStep, setPose: fn => { landmarker = { detectForVideo: fn }; } };
+if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor() { return monitor; }, get legGate() { return legGate; }, get trace() { return trace; }, get frameNo() { return frameNo; }, get current() { return current; }, get running() { return running; }, get poseMs() { return poseMs; }, get poseSkip() { return poseSkip; }, get poseInfo() { return poseInfo; }, get countingDown() { return countdownStart !== null; }, video, step, previewStep, setPose: fn => { landmarker = { detectForVideo: fn }; } };
 
 $("back").onclick = closeExercise;
 $("finish").onclick = () => finish(false);
-$("reset").onclick = () => { if (monitor) { monitor.reset(); if (voice) voice.reset(); if (tracker) tracker.reset(); $("reps").textContent = "0"; prescribedDone = false; $("status").textContent = voiceCounting() ? "Count reset. Start again from one." : "Count reset."; $("status").className = "status"; } };
+$("reset").onclick = () => { if (monitor) { monitor.reset(); if (voice) voice.reset(); if (tracker) tracker.reset(); legGate?.reset(); $("reps").textContent = "0"; prescribedDone = false; $("status").textContent = voiceCounting() ? "Count reset. Start again from one." : "Count reset."; $("status").className = "status"; } };
 document.addEventListener("keydown", e => {
   if (!$("ex").classList.contains("open") || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
   if ($("done").classList.contains("show")) return;   // the finish screen is answered with its own buttons; a stray key must not lose the record

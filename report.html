@@ -59,21 +59,21 @@ function render() {
   h += `<h2>Sessions, last six weeks</h2>${calendar(rs, today)}`;
   h += `<h2>Recovery curve</h2>${curve(rs)}`;
   h += `<h2>Sessions</h2><div style="overflow-x:auto"><table><thead><tr><th>started</th><th>day</th><th>exercise</th><th>reps</th><th>tempo</th><th>active</th><th>peak flex</th><th>extension</th><th>above target</th><th>pain</th><th>difficulty</th></tr></thead><tbody>`;
-  /* The count of record with the other count beside it. When the patient counted out loud, that is the
-     count; the pixel-motion count is always kept and shown as the cross-check, never merged with it. */
+  // Use the recorded counting method. Keep the raw optical count as a labelled cross-check.
   function repCell(r, mo) {
     const of = r.prescribed_reps ? "/" + r.prescribed_reps : "";
-    const other = r.count_source === "patient_voice" ? r.patient_count : r.count_source === "knee_tracker" ? r.tracking : null;
+    const other = r.count_source === "pose_gated_optical" ? r.pose_validation : r.count_source === "patient_voice" ? r.patient_count : r.count_source === "knee_tracker" ? r.tracking : null;
+    if (r.count_source === "pose_gated_optical" && !Number.isFinite(other?.repetitions)) return "Not recorded";
     if (!other) return `${mo.repetitions}${of}`;
-    const label = r.count_source === "patient_voice" ? "said aloud" : "knee tracker";
+    const label = r.count_source === "pose_gated_optical" ? "leg confirmed" : r.count_source === "patient_voice" ? "said aloud" : "knee tracker";
     const wide = Math.abs(other.repetitions - mo.repetitions) > Math.max(2, 0.25 * Math.max(1, other.repetitions));
     return `${other.repetitions}${of} <span class="pill${wide ? " warn" : ""}" title="${label}; movement in the box counted ${mo.repetitions}">${wide ? "counts differ" : label}</span>`;
   }
   for (const r of [...rs].reverse()) { const m = r.measurement, mo = r.monitoring, p = r.patient;
     h += `<tr><td>${esc(r.started_at.replace("T", " ").slice(0, 16))}</td><td class="n">${esc(r.days_post_op)}</td><td>${esc(r.exercise).replace(/_/g, " ")}</td><td class="n">${r.hold ? `${r.hold.cycles_completed}${r.prescribed_reps ? "/" + r.prescribed_reps : ""} <span class="pill" title="timed holds of ${r.hold.hold_s} s; the count is timer cycles, not movement">holds</span>` : `${repCell(r, mo)}`} ${mo.early_stop ? '<span class="pill warn">early stop</span>' : ""}</td><td class="n">${mo.tempo_s_per_rep ? mo.tempo_s_per_rep.toFixed(1) + " s" : ""}</td><td class="n">${Math.round(mo.active_fraction * 100)}%</td><td class="n">${m.p95_flexion_deg ?? ""}</td><td class="n">${m.p05_extension_deg ?? ""}</td><td class="n">${m.time_above_target_s} s</td><td class="n">${p.pain_0_10 === null ? "" : p.pain_0_10 >= PAIN_FLAG ? `<span class="pill bad">${p.pain_0_10}</span>` : p.pain_0_10}</td><td class="n">${esc(p.difficulty_1_5)}</td></tr>`; }
-  h += `</tbody></table></div><p class="note">Repetitions are counted from pixel motion in a separate layer and are not attached to the angle. Watch the video to judge how a repetition was done.</p>`;
+  h += `</tbody></table></div><p class="note">New camera counts require an optical event and a complete movement of the selected leg. Historical counts retain their original method. Tempo and activity describe raw pixel motion. Whole-session angles and confirmed counts do not assess exercise form. Watch the video to judge how a repetition was done.</p>`;
   h += `<h2>Knee angle across each session</h2>`;
-  for (const r of [...rs].reverse().slice(0, 12)) { const tp = r.measurement.trace_preview; h += `<div class="muted" style="margin-top:14px">${esc(r.started_at.replace("T", " ").slice(0, 16))} · day ${esc(r.days_post_op)} · ${esc(r.exercise).replace(/_/g, " ")} · ${r.hold ? `${r.hold.cycles_completed} timed holds` : `${r.count_source === "patient_voice" && r.patient_count ? `${r.patient_count.repetitions} reps (counted aloud by the patient; pixel motion counted ${r.monitoring.repetitions})` : r.count_source === "knee_tracker" && r.tracking ? `${r.tracking.repetitions} reps (knee followed in the picture; pixel motion counted ${r.monitoring.repetitions})` : `${r.monitoring.repetitions} reps (counted separately from pixel motion)`}`}</div>` + (tp ? traceSvg(tp, r.duration_s) : `<div class="muted">no angle trace stored for this session</div>`); }
+  for (const r of [...rs].reverse().slice(0, 12)) { const tp = r.measurement.trace_preview; h += `<div class="muted" style="margin-top:14px">${esc(r.started_at.replace("T", " ").slice(0, 16))} · day ${esc(r.days_post_op)} · ${esc(r.exercise).replace(/_/g, " ")} · ${r.hold ? `${r.hold.cycles_completed} timed holds` : `${r.count_source === "pose_gated_optical" && r.pose_validation ? `${r.pose_validation.repetitions} reps (selected-leg confirmation; ${r.pose_validation.rejected} rejected and ${r.pose_validation.unconfirmed} unconfirmed optical events)` : r.count_source === "patient_voice" && r.patient_count ? `${r.patient_count.repetitions} reps (counted aloud by the patient; pixel motion counted ${r.monitoring.repetitions})` : r.count_source === "knee_tracker" && r.tracking ? `${r.tracking.repetitions} reps (knee followed in the picture; pixel motion counted ${r.monitoring.repetitions})` : `${r.monitoring.repetitions} reps (counted separately from pixel motion)`}`}</div>` + (tp ? traceSvg(tp, r.duration_s) : `<div class="muted">no angle trace stored for this session</div>`); }
   $("out").innerHTML = h;
 }
 function traceSvg(tp, duration) {
