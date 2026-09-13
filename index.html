@@ -493,11 +493,17 @@ body:not(.settings-view) #home>.details,body:not(.settings-view) #home>.camera-o
 /* Stable navigation: identical links, order and dimensions in every patient view. */
 html{scrollbar-gutter:stable;scroll-padding-top:180px}
 .brandbar{position:sticky;top:0;z-index:10;align-self:start;background:var(--paper)}
-.patient-header-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:568px;flex-shrink:0}
+.patient-header-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:568px;flex-shrink:0}
 .patient-header-nav a{display:flex;align-items:center;justify-content:center;min-height:46px;padding:10px 8px;text-align:center;font-size:12px;line-height:1.35}
 #home .patient-header-nav a[aria-current="page"]{background:var(--ink);color:var(--bone);border-color:var(--ink)}
 @media(max-width:1023px){html{scroll-padding-top:230px}.brandbar{flex-direction:column;align-items:flex-start;gap:16px}.patient-header-nav{width:100%;flex-wrap:nowrap;justify-content:normal}}
 @media(max-width:759px){.brandbar{gap:12px}.patient-header-nav{gap:6px}.patient-header-nav a{font-size:11px;padding:8px 4px;min-height:46px}}
+/* Questionnaire reminders stay with the calendar and the footer. */
+.followup-list{margin:12px 0}.followup-row{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}.followup-row p{margin:4px 0}.followup-row small{color:var(--muted)}
+#questionnaire-followups summary{cursor:pointer;font-weight:700;padding:12px 0}#questionnaire-followups form{padding:12px 0}#questionnaire-result{scroll-margin-top:160px}#questionnaire-result .pt-block select{width:100%;min-width:0;max-width:100%}
+.recovery-questionnaire-mark{display:block;font-size:10px;font-weight:700;margin-top:5px;line-height:1.3;color:#214c86}.recovery-day.used .recovery-questionnaire-mark{color:#fff}.recovery-calendar-legend i.questionnaire{background:#467abb;border-radius:50%}.calendar-followups{padding:14px 0}.calendar-followups a{display:block;line-height:1.6}.calendar-followups small{display:block}.calendar-followups h4{margin:6px 0}
+.mini-day.followup{color:inherit;text-decoration:none}.mini-day.followup::after{content:'';position:absolute;bottom:2px;width:5px;height:5px;border-radius:50%;background:#a4caff}.mini-calendar-legend i.questionnaire-dot{background:#a4caff}.mini-followup-note{padding-top:10px;font-size:11px;line-height:1.6}.mini-followup-note a{display:block}.mini-followup-note small{display:block;color:var(--muted)}
+@media(max-width:600px){.followup-row{align-items:flex-start;flex-direction:column}.recovery-questionnaire-mark{font-size:9px}.recovery-questionnaire-mark>span{display:none}.recovery-calendar-nav{gap:4px}}
 </style>
 </head>
 <body>
@@ -509,7 +515,7 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
       <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M14 5 L14 19 L26 33" stroke="#1a1918" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter"/><circle cx="12.5" cy="23.5" r="4.6" fill="#d64026"/></svg>
       <b>Cambridge<br>Kinematics</b>
     </a>
-    <nav class="patient-header-nav" aria-label="Patient navigation"><a class="home-link" href="./" data-page="home">Home</a><a class="settings-link" href="?view=settings" data-page="settings">Settings</a><a class="summary-link" href="?view=recovery-summary" data-page="recovery-summary">Recovery summary</a><a class="tracker-link" href="?view=progress" data-page="progress">Exercise history</a><a class="to-date-link" href="?view=progress-to-date" data-page="progress-to-date">Exercise metrics</a><a class="timeline-link" href="?view=recovery-timeline" data-page="recovery-timeline">Recovery timeline</a><a class="measures-link" href="?view=patient-measures" data-page="patient-measures">Patient-reported measures</a></nav>
+    <nav class="patient-header-nav" aria-label="Patient navigation"><a class="home-link" href="./" data-page="home">Home</a><a class="settings-link" href="?view=settings" data-page="settings">Settings</a><a class="summary-link" href="?view=recovery-summary" data-page="recovery-summary">Recovery summary</a><a class="tracker-link" href="?view=progress" data-page="progress">Exercise history</a><a class="to-date-link" href="?view=progress-to-date" data-page="progress-to-date">Exercise metrics</a><a class="timeline-link" href="?view=recovery-timeline" data-page="recovery-timeline">Recovery timeline</a></nav>
   </header>
 
   <section class="pt-page" id="progressToDate" aria-label="Progress to date" hidden></section>
@@ -593,9 +599,9 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
     <p class="footer-essential">Knee Recovery is a development prototype. Follow your physiotherapist’s or surgeon’s plan. The app does not replace professional medical advice, diagnosis or treatment.</p>
     <div class="footer-notices">
       <details id="app-disclaimer"><summary>About the app and medical disclaimer</summary><div class="footer-detail"><p>This prototype has not been clinically validated for diagnosis or treatment decisions. Camera estimates and repetition counts can be inaccurate or unavailable. They do not confirm that an exercise is safe or correctly performed, and provisional video estimates are not validated clinical scores.</p><p>Only perform exercises your treating clinician has advised. Do not change your rehabilitation plan on the basis of an app result. Stop exercising if you experience sharp pain and seek advice from your clinical team. The app is not an emergency service and sessions are not monitored by a clinician.</p><p>The exercise library and week labels provide a general structure, not an individual prescription. Some exercises remain pending while the app is developed.</p><span id="engine" hidden></span><nav aria-label="Technical views"><a href="video-analysis/">Analyse a recorded exercise</a><a href="report.html">Physio report</a><a href="bench.html">Technical bench view</a></nav></div></details>
-      <details id="data-notice"><summary>Privacy and your data</summary><div class="footer-detail"><p>Patient details, preferences, activity dates, exercise ticks and saved session results are stored in this browser on this device. They are not automatically sent to Cambridge Kinematics or your clinical team. There is no patient account or automatic synchronisation between devices. Clearing browser site data can remove these records, and other people using the same browser profile may be able to view them.</p><p>Camera frames are processed on this device. When enabled in Settings, exercise video can be recorded and session files downloaded. Downloaded files are separate from browser storage; keep them securely and share them only with people you choose.</p><p>Spoken prompts use generated Marin audio played by this device. The exercise flow does not request microphone access or listen for voice commands.</p><p>The website is hosted by GitHub Pages and loads fonts and, when needed, model resources from external providers. These services receive normal web-request information such as your IP address. Local processing does not mean that visiting the website makes no network requests.</p><nav aria-label="Privacy information"><a href="?view=settings">Manage your settings</a><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub privacy information</a></nav></div></details>
+      <details id="data-notice"><summary>Privacy and your data</summary><div class="footer-detail"><p>Patient details, preferences, activity dates, exercise ticks, questionnaire reminders and results, and saved session results are stored in this browser on this device. They are not automatically sent to Cambridge Kinematics or your clinical team. There is no patient account or automatic synchronisation between devices. Clearing browser site data can remove these records, and other people using the same browser profile may be able to view them.</p><p>Camera frames are processed on this device. When enabled in Settings, exercise video can be recorded and session files downloaded. Downloaded files are separate from browser storage; keep them securely and share them only with people you choose.</p><p>Spoken prompts use generated Marin audio played by this device. The exercise flow does not request microphone access or listen for voice commands.</p><p>The website is hosted by GitHub Pages and loads fonts and, when needed, model resources from external providers. These services receive normal web-request information such as your IP address. Local processing does not mean that visiting the website makes no network requests.</p><nav aria-label="Privacy information"><a href="?view=settings">Manage your settings</a><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub privacy information</a></nav></div></details>
     </div>
-    <div class="footer-bottom"><p>© <span id="copyrightYear">2026</span> Cambridge Kinematics Limited</p><nav aria-label="Footer navigation"><a href="https://cambridgekinematics.co.uk/">Company website ↗</a><a href="?view=recovery-summary">Patient summary</a><a href="?view=settings">Settings</a></nav></div>
+    <div class="footer-bottom"><p>© <span id="copyrightYear">2026</span> Cambridge Kinematics Limited</p><nav aria-label="Footer navigation"><a class="measures-link" href="?view=patient-measures">Questionnaires &amp; follow-ups</a><a href="https://cambridgekinematics.co.uk/">Company website ↗</a><a href="?view=recovery-summary">Patient summary</a><a href="?view=settings">Settings</a></nav></div>
   </footer>
 </main>
 
@@ -665,8 +671,8 @@ import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=recording-v
 import { renderRecoverySummary } from "./recovery-summary.mjs?v=1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
 import { renderProgressToDate } from "./progress-to-date.mjs?v=recording-voice-2";
-import { renderPatientMeasures } from "./patient-measures.mjs?v=1";
-import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=recording-voice-2";
+import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
+import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=followups-1";
 import { showExerciseGuide } from "./exercise-guides/guide-player.js";
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=recording-voice-2";
 
@@ -824,7 +830,7 @@ function renderHome() {
     if (record.exercise_analysis) $("patientReviewContent").append(savedAnalysisSummary(record.exercise_analysis));
     $("patientReview").showModal();
   };
-  const progressOptions = {patientId: $("patient").value, operationDate: $("opdate").value, side: $("side").value, onReview: reviewSession};
+  const progressOptions = {patientId: $("patient").value, operationDate: $("opdate").value, side: $("side").value, followupId: new URLSearchParams(location.search).get("followup"), onReview: reviewSession};
   if (PAGE_VIEW === "recovery-summary") renderRecoverySummary($("recoverySummary"), recs, progressOptions);
   else if (PAGE_VIEW === "progress-to-date") renderProgressToDate($("progressToDate"), recs, progressOptions);
   else if (PAGE_VIEW === "patient-measures") renderPatientMeasures($("patientMeasures"), progressOptions);
