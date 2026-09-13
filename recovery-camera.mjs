@@ -1,9 +1,11 @@
 import {loadPose} from './kneerec.js?v=endpoint-heavy-images-1';
-import {kneeFrame,summariseEndpoint} from './recovery-measurements.mjs';
+import {kneeFrame,summariseEndpoint} from './recovery-measurements.mjs?v=endpoint-2';
 import {loadHighFive,highFiveState,drawHands} from './high-five.mjs';
 import {EndpointGesture} from './endpoint-gesture.mjs';
 import {EndpointPreviewAverage} from './endpoint-smoothing.mjs';
 export const ENDPOINT_CAPTURE_MS=2000;
+export const ENDPOINT_PICTURES=10;
+const PICTURE_INTERVAL_MS=150;
 
 export function cameraMessage(error){
  if(error?.name==='NotAllowedError'||error?.name==='SecurityError')return 'Camera access is blocked. Allow this site in your browser and, on a Mac, allow the browser under System Settings > Privacy & Security > Camera. You can also open this page in Chrome or Safari, or use a sequence of photos below.';
@@ -52,8 +54,8 @@ export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>
      const lm=result.landmarks?.length===1?result.landmarks[0]:null,ids=side==='left'?[23,25,27]:[24,26,28];
      const preview=smoother.update(frame.angle,lm?ids.map(id=>lm[id]):null,now);onAngle(preview);
      if(preview){ctx.strokeStyle='#dc682e';ctx.fillStyle='#fff';ctx.lineWidth=5;ctx.beginPath();preview.points.forEach((p,i)=>{i?ctx.lineTo(p.x*canvas.width,p.y*canvas.height):ctx.moveTo(p.x*canvas.width,p.y*canvas.height);});ctx.stroke();for(const p of preview.points){ctx.beginPath();ctx.arc(p.x*canvas.width,p.y*canvas.height,7,0,2*Math.PI);ctx.fill();}}
-     if(bucket)bucket.frames.push({...frame,time_ms:now-bucket.start});
-    }catch(error){smoother.reset();onAngle(null);if(bucket)bucket.frames.push({angle:null,time_ms:now-bucket.start,reason:'Pose inference failed'});}
+     samplePicture(frame,now);
+    }catch(error){smoother.reset();onAngle(null);samplePicture({angle:null,reason:'Pose inference failed'},now);}
     // The hand signal is independent of body-pose visibility. A poor knee view
     // can still trigger capture, but cannot produce a falsely usable result.
     if(hands&&!bucket){
@@ -66,21 +68,26 @@ export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>
    raf=requestAnimationFrame(tick);
   }catch(error){if(token===generation){stop();onStatus(cameraMessage(error));}}
  }
+ function samplePicture(frame,now){
+  if(!bucket||bucket.frames.length>=ENDPOINT_PICTURES||now-bucket.lastSample<PICTURE_INTERVAL_MS)return;
+  bucket.lastSample=now;bucket.frames.push({...frame,time_ms:Math.max(0,now-bucket.start)});
+  onGesture({stage:'capturing',progress:bucket.frames.length/ENDPOINT_PICTURES});
+ }
  function capture(trigger='button'){
   if(!model||!stream||bucket)return false;
   gesture.disarm();onCaptureStart({trigger});onGesture({stage:'capturing',progress:0});
-  const token=generation;bucket={start:performance.now(),captured_at:new Date().toISOString(),frames:[]};
-  onStatus('Capturing your operated knee for two seconds. Keep this position only while comfortable.');
+  const token=generation;bucket={start:performance.now(),captured_at:new Date().toISOString(),frames:[],lastSample:-Infinity};
+  onStatus('Taking up to 10 pictures of your operated knee over two seconds. Keep this position only while comfortable.');
   timer=setTimeout(()=>{
    if(token!==generation||!bucket)return;
    const result=bucket;bucket=null;gesture.disarm();onGesture({stage:'complete',progress:1});
-   try{const summary=summariseEndpoint(result.frames);onResult({frames:result.frames,summary,captured_at:result.captured_at,source:{kind:'mediapipe_2d',device:modelName,method:'Side-view live endpoint images (IMAGE mode)'}});onStatus('Capture ready to review. You can relax your leg.');}
+   try{const summary=summariseEndpoint(result.frames);onResult({frames:result.frames,summary,captured_at:result.captured_at,source:{kind:'mediapipe_2d',device:modelName,method:'Side-view live endpoint images (IMAGE mode, 10-picture sequence)'}});onStatus('Capture ready to review. You can relax your leg.');}
    catch(error){onStatus(error.message);onResult(null);}
   },ENDPOINT_CAPTURE_MS);return true;
  }
  async function images(files,chosenSide){
   stop();const token=generation;
-  if(files.length<6||files.length>60){onStatus('Choose between 6 and 60 images of the same comfortable end position.');return;}
+  if(files.length<5||files.length>10){onStatus('Choose between 5 and 10 images of the same comfortable end position.');return;}
   if(files.some(f=>!f.type.startsWith('image/')||f.size>20*1024*1024)){onStatus('Use image files smaller than 20 MB each.');return;}
   onStatus('Analysing the selected images on this device.');
   try{

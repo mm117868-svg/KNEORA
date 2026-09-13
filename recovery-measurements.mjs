@@ -2,8 +2,8 @@ import {dayNumber,localDate,postOpDay,finite} from './progress-data.mjs';
 import {assessPose} from './video-analysis/analysis.mjs';
 
 export const RECOVERY_KEY='kr_recovery_measurements_v1';
-export const MEASUREMENT_VERSION='endpoint-1';
-export const CAPTURE_RULES=Object.freeze({minimumFrames:6,minimumCoverage:.5,maximumSpread:8,minVisibility:.5});
+export const MEASUREMENT_VERSION='endpoint-2';
+export const CAPTURE_RULES=Object.freeze({minimumFrames:5,minimumCoverage:.5,maximumSpread:8,minVisibility:.5});
 export const SOURCE_NAMES={mediapipe_2d:'MediaPipe 2D',depth_3d:'Imported depth camera',clinical:'Clinical measurement entered'};
 export const MOTION_NAMES={bend:'Knee bending',straighten:'Knee straightening'};
 export const MODE_NAMES={active:'Without assistance',assisted:'With assistance',passive:'Clinician-assessed passive range'};
@@ -21,7 +21,7 @@ export function kneeFrame(poses,width,height,side){
 export function summariseEndpoint(frames){
  if(!Array.isArray(frames)||frames.length>600)throw Error('Use a short sequence of at most 600 frames.');
  const valid=frames.filter(f=>validAngle(f.angle)),angles=valid.map(f=>f.angle);
- if(angles.length<CAPTURE_RULES.minimumFrames)throw Error('Not enough clear frames. Keep the hip, knee and ankle visible and try again.');
+ if(angles.length<CAPTURE_RULES.minimumFrames)throw Error('Not enough clear pictures (at least 5 needed). Keep the hip, knee and ankle visible and try again.');
  const coverage=valid.length/frames.length;
  if(coverage<CAPTURE_RULES.minimumCoverage)throw Error('Too much of this sequence could not be measured. Reposition the camera and try again.');
  const minimum=Math.min(...angles),maximum=Math.max(...angles),average=mean(angles);

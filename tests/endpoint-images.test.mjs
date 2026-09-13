@@ -14,8 +14,17 @@ test('uploaded pictures use Heavy IMAGE inference independently and release ever
   assert.deepEqual(options,{variant:'heavy',runningMode:'IMAGE'});
   return {model:'heavy model',landmarker:{setOptions:async()=>{},detect:image=>{assert.equal(image.id,++inferences);return {landmarks:[landmarks]};},detectForVideo:()=>assert.fail('No temporal tracking for uploaded pictures'),close:()=>closed++}};
  }});
- await camera.images(Array.from({length:6},()=>({type:'image/png',size:100})),'right');
- assert.equal(results[0].summary.mean,90);assert.equal(results[0].summary.accepted,6);
+ await camera.images(Array.from({length:5},()=>({type:'image/png',size:100})),'right');
+ assert.equal(results[0].summary.mean,90);assert.equal(results[0].summary.accepted,5);
  assert.match(results[0].source.method,/IMAGE mode/);assert.equal(results[0].captured_at,null);
- assert.equal(released,6);assert.equal(closed,1);
+ assert.equal(released,5);assert.equal(closed,1);
+});
+
+test('photo sets outside 5 to 10 images and oversized files are rejected before loading a model',async t=>{
+ const old=globalThis.cancelAnimationFrame;globalThis.cancelAnimationFrame=()=>{};t.after(()=>{globalThis.cancelAnimationFrame=old;});
+ let loads=0;const status=[],results=[];
+ const camera=createEndpointCamera({video:{srcObject:null},canvas:{getContext:()=>({})},onStatus:s=>status.push(s),onResult:r=>results.push(r),modelLoader:async()=>{loads++;throw Error('Unexpected model load');}});
+ for(const count of [0,4,11]){await camera.images(Array.from({length:count},()=>({type:'image/png',size:100})),'left');assert.match(status.at(-1),/between 5 and 10/);}
+ await camera.images(Array.from({length:5},()=>({type:'image/png',size:21*1024*1024})),'left');assert.match(status.at(-1),/smaller than 20 MB/);
+ assert.equal(loads,0);assert.deepEqual(results,[]);
 });
