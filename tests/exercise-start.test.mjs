@@ -137,3 +137,48 @@ test('abandoned sessions do not announce completed repetitions', async () => {
   h.recorder.dispatchEvent(new Event('stop')); await finishing;
   assert.deepEqual(h.events, ['stop requested', 'camera stopped']);
 });
+
+for (const exercise of ['straight_leg_raise', 'seated_extension', 'heel_slide']) {
+  test(`${exercise}: finishing starts automatic analysis before patient answers, then saves and displays the report`, async () => {
+    const h = finishHarness(), records = [], updates = [];
+    let analysis, answer;
+    const elements = new Map();
+    const $ = id => {
+      if (!elements.has(id)) elements.set(id, {value: '', checked: false, innerHTML: '', classList: {add(){}, remove(){}}});
+      return elements.get(id);
+    };
+    $('patient').value = 'SOFTWARE-TEST'; $('side').value = 'left'; $('opdate').value = '2026-09-01';
+    Object.assign(h.context, {$, current: {id: exercise, kind: 'reps', count: 10, aim: {}},
+      chunks: [new Blob(['software fixture'], {type: 'video/webm'})], startedAt: new Date('2026-09-13T10:00:00Z'),
+      frameNo: 250, SOFTWARE: 'test', phase: 1, trace: {rows: []},
+      daysPostOp: () => 12, localIso: date => date.toISOString(), summarise: () => ({}), tracePreview: () => [],
+      storeRecord: record => records.push(record), updateRecord: (slot, record) => updates.push({slot, record}),
+      loadRecords: () => records, patientRecords: records => records, esc: value => value,
+      renderBasicExerciseSummary: record => record.exercise_analysis ? 'Analysed summary' : 'Live summary',
+      renderDetailedExerciseSummary: record => record.exercise_analysis ? 'Full measured report' : 'Waiting for analysis',
+      renderHome(){}, disposeAnalysis(){}, smallMovement: () => false,
+      mountExerciseAnalysis(host, options){analysis = options; h.events.push('analysis mounted'); return () => {};},
+      ask(){h.events.push('patient question'); return new Promise(resolve => {answer = resolve;});}
+    });
+    const start = html.indexOf('async function finish(abandon');
+    vm.runInContext(html.slice(start, html.indexOf('\nfunction ask(', start)), h.context);
+    const finishing = h.context.finish();
+    assert.equal(analysis, undefined, 'analysis must wait for the final recording data');
+    h.recorder.dispatchEvent(new Event('stop'));
+    // finishRecording and finish each resume after the recorder stop event.
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(analysis.autoStart, true, 'the main exercise page must enable automatic analysis');
+    assert.equal(analysis.metadata.exercise, exercise);
+    assert.equal(analysis.metadata.side, 'left');
+    assert.ok(analysis.blob.size > 0);
+    assert.deepEqual(h.events, ['stop requested', 'camera stopped', 'repetitions_complete', 'analysis mounted', 'patient question']);
+    assert.equal($('simpleExerciseSummary').innerHTML, 'Live summary');
+    const report = {exercise, reps: [{duration: 5}], metrics: {maximumObservedBend: 90}};
+    analysis.onReport(report);
+    assert.equal(updates.length, 1); assert.equal(updates[0].slot, 0);
+    assert.equal(records[0].exercise_analysis, report);
+    assert.equal($('simpleExerciseSummary').innerHTML, 'Analysed summary');
+    assert.equal($('fullExerciseSummary').innerHTML, 'Full measured report');
+    h.context.openGen++; answer(null); await finishing;
+  });
+}
