@@ -397,8 +397,9 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
 .mini-day{position:relative;display:grid;place-items:center;aspect-ratio:1;font-size:13px;font-weight:700;border-radius:50%;min-width:0}
 .mini-day.visited{background:#a8480f;color:#fff}
 .mini-day.today{outline:1px solid #f8f7f3;outline-offset:-1px}
-.mini-day.surgery::after{content:"";position:absolute;bottom:1px;left:calc(50% - 2.5px);width:5px;height:5px;border-radius:50%;background:#8ed8d0}
-.mini-calendar-legend i.surgery-dot{background:#8ed8d0}
+.mini-day.surgery{background:#3d9567;color:#fff;border:2px solid #a8edc5;border-radius:50%;box-shadow:0 0 0 1px #3d9567}
+.mini-day.surgery.today{outline:2px solid #fff;outline-offset:2px}
+.mini-calendar-legend i.surgery-dot{background:#3d9567;border:1px solid #a8edc5;width:10px;height:10px}
 .progress .mini-postop{font-size:13px;font-weight:700;line-height:1.5;margin:12px 0 0}
 .mini-calendar-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:9px;margin-top:14px;color:#d4d1c9}
 .mini-calendar-legend>span{display:flex;align-items:center;gap:4px}
