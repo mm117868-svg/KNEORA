@@ -455,6 +455,14 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
 .overview-result h3{font-size:16px;margin:0 0 7px}
 .overview-result p{text-align:right;line-height:1.8}
 @media(max-width:759px){.overview-details{grid-template-columns:1fr 1fr}.patient-header-nav{flex-wrap:wrap;justify-content:flex-end}.overview-result{flex-wrap:wrap}.overview-result p{text-align:left}}
+
+body:not(.settings-view) #home>.details,body:not(.settings-view) #home>.camera-options,body:not(.settings-view) .settings-heading{display:none}
+.settings-view #home>.hero,.settings-view #progress,.settings-view #todayExercises,.settings-view #home>.phasepick,.settings-view #weeks,.settings-view #home>.safety,.settings-view #home>.foot{display:none}
+.settings-heading{grid-column:1/-1;margin:32px 0 24px}
+.settings-heading h1{font-size:clamp(28px,4vw,44px);margin:12px 0}
+.settings-heading p{font-size:14px;color:var(--muted);line-height:1.6}
+.settings-view #home>.details{grid-column:1/-1}
+.setup-prompt{font-size:13px;padding:14px;background:var(--paper);border-left:3px solid var(--brand);margin:0 0 18px}
 </style>
 </head>
 <body>
@@ -466,7 +474,7 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
       <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M14 5 L14 19 L26 33" stroke="#1a1918" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter"/><circle cx="12.5" cy="23.5" r="4.6" fill="#d64026"/></svg>
       <b>Cambridge<br>Kinematics</b>
     </a>
-    <nav class="patient-header-nav" aria-label="Patient navigation"><span class="product-name">Knee Recovery</span><a class="summary-link" href="?view=summary#progress">Patient summary</a><a class="tracker-link" href="?view=progress#progress">Progress tracker</a><a class="tracker-back" href="index.html" hidden>Back to exercises</a></nav>
+    <nav class="patient-header-nav" aria-label="Patient navigation"><span class="product-name">Knee Recovery</span><a class="settings-link" href="?view=settings">Settings</a><a class="summary-link" href="?view=summary#progress">Patient summary</a><a class="tracker-link" href="?view=progress#progress">Progress tracker</a><a class="tracker-back" href="index.html" hidden>Back to exercises</a></nav>
   </header>
 
 
@@ -480,6 +488,8 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
   <section class="progress patient-progress" id="progress" aria-label="Your recovery progress"></section>
 
   <section id="todayExercises" class="today-exercises" aria-labelledby="todayTitle"></section>
+
+  <section class="settings-heading"><div class="eyebrow">Your setup</div><h1>Patient details and settings</h1><p>Set your details and preferences here. Changes are saved automatically on this device.</p></section>
 
   <section class="card details" aria-labelledby="detailsTitle">
     <h2 id="detailsTitle">Your details</h2>
@@ -526,7 +536,7 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
         <label class="setting-check countdown-choice"><input type="checkbox" id="speak" checked><span>Speak the countdown and hand-detection prompts</span></label>
       </fieldset>
     </div>
-    <button type="button" id="settingsDone" class="settings-done">Done with setup</button>
+    <button type="button" id="settingsDone" class="settings-done">Save and return to exercises</button>
   </details>
 
   <section class="phasepick">
@@ -603,7 +613,7 @@ import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js";
 import { VoiceCount, voiceAvailable, VOICE_VERSION } from "./voicecount.js";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js";
-import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary, renderPatientOverview } from "./patient-progress.js?v=patient-overview-1";
+import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary, renderPatientOverview } from "./patient-progress.js?v=settings-page-1";
 
 /* ---------------- Exercise library ----------------
    kind 'reps': repetitions come from the pixel-motion counter in kneerec.js.
@@ -674,14 +684,18 @@ const SETUP = "Camera side-on to the operated leg, about 2 m away, level with th
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const SETTINGS_VIEW = new URLSearchParams(location.search).get("view") === "settings";
 const SUMMARY_VIEW = new URLSearchParams(location.search).get("view") === "summary";
 const PROGRESS_VIEW = SUMMARY_VIEW || new URLSearchParams(location.search).get("view") === "progress";
 document.body.classList.toggle("progress-view", PROGRESS_VIEW);
-document.querySelector(".tracker-back").hidden = !PROGRESS_VIEW;
+document.body.classList.toggle("settings-view", SETTINGS_VIEW);
+document.querySelector(".settings-link").hidden = SETTINGS_VIEW;
+if (SETTINGS_VIEW) document.title = "Your settings · Cambridge Kinematics";
+document.querySelector(".tracker-back").hidden = !(PROGRESS_VIEW || SETTINGS_VIEW);
 document.querySelector(".tracker-link").hidden = PROGRESS_VIEW && !SUMMARY_VIEW;
 document.querySelector(".summary-link").hidden = SUMMARY_VIEW;
 if (PROGRESS_VIEW) document.title = SUMMARY_VIEW ? "Your patient summary · Cambridge Kinematics" : "Your progress tracker · Cambridge Kinematics";
-const NOPOSE = PROGRESS_VIEW || new URLSearchParams(location.search).has("nopose");
+const NOPOSE = SETTINGS_VIEW || PROGRESS_VIEW || new URLSearchParams(location.search).has("nopose");
 
 /* ---------------- settings ---------------- */
 const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", codeword: "kr_app_codeword", stopword: "kr_app_stopword", countby: "kr_app_countby" };
@@ -700,8 +714,8 @@ function updateSettingsSummary() {
   const controls=[$("handstart").checked?"Hand controls on":"",$("voice").checked?"Voice controls on":""].filter(Boolean);
   $("settingsSummary").textContent=[leg?`${leg === "left" ? "Left" : "Right"} leg`:"Choose your operated leg",camera,controls.length?controls.join(" + "):"On-screen controls"].join(" · ");
 }
-$("cameraOptions").open = !["left","right"].includes($("side").value);
-$("settingsDone").onclick = () => { if (!$("side").reportValidity()) return; $("cameraOptions").open=false; $("cameraOptions").querySelector("summary").focus(); };
+$("cameraOptions").open = SETTINGS_VIEW || !["left","right"].includes($("side").value);
+$("settingsDone").onclick = () => { if (!$("side").reportValidity()) return; location.href="./#todayExercises"; };
 
 /* ---------------- home: every exercise on one page, grouped by week ---------------- */
 let phase = 1;   // the week section the open exercise came from; written into the record
@@ -720,16 +734,18 @@ function renderWeeks() {
 function renderToday() {
   const now=currentPhase(),host=$("todayExercises"),days=daysPostOp($("opdate").value,new Date());
   host.innerHTML='<h2 id="todayTitle">Your exercises today</h2>';
-  if(now===null){host.innerHTML+=`<p class="small-note">${days===null?'Enter your operation date to see the exercises for your current recovery week.':'Your operation date is in the future. Your current exercises will appear from the day of surgery.'}</p><a href="#opdate">${days===null?'Enter operation date':'Check operation date'}</a>`;return;}
+  if(now===null){host.innerHTML+=`<p class="small-note">${days===null?'Enter your operation date to see the exercises for your current recovery week.':'Your operation date is in the future. Your current exercises will appear from the day of surgery.'}</p><a href="?view=settings#opdate">${days===null?'Enter operation date':'Check operation date'}</a>`;return;}
   host.innerHTML+=`<p class="small-note">Day ${days} after your operation · ${esc(PHASES[now])}. Follow the exercises your physiotherapist has given you.</p><div class="list"></div><div class="today-links"><a href="?view=summary#progress">Patient summary →</a><a href="?view=progress#progress">View progress and daily checklist →</a><a href="#weeknav">Browse full programme ↓</a></div>`;
+  if (!["left","right"].includes($("side").value)) host.querySelector('.list').insertAdjacentHTML('beforebegin','<p class="setup-prompt">Before your first session, <a href="?view=settings#side">select your operated leg in Settings →</a></p>');
   const list=host.querySelector('.list');
   $("week"+now).querySelectorAll('.ex-card:not(:disabled)').forEach(card=>{const copy=card.cloneNode(true);copy.onclick=()=>{phase=now;openExercise(LIB[now][+copy.dataset.i]);};list.append(copy);});
   if(!list.children.length)list.innerHTML='<p class="small-note">The exercises in this phase are pending. Browse the full programme below and follow your physiotherapist’s plan.</p>';
 }
 function renderHome() {
   const d = daysPostOp($("opdate").value, new Date());
-  $("dayline").innerHTML = d === null ? "Enter your operation date to see where you are in recovery." : d < 0 ? `Operation in <b>${-d}</b> day${-d === 1 ? "" : "s"}.` : `Day <b>${d}</b> after your operation · <a href="#week${phaseForDay(d)}">${esc(PHASES[phaseForDay(d)])}</a>`;
+  $("dayline").innerHTML = d === null ? "Enter your operation date to see where you are in recovery." : d < 0 ? `Operation in <b>${-d}</b> day${-d === 1 ? "" : "s"}.` : `Day <b>${d}</b> after your operation · <a href="./#week${phaseForDay(d)}">${esc(PHASES[phaseForDay(d)])}</a>`;
   $("privacy").textContent = $("voice").checked && speechAvailable() ? "Nothing leaves this device, except the sound the browser's speech service listens to while voice control is on." : $("countby").value === "voice" ? "Nothing leaves this device. Your counting is heard by a word spotter that runs here." : "Nothing leaves this device.";
+  if (SETTINGS_VIEW) { updateSettingsSummary(); return; }
   renderWeeks();
   renderToday();
   updateSettingsSummary();
@@ -772,7 +788,7 @@ let jsfeatLib = null;
 
 async function openExercise(ex) {
   if (!isExerciseAvailable(ex)) return;
-  if (!["left", "right"].includes($("side").value)) { $("cameraOptions").open=true; $("side").scrollIntoView({block:"center",behavior:"smooth"}); $("side").focus(); $("side").reportValidity(); return; }
+  if (!["left", "right"].includes($("side").value)) { location.href="?view=settings#side"; return; }
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; handSince = null; handArmed = false; statusBefore = null;
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
   $("briefTitle").textContent = ex.title; $("briefMeta").textContent = `${PHASES[phase]} · ${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}`;
