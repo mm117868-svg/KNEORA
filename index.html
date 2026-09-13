@@ -43,7 +43,7 @@ a{color:var(--brand-deep)}
 .details h2{font-size:13px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 label.f{display:block;font-size:12px;color:var(--muted);font-weight:600}
-label.f input,label.f select{display:block;width:100%;margin-top:4px;font:inherit;font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+label.f input,label.f select,.short-date>input{display:block;width:100%;margin-top:4px;font:inherit;font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px}
 .dayline{margin-top:12px;font-size:13px;color:var(--muted)}
 .dayline b{color:var(--ink)}
 .toggles{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 14px}
@@ -212,7 +212,7 @@ details.more summary{cursor:pointer;font-weight:600}
 .hero p{font-size:15px;line-height:1.7;max-width:46ch}
 .details{margin:0;padding:24px;align-self:start}
 .details h2{color:var(--ink);margin-bottom:18px}
-label.f input,label.f select{border-radius:2px;min-height:44px;background:var(--bone)}
+label.f input,label.f select,.short-date>input{border-radius:2px;min-height:44px;background:var(--bone)}
 .phasepick{grid-column:1/-1;margin:54px 0 0;padding-top:28px;border-top:1px solid var(--line)}
 .phasepick .eyebrow{color:var(--ink);font-size:12px;margin-bottom:12px}
 .small-note{max-width:90ch;font-size:14px;line-height:1.65}
@@ -503,6 +503,7 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
 body:not(.progress-view) #home>.patient-details{grid-column:1;grid-row:2;margin:0 0 28px;min-width:0}
 .patient-details h1{font-size:28px;line-height:1.15;letter-spacing:-.02em;margin:10px 0 14px}.patient-details .eyebrow{font-size:10px}
 .patient-fields{gap:16px}.patient-fields .f{min-width:0}.patient-fields input{width:100%;min-width:0;font-size:15px}
+.patient-fields div.f{font-size:12px;color:var(--muted);font-weight:600}.short-date{position:relative;margin-top:4px}.short-date>input{margin:0;padding-right:48px}.date-picker{position:absolute;right:1px;top:1px;bottom:1px;width:44px;display:grid;place-items:center;color:var(--ink)}.date-picker svg{width:19px;height:19px;pointer-events:none}.date-picker input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0;margin:0}.date-picker input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;padding:0;margin:0}.date-picker:focus-within{outline:2px solid var(--ink);outline-offset:2px}
 .patient-facts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px;border-top:1px solid var(--line);padding-top:18px}.patient-facts span{display:block;color:var(--muted);font-size:12px}.patient-facts strong{display:block;font-size:22px;line-height:1.35;margin-top:5px}.patient-details .dayline{font-size:12px}.profile-message{font-size:12px;color:var(--muted);line-height:1.5;margin:8px 0 0}.profile-message:empty{display:none}
 body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron{font-size:24px;line-height:1;transition:transform .15s}.camera-options[open] .settings-chevron{transform:rotate(180deg)}
 @media(max-width:759px){.patient-header-nav{grid-template-columns:repeat(2,minmax(0,1fr))}body:not(.progress-view) #home>.patient-details{margin-bottom:24px}.patient-fields{grid-template-columns:1fr}.patient-details h1{font-size:26px}.patient-facts strong{font-size:20px}}
@@ -548,8 +549,8 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
     <p class="settings-intro">Your details are saved on this device.</p>
     <div class="grid2 patient-fields">
       <label class="f">Full name<input id="patientName" autocomplete="name" maxlength="160" placeholder="Enter full name"></label>
-      <label class="f">Date of birth<input id="patientDob" type="date" autocomplete="bday"></label>
-      <label class="f">Operation date<input id="opdate" type="date"></label>
+      <div class="f"><label for="patientDobShort">Date of birth</label><div class="short-date"><input id="patientDobShort" placeholder="DD/MM/YY" inputmode="numeric" autocomplete="bday" maxlength="10" aria-label="Date of birth, DD/MM/YY"><span class="date-picker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg><input id="patientDob" type="date" aria-label="Choose date of birth from calendar"></span></div></div>
+      <div class="f"><label for="opdateShort">Operation date</label><div class="short-date"><input id="opdateShort" placeholder="DD/MM/YY" inputmode="numeric" maxlength="10" aria-label="Operation date, DD/MM/YY"><span class="date-picker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg><input id="opdate" type="date" aria-label="Choose operation date from calendar"></span></div></div>
       <label class="f">Patient ID<input id="patient" value="P001" autocomplete="off"></label>
     </div>
     <div class="patient-facts" aria-live="polite"><div><span>Age</span><strong id="patientAge">Enter date of birth</strong></div><div><span id="postopLabel">Days after surgery</span><strong id="patientPostop">Enter operation date</strong></div></div>
@@ -683,6 +684,7 @@ import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview
 import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=high-five-small-1";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js?v=wide-smooth-1";
 import { ageYears, loadProfile, saveProfile } from "./patient-profile.mjs";
+import { bindShortDate } from "./short-date.mjs";
 import { AppVoice, completionNotice } from "./app-voice.mjs";
 import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=high-five-small-1";
 import { renderRecoverySummary } from "./recovery-summary.mjs?v=combined-graph-1";
@@ -808,7 +810,7 @@ $("cameraOptions").open = false;
 $("settingsDone").onclick = () => { if (!$("side").reportValidity()) return; $("cameraOptions").open=false; location.hash="todayExercises"; $("todayExercises").scrollIntoView({block:"start"}); };
 function openHomeSection() {
   if(PROGRESS_VIEW)return;
-  const id=location.hash.slice(1),target=id&&document.getElementById(id);
+  const id=location.hash.slice(1),target=id&&(document.getElementById(`${id}Short`)||document.getElementById(id));
   if(target && $("cameraOptions").contains(target)) $("cameraOptions").open=true;
   if(target && (target===$("cameraOptions") || $("cameraOptions").contains(target) || $("patientDetails").contains(target))){target.scrollIntoView({block:"start"});if(target.matches('input,select'))target.focus({preventScroll:true});}
 }
@@ -816,9 +818,12 @@ window.addEventListener("hashchange",openHomeSection);
 
 
 function todayKey() {const now=new Date();return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;}
+const syncBirthDate=bindShortDate($("patientDob"),$("patientDobShort"),()=>({today:todayKey(),birthDate:true}));
+bindShortDate($("opdate"),$("opdateShort"),()=>({today:todayKey()}));
 function restorePatientProfile() {
   $("patientName").value="";$("patientDob").value="";$("profileMessage").textContent="";
   try{const record=loadProfile($("patient").value);$("patientName").value=record.full_name||"";$("patientDob").value=record.birth_date||"";}catch(e){$("profileMessage").textContent=e.message;}
+  syncBirthDate();
 }
 function updatePatientFacts() {
   const today=todayKey(),age=ageYears($("patientDob").value,today),days=daysPostOp($("opdate").value,new Date());
