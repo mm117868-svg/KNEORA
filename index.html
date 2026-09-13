@@ -4,22 +4,22 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f5f2ec">
+<meta name="theme-color" content="#efeee9">
 <title>Knee Recovery · Cambridge Kinematics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#f5f2ec;--paper2:#ebe6dc;--bone:#fbf9f5;--line:#d9d2c5;--ink:#101c2b;--muted:#6b6a64;
-  --brand:#1f5fa8;--brand-deep:#174a84;--brand-soft:#e3edf9;--go:#2a9d6a;--go-soft:#dff1e7;--warn:#b8860b;--warn-soft:#fbf1d6;
-  --dk:#0b1220;--dk2:#121c2e;--dk3:#1a2740;--dkline:rgba(255,255,255,.12);--dkink:#eef2f7;--dkmuted:#9aa6b8;--green:#3ddc84;--amber:#f2b134;--red:#ff6b6b;
-  --r:18px;--shadow:0 12px 32px -14px rgba(16,28,43,.35);
+  --paper:#efeee9;--paper2:#e7e5dd;--bone:#fbfaf7;--line:#dad7ce;--ink:#1a1918;--muted:#55524c;
+  --brand:#a8480f;--brand-deep:#a8480f;--brand-soft:#f5e8dd;--go:#2a9d6a;--go-soft:#dff1e7;--warn:#b8860b;--warn-soft:#fbf1d6;
+  --dk:#171716;--dk2:#20201e;--dk3:#2a2926;--dkline:rgba(255,255,255,.12);--dkink:#eef2f7;--dkmuted:#9aa6b8;--green:#3ddc84;--amber:#f2b134;--red:#ff6b6b;
+  --r:2px;--shadow:0 12px 32px -14px rgba(16,28,43,.35);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
-body{background:var(--paper);color:var(--ink);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
-.display{font-family:"Newsreader","Georgia",serif;font-weight:600;letter-spacing:-.015em;line-height:1.05}
+body{background:var(--paper);color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.display{font-family:"Archivo",Arial,sans-serif;font-weight:600;letter-spacing:-.015em;line-height:1.05}
 .eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--brand-deep)}
 .num{font-variant-numeric:tabular-nums}
 button{font-family:inherit}
@@ -55,12 +55,17 @@ details.more summary{cursor:pointer;font-weight:600}
 .week{margin-top:26px;padding-top:4px}
 .week.now{border-left:4px solid var(--brand);padding-left:14px;margin-left:-18px}
 .week .head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-.week h2{font-family:"Newsreader","Georgia",serif;font-weight:600;font-size:24px;margin:0;letter-spacing:-.01em}
+.week h2{font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:24px;margin:0;letter-spacing:-.01em}
 .week .days{font-size:12.5px;color:var(--muted)}
 .week .badge{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bone);background:var(--brand);padding:4px 8px;border-radius:7px}
 .list{display:flex;flex-direction:column;gap:12px}
 .ex-card{background:var(--bone);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;text-align:left;width:100%;transition:.15s}
-.ex-card:active{transform:scale(.985)}
+.ex-card:not(:disabled):active{transform:scale(.985)}
+.ex-card:disabled{cursor:default;opacity:1;color:var(--ink);background:var(--paper)}
+.ex-card:disabled::after{background:var(--line)}
+.ex-card:disabled .ic,.ex-card:disabled .tag{background:var(--line)}
+.ex-card:disabled .ic svg{stroke:var(--muted)}
+.ex-card:disabled .tag,.ex-card:disabled .meta{color:var(--muted)}
 .ex-card::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand)}
 .ex-card .ic{width:48px;height:48px;flex:0 0 auto;border-radius:12px;background:var(--brand-soft);display:grid;place-items:center}
 .ex-card .ic svg{width:26px;height:26px;stroke:var(--brand-deep);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -73,7 +78,7 @@ details.more summary{cursor:pointer;font-weight:600}
 .progress p{margin:0;font-size:13.5px;color:var(--muted)}
 .progress .stats{display:flex;gap:18px;margin:8px 0 10px}
 .progress .stats div{font-size:12px;color:var(--muted)}
-.progress .stats b{display:block;font-size:24px;color:var(--ink);font-family:"Newsreader","Georgia",serif;font-weight:600;line-height:1.1}
+.progress .stats b{display:block;font-size:24px;color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-weight:600;line-height:1.1}
 .linkbtn{display:inline-block;background:var(--ink);color:var(--bone);text-decoration:none;font-weight:600;font-size:13.5px;padding:10px 16px;border-radius:11px}
 .safety{margin:26px 0 0;padding:16px;background:var(--warn-soft);border:1px solid #ecdcbf;border-radius:14px;font-size:12.5px;color:#6b5418}
 .safety b{color:#4e3d0f}
@@ -91,7 +96,7 @@ details.more summary{cursor:pointer;font-weight:600}
 .iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--dkline);background:rgba(255,255,255,.1);color:#fff;font-size:22px;cursor:pointer;display:grid;place-items:center;flex:0 0 auto;line-height:1}
 .stage .title{flex:1;min-width:0}
 .stage .title .eyebrow{color:#9fc4f0}
-.stage .title h2{margin:2px 0 0;font-size:18px;font-weight:600;font-family:"Newsreader","Georgia",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage .title h2{margin:2px 0 0;font-size:18px;font-weight:600;font-family:"Archivo",Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stage .clockwrap{display:flex;align-items:center;gap:8px;align-self:center;font-size:13px;font-weight:600;padding:7px 11px;border-radius:9px;background:rgba(5,10,20,.65);border:1px solid var(--dkline);color:var(--dkmuted)}
 .stage .rec{display:none;width:9px;height:9px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite}
 .stage .rec.on{display:inline-block}
@@ -104,7 +109,7 @@ details.more summary{cursor:pointer;font-weight:600}
 .panel{background:var(--dk2);border-left:1px solid var(--dkline);padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);display:flex;flex-direction:column;gap:12px;overflow:auto;min-height:0}
 .tile{background:var(--dk3);border:1px solid var(--dkline);border-radius:14px;padding:12px 14px}
 .tile .lab{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dkmuted)}
-.tile .val{font-family:"Newsreader","Georgia",serif;font-weight:600;font-size:44px;line-height:1;margin-top:6px}
+.tile .val{font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:44px;line-height:1;margin-top:6px}
 .tile .val small{font-size:18px;color:var(--dkmuted);font-weight:500;margin-left:2px}
 .tile .sub{font-size:12px;color:var(--dkmuted);margin-top:6px}
 .tile .sub b{color:var(--dkink);font-weight:600}
@@ -118,8 +123,8 @@ details.more summary{cursor:pointer;font-weight:600}
 .tile.instr ol{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--dkink);line-height:1.45}
 .tile.instr li{margin-bottom:5px}
 .tile.hold .ring{display:flex;align-items:center;gap:14px;margin-top:6px}
-.tile.hold .cue{font-family:"Newsreader","Georgia",serif;font-size:30px;font-weight:600;line-height:1}
-.tile.hold .count{font-size:44px;font-family:"Newsreader","Georgia",serif;font-weight:600;color:var(--amber);min-width:56px;text-align:right}
+.tile.hold .cue{font-family:"Archivo",Arial,sans-serif;font-size:30px;font-weight:600;line-height:1}
+.tile.hold .count{font-size:44px;font-family:"Archivo",Arial,sans-serif;font-weight:600;color:var(--amber);min-width:56px;text-align:right}
 .tile.hold.on .count{color:var(--green)}
 .panel .status{font-size:13.5px;line-height:1.4;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--dkline);color:var(--dkink)}
 .panel .status.ok{background:rgba(42,157,106,.2);border-color:rgba(61,220,132,.45)}
@@ -135,13 +140,13 @@ details.more summary{cursor:pointer;font-weight:600}
 .veil.hide{display:none}
 .veil .spin{width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:var(--brand);animation:spin 1s linear infinite;margin-bottom:14px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.veil h3{font-family:"Newsreader","Georgia",serif;font-size:22px;margin:0;font-weight:600}
+.veil h3{font-family:"Archivo",Arial,sans-serif;font-size:22px;margin:0;font-weight:600}
 .veil p{color:var(--dkmuted);font-size:14px;margin:4px 0 0;max-width:34ch}
 .veil .small{font-size:11.5px;color:var(--dkmuted);opacity:.7;margin-top:14px}
 .brief{position:absolute;z-index:7;left:0;right:0;bottom:0;background:var(--bone);color:var(--ink);border-radius:22px 22px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom) + 18px);box-shadow:0 -10px 40px -10px rgba(0,0,0,.6);transform:translateY(105%);transition:transform .3s ease;max-height:80%;overflow:auto}
 .brief.up{transform:none}
 .brief .grip{width:38px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 14px}
-.brief h3{margin:0 0 2px;font-family:"Newsreader","Georgia",serif;font-size:22px;font-weight:600}
+.brief h3{margin:0 0 2px;font-family:"Archivo",Arial,sans-serif;font-size:22px;font-weight:600}
 .brief .meta{font-size:12.5px;color:var(--brand-deep);font-weight:600;margin-bottom:12px}
 .brief ol{margin:0 0 12px;padding-left:20px}
 .brief ol li{font-size:13.5px;line-height:1.5;margin-bottom:6px}
@@ -151,10 +156,10 @@ details.more summary{cursor:pointer;font-weight:600}
 .brief .hands{margin-top:12px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:10px}
 .brief .hands .bar{flex:0 0 90px;height:8px;border-radius:5px;background:var(--paper2);overflow:hidden}
 .brief .hands .fill{height:100%;width:0;background:var(--brand);transition:width .1s linear}
-.countdown{position:absolute;inset:0;z-index:8;display:grid;place-items:center;font-family:"Newsreader","Georgia",serif;font-weight:600;font-size:clamp(120px,30vh,260px);color:#fff;text-shadow:0 6px 40px rgba(0,0,0,.7);cursor:pointer;text-align:center}
+.countdown{position:absolute;inset:0;z-index:8;display:grid;place-items:center;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:clamp(120px,30vh,260px);color:#fff;text-shadow:0 6px 40px rgba(0,0,0,.7);cursor:pointer;text-align:center}
 .countdown small{display:block;font-family:"Inter",sans-serif;font-size:16px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-align:center;color:var(--dkmuted)}
 .handring{position:absolute;left:50%;top:22%;transform:translateX(-50%);z-index:6;width:min(520px,80%);text-align:center;pointer-events:none}
-.handring .htext{font-family:"Newsreader","Georgia",serif;font-weight:600;font-size:clamp(26px,5vh,44px);color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.8);margin-bottom:10px}
+.handring .htext{font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:clamp(26px,5vh,44px);color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.8);margin-bottom:10px}
 .handring .hbar{height:14px;border-radius:8px;background:rgba(255,255,255,.2);overflow:hidden;border:1px solid rgba(255,255,255,.35)}
 .handring .hfill{height:100%;width:0;background:var(--green);transition:width .1s linear}
 .handring.finish .hfill{background:var(--amber)}
@@ -162,14 +167,14 @@ details.more summary{cursor:pointer;font-weight:600}
 .done{position:fixed;inset:0;z-index:30;background:rgba(11,18,32,.97);display:none;overflow:auto;padding:26px 20px}
 .done.show{display:block}
 .done .inner{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
-.done h2{font-family:"Newsreader","Georgia",serif;font-size:30px;margin:0;font-weight:600}
+.done h2{font-family:"Archivo",Arial,sans-serif;font-size:30px;margin:0;font-weight:600}
 .done p{color:var(--dkmuted);font-size:15px;margin:0;max-width:40ch}
 .done .stats{display:flex;gap:26px;margin:10px 0 4px;flex-wrap:wrap;justify-content:center}
 .done .stats div{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dkmuted);font-weight:700}
-.done .stats b{display:block;font-family:"Newsreader","Georgia",serif;font-size:38px;font-weight:600;color:#fff;letter-spacing:0;text-transform:none;line-height:1.1}
+.done .stats b{display:block;font-family:"Archivo",Arial,sans-serif;font-size:38px;font-weight:600;color:#fff;letter-spacing:0;text-transform:none;line-height:1.1}
 .done .chart{width:min(760px,92vw);margin:6px 0 4px}
 .done .chart svg{width:100%;height:auto;border-radius:10px}
-.done .q h3{font-family:"Newsreader","Georgia",serif;font-size:24px;margin:8px 0 2px;font-weight:600}
+.done .q h3{font-family:"Archivo",Arial,sans-serif;font-size:24px;margin:8px 0 2px;font-weight:600}
 .done .scale{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
 .done .scale button{min-width:52px;font-size:20px;padding:12px 0;border-radius:12px;border:1px solid var(--dkline);background:rgba(255,255,255,.08);color:#fff;cursor:pointer}
 .done .scale button:hover{background:var(--brand)}
@@ -189,18 +194,98 @@ details.more summary{cursor:pointer;font-weight:600}
   .panel .actions .btn{padding:11px 12px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Cambridge Kinematics visual identity: Archivo, warm paper and restrained orange. */
+#home{max-width:1200px;padding:0 40px 64px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);column-gap:72px}
+.brandbar{grid-column:1/-1;justify-content:space-between;margin:0 0 64px;padding:16px 0;border-bottom:1px solid var(--line)}
+.brand-link{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink)}
+.brandbar svg{width:60px;height:60px}
+.brandbar b{font-size:15.5px;line-height:1.08;font-weight:900;letter-spacing:.045em;text-transform:uppercase}
+.brandbar .product-name{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.hero{align-self:center;padding:8px 0 32px}
+.development-label{font-size:11px;letter-spacing:.12em;margin-bottom:20px;display:flex;align-items:center;gap:9px}
+.development-label::before{content:"";width:6px;height:6px;background:#e2691c;border-radius:50%;flex:none}
+.hero h1{font-size:clamp(40px,5.2vw,64px);font-weight:900;letter-spacing:-.035em;line-height:1.04;margin-bottom:22px}
+.hero h1 em{color:var(--ink)}
+.hero p{font-size:15px;line-height:1.7;max-width:46ch}
+.details{margin:0;padding:24px;align-self:start}
+.details h2{color:var(--ink);margin-bottom:18px}
+label.f input,label.f select{border-radius:2px;min-height:44px;background:var(--bone)}
+.phasepick{grid-column:1/-1;margin:54px 0 0;padding-top:28px;border-top:1px solid var(--line)}
+.phasepick .eyebrow{color:var(--ink);font-size:12px;margin-bottom:12px}
+.small-note{max-width:90ch;font-size:14px;line-height:1.65}
+.weeknav{gap:10px;margin-top:22px}
+.weeknav a{border-radius:2px;padding:12px 18px;text-transform:uppercase;letter-spacing:.07em;font-size:11px;color:var(--ink);background:transparent;border-color:var(--ink)}
+.weeknav a:hover{border-color:var(--brand);color:var(--brand)}
+#weeks{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 32px;margin-top:36px}
+.week{margin:0;padding-top:18px;border-top:2px solid var(--ink);scroll-margin-top:24px}
+.week.now{border-left:0;border-top-color:var(--brand);padding-left:0;margin-left:0}
+.week .head{gap:8px;margin-bottom:18px}
+.week h2{font-size:26px;font-weight:800;letter-spacing:-.025em}
+.week .days{font-size:11px}
+.week .badge{border-radius:2px;font-size:9px}
+.list{gap:10px}
+.ex-card{padding:18px 16px;gap:12px;min-height:116px;align-items:flex-start}
+.ex-card::after{width:3px}
+.ex-card .ic{width:38px;height:38px;border-radius:2px}
+.ex-card .ic svg{width:23px;height:23px}
+.ex-card h3{font-size:15px;font-weight:800;line-height:1.3;margin-bottom:5px}
+.ex-card p{line-height:1.5}
+.ex-card .meta{font-size:11px;margin-top:7px}
+.ex-card .tag{border-radius:2px;font-size:9px;padding:4px 6px;text-transform:uppercase;letter-spacing:.04em}
+.ex-card:not(:disabled):hover{border-color:var(--brand);background:#f8f3ed}
+.ex-card:disabled{border-style:dashed}
+.ex-card:disabled .ic,.ex-card:disabled .tag{background:var(--paper2)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #1d5c57;outline-offset:4px}
+.progress,.safety,.foot{grid-column:1/-1}
+.progress{margin-top:48px;padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.progress h2{color:var(--ink);margin-bottom:10px}
+.progress .stats b{font-weight:800}
+.linkbtn,.safety,.iconbtn,.tile,.btn,.done .row a{border-radius:2px}
+.safety{margin-top:28px}
+.foot{max-width:90ch;margin-top:24px}
+.stage .title .eyebrow{color:#edb28a}
+.stage .title h2,.display{font-weight:800}
+@media(min-width:760px){.week .head .days{margin-left:auto}}
+@media(max-width:759px){
+  #home{display:block;padding:0 20px 40px}
+  .brandbar{margin-bottom:32px;padding:14px 0}
+  .brandbar svg{width:44px;height:44px}
+  .brandbar b{font-size:12px}
+  .brandbar .product-name{font-size:10px;max-width:84px;text-align:right}
+  .brand-link{gap:8px}
+  .hero{padding:0 0 28px}
+  .hero h1{font-size:46px}
+  .development-label{font-size:9px;letter-spacing:.08em;margin-bottom:16px}
+  .details{padding:20px}
+  .phasepick{margin-top:32px;padding-top:24px}
+  .small-note{font-size:13px}
+  .weeknav{gap:6px}
+  .weeknav a{padding:11px 12px;font-size:10px}
+  #weeks{display:block;margin-top:28px}
+  .week{margin-bottom:30px}
+  .ex-card{min-height:104px;padding:16px 12px;gap:10px}
+  .ex-card .ic{width:32px;height:32px}
+  .ex-card .tag{font-size:8px;padding:4px}
+  .ex-card h3{font-size:14px}
+  .ex-card p{font-size:12px}
+}
 </style>
 </head>
 <body>
 
 <!-- ===================== HOME ===================== -->
 <main id="home">
-  <div class="brandbar">
-    <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#1f5fa8"/><path d="M13 11v18M13 20l8 6M13 20l9-7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="13" cy="20" r="2.4" fill="#fff"/></svg>
-    <div><b>Cambridge Kinematics</b><span>Knee Recovery</span></div>
-  </div>
+  <header class="brandbar">
+    <a class="brand-link" href="https://cambridgekinematics.co.uk/" aria-label="Cambridge Kinematics company website">
+      <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M14 5 L14 19 L26 33" stroke="#1a1918" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter"/><circle cx="12.5" cy="23.5" r="4.6" fill="#d64026"/></svg>
+      <b>Cambridge<br>Kinematics</b>
+    </a>
+    <span class="product-name">Knee Recovery</span>
+  </header>
 
   <section class="hero">
+    <div class="eyebrow development-label">In development · Knee rehabilitation</div>
     <h1 class="display">Your knee,<br><em>day by day.</em></h1>
     <p>Your camera counts each repetition and measures how far your knee bends, so your physiotherapist can see how the recovery is going. <span id="privacy">Nothing leaves this device.</span></p>
   </section>
@@ -245,7 +330,7 @@ details.more summary{cursor:pointer;font-weight:600}
 
   <section class="phasepick">
     <span class="eyebrow">Your programme, week by week</span>
-    <p class="small-note">All the exercises on one page. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
+    <p class="small-note">We are focusing first on heel slides, straight leg raises, seated knee extension and standing knee bend, with accurate repetition counting and assessment of movement quality as our development priorities. Performance scoring is planned and is not yet available. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
     <nav class="weeknav" id="weeknav" aria-label="Jump to a week"></nav>
   </section>
 
@@ -368,6 +453,9 @@ const LIB = {
       steps: ["Stand near a counter for safety, side-on to the camera.", "Lift the other foot and balance on the operated leg.", "Hold while the timer counts, then rest."] },
   ],
 };
+// Keep future exercises visible while restricting entry to the current exercise set.
+const ACTIVE_EXERCISES = new Set(["heel_slide", "straight_leg_raise", "seated_extension", "standing_flexion"]);
+const isExerciseAvailable = ex => ACTIVE_EXERCISES.has(ex.id);
 const ICONS = {
   flex: '<path d="M5 19V5M5 12h9a4 4 0 0 0 4-4"/>',
   slide: '<path d="M4 17h7l5-9M4 17l3-3"/><circle cx="17" cy="6" r="2"/>',
@@ -398,11 +486,11 @@ function renderWeeks() {
   $("weeknav").innerHTML = Object.keys(LIB).map(p => `<a href="#week${p}" class="${+p === now ? "now" : ""}">${esc(PHASES[p])}${+p === now ? " · now" : ""}</a>`).join("");
   $("weeks").innerHTML = Object.keys(LIB).map(p => `<section class="week${+p === now ? " now" : ""}" id="week${p}" aria-label="${esc(PHASES[p])}">
     <div class="head"><h2>${esc(PHASES[p])}</h2><span class="days">${esc(PHASE_DAYS[p])}</span>${+p === now ? '<span class="badge">you are here</span>' : ""}</div>
-    <div class="list">${LIB[p].map((ex, i) => `<button class="ex-card" data-p="${p}" data-i="${i}">
+    <div class="list">${LIB[p].map((ex, i) => `<button class="ex-card" data-p="${p}" data-i="${i}"${isExerciseAvailable(ex) ? "" : ' disabled aria-disabled="true"'}>
       <div class="ic"><svg viewBox="0 0 24 24">${ICONS[ex.icon]}</svg></div>
-      <div><h3>${esc(ex.title)}</h3><p>${esc(ex.blurb)}</p><p class="meta">${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}</p></div>
-      <div class="tag">${esc(ex.tag)}</div></button>`).join("")}</div></section>`).join("");
-  $("weeks").querySelectorAll(".ex-card").forEach(b => b.onclick = () => { phase = +b.dataset.p; openExercise(LIB[phase][+b.dataset.i]); });
+      <div><h3>${esc(ex.title)}</h3><p>${esc(ex.blurb)}</p><p class="meta">${isExerciseAvailable(ex) ? `${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}` : "To be introduced in due course"}</p></div>
+      <div class="tag">${isExerciseAvailable(ex) ? esc(ex.tag) : "Pending"}</div></button>`).join("")}</div></section>`).join("");
+  $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; openExercise(LIB[phase][+b.dataset.i]); });
 }
 function renderHome() {
   const d = daysPostOp($("opdate").value, new Date());
@@ -445,6 +533,7 @@ let tracker = null;  // the knee tracker: points followed in the box. Pixels and
 let jsfeatLib = null;
 
 async function openExercise(ex) {
+  if (!isExerciseAvailable(ex)) return;
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; handSince = null; handArmed = false; statusBefore = null;
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
   $("briefTitle").textContent = ex.title; $("briefMeta").textContent = `${PHASES[phase]} · ${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}`;
