@@ -1,0 +1,39 @@
+{
+  "title": "Seated knee extension: repetition-count exemplar",
+  "algorithm": "reference-image-return-experimental-v1",
+  "algorithmSourceSha256": "5ce917c656d8b5e03603a89308b6e581c063c8856ac963656a28f54c4eef6933",
+  "sourceVideoSha256": "9bdf0fc7d4c9e3ec6beaedf8fd0560c0dcd5e969490715fe739c5b960d9c4c1c",
+  "sourceDurationSeconds": 39.433333,
+  "exemplarDurationSeconds": 41.4,
+  "visualReferenceCount": 5,
+  "observedCount": 5,
+  "events": [
+    {
+      "repetition": 1,
+      "time": 10.118,
+      "signalExcursion": 6.226
+    },
+    {
+      "repetition": 2,
+      "time": 17.615,
+      "signalExcursion": 4.088
+    },
+    {
+      "repetition": 3,
+      "time": 24.613,
+      "signalExcursion": 3.657
+    },
+    {
+      "repetition": 4,
+      "time": 31.915,
+      "signalExcursion": 4.033
+    },
+    {
+      "repetition": 5,
+      "time": 39.282,
+      "signalExcursion": 3.941
+    }
+  ],
+  "rendering": "Full recording played at normal speed, resized to 360 x 640 beside a count overlay driven by saved browser-replay events. Audio and source metadata omitted. Final image held for two extra seconds.",
+  "evidenceScope": "Development exemplar using a recording inspected during development. Not independent validation, live-camera testing, or evidence of accuracy at a measured 3-5 m."
+}
