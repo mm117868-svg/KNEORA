@@ -845,7 +845,10 @@ for(const id of ["patientName","patientDob"]){$(id).addEventListener("change",()
 let phase = 1;   // the week section the open exercise came from; written into the record
 let renderedDay = todayKey();
 function currentPhase() { const d = daysPostOp($("opdate").value, new Date()); return d === null || d < 0 ? null : phaseForDay(d); }
-function exerciseDemoLink(ex) { return ""; }
+function exerciseDemoLink(ex) {
+  if (isExerciseAvailable(ex)) return "";
+  return `<a class="exercise-demo" href="./exercise-guides/magnific/#${encodeURIComponent(ex.id)}" target="_blank" rel="noopener" aria-label="Watch demonstration: ${esc(ex.title)} (opens in a new tab)">Watch demonstration ↗</a>`;
+}
 
 function renderWeeks() {
   const now = currentPhase();
