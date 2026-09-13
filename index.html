@@ -578,12 +578,6 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
         <label class="setting-check"><input type="checkbox" id="savevideo" checked><span>Save the video to Downloads<small>A recording is kept temporarily for analysis until you leave the session. Enable this and session file saving to download the video.</small></span></label>
         <label class="setting-check"><input type="checkbox" id="savefiles" checked><span>Save session files to Downloads<small>Download the session files when you finish. Your browser controls where downloads are saved.</small></span></label>
       </fieldset>
-      <fieldset class="setting-box"><legend>Repetition counting</legend>
-        <div class="f"><span>Repetition counting</span><strong>Position recognition (prototype)</strong><input type="hidden" id="countby" value="position"></div>
-
-        <p class="small-note" id="countDescription" aria-live="polite"></p>
-        <p class="small-note">Counting runs on this device. Hold the resting position for 3 seconds after starting. Uncertain movements remain unconfirmed.</p>
-      </fieldset>
       <fieldset class="setting-box session-settings"><legend>Start and finish sessions</legend>
         <p class="small-note"><b>Start from your exercise position.</b> Show an open palm towards the camera anywhere in the picture and hold it for two seconds. A five-second Marin countdown gives you time to lower your hand before recording starts. Your head does not need to be visible.</p>
         <p class="small-note">To finish, show an open palm for three seconds or select Finish. The app confirms when recording has stopped and you can move from your exercise position.</p>
@@ -794,21 +788,13 @@ if (PROGRESS_VIEW) document.title = `${PAGE_VIEW === "recovery-summary" ? "Recov
 const NOPOSE = PROGRESS_VIEW || new URLSearchParams(location.search).has("nopose");
 
 /* ---------------- settings ---------------- */
-const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", countby: "kr_app_countby" };
+const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam" };
 const flags = { showangle: "kr_app_angle", savevideo: "kr_app_video", savefiles: "kr_app_files" };
 
 for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); if(k==="patient")restorePatientProfile(); renderHome(); }); }
-// Replace retired choices; historical session records remain readable.
-$("countby").value = "position";
-localStorage.setItem(prefs.countby, "position");
 for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => {localStorage.setItem(flags[k], $(k).checked ? "1" : "0"); updateSettingsSummary();}); }
 
 if (!["left", "right"].includes($("side").value)) $("side").value = "";
-const countDescriptions = {position: "Counts movement away from rest and back using exercise-specific positions. Separate prototype models for straight-leg raises, seated knee extensions and heel slides. Use the same side-on lower-limb framing as the prototype; working-leg identity and small movements are not validated."};
-function updateSettingHelp() { $("countDescription").textContent = countDescriptions.position; }
-$("countby").addEventListener("change", updateSettingHelp); updateSettingHelp();
-
-
 function updateSettingsSummary() {
   const leg=$("side").value, camera=$("camsel").selectedOptions[0]?.textContent || "Default camera";
   const controls = "Raised-hand start";
@@ -1041,7 +1027,7 @@ async function openCamera(gen) {
 }
 /* ---------------- repetition-count layer ----------------
    The knee tracker and pixel-motion counter run independently. Both counts go into the record. */
-const countBy = () => current && current.kind === "hold" ? "timer" : $("countby").value;
+const countBy = () => current && current.kind === "hold" ? "timer" : "position";
 const smallMovement = () => countBy() === "small";
 const trackWanted = () => ["track","small"].includes(countBy());
 const trackCounting = () => !!(tracker && tracker.ready && trackWanted());
