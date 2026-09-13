@@ -1,8 +1,8 @@
 [
   {
     "path": "videos/heel_slide.jpg",
-    "bytes": 67171,
-    "sha256": "d482358565d804faa899283a6adfffe64ac7a548afdb52bb873b83ebdfe7edeb"
+    "bytes": 33398,
+    "sha256": "9fbdefe23585bb7727391207ff863af5644ab14ac1094e896731cf3866b2478d"
   },
   {
     "path": "videos/heel_slide.mp4",
@@ -16,8 +16,8 @@
   },
   {
     "path": "videos/mini_squat.jpg",
-    "bytes": 67752,
-    "sha256": "b385f2c34d822f685e8c650df2d69ba0a0777bcd6a0f0701e1c1c6bd925b03e8"
+    "bytes": 32848,
+    "sha256": "a8fed19237eeda9d07da10e29dd870a3e2136073fcd88f3482042bbd0eb8e0e5"
   },
   {
     "path": "videos/mini_squat.mp4",
@@ -31,8 +31,8 @@
   },
   {
     "path": "videos/quad_set.jpg",
-    "bytes": 70623,
-    "sha256": "035ec03a03372f4c57efbccd0ceaafbce0fcc596249abfba0be648661382a95a"
+    "bytes": 38644,
+    "sha256": "b28651361f5fd5cea9822a66e1062282dfd7b8fc89b7124f2a9199fb1de7eb72"
   },
   {
     "path": "videos/quad_set.mp4",
@@ -46,8 +46,8 @@
   },
   {
     "path": "videos/seated_extension.jpg",
-    "bytes": 76848,
-    "sha256": "db0a7cd94f16149b8a444d9fb5de29dd6f4934d49033cc2140abb4ab2b20ea6d"
+    "bytes": 35253,
+    "sha256": "1ae1ea4f9f29f2d6638b83213f3648dc0820c34b3b8bb370ab87835103992213"
   },
   {
     "path": "videos/seated_extension.mp4",
@@ -61,8 +61,8 @@
   },
   {
     "path": "videos/single_leg_stance.jpg",
-    "bytes": 70298,
-    "sha256": "521f1fbe2b96f61a46e5e60b8bbefef13f2265bb215f5e0e42ce295a4b5ca69b"
+    "bytes": 34795,
+    "sha256": "33dc4ee158cde2944021874eb2e3e3f6a00578544456b13d6876826a146af046"
   },
   {
     "path": "videos/single_leg_stance.mp4",
@@ -76,8 +76,8 @@
   },
   {
     "path": "videos/sit_to_stand.jpg",
-    "bytes": 64405,
-    "sha256": "f55d8e40330e691fb2416148949e6561900e81abc8aecb9b7b15843171dde3ac"
+    "bytes": 35289,
+    "sha256": "33b97947e47d62e34091f23802a2a9a9c2180271862d03c951c3bd47794f3f1f"
   },
   {
     "path": "videos/sit_to_stand.mp4",
@@ -91,8 +91,8 @@
   },
   {
     "path": "videos/squat.jpg",
-    "bytes": 63721,
-    "sha256": "7b6fd7e31ad8161a8163ac6612c72f443cba9e2cfa01b396ddcd72366199f836"
+    "bytes": 28427,
+    "sha256": "606eeb289ced30ccf090be799c4ad78d4dcec61b5fb78fd0373ababac7418590"
   },
   {
     "path": "videos/squat.mp4",
@@ -106,8 +106,8 @@
   },
   {
     "path": "videos/standing_flexion.jpg",
-    "bytes": 72673,
-    "sha256": "8068569cf89c93f8037afc6c5710a99e0cee5295cde6265661b07b90757fd755"
+    "bytes": 38124,
+    "sha256": "f81cb894562a157b136061ad865c5a5c00477af165894e54fb1477243b444091"
   },
   {
     "path": "videos/standing_flexion.mp4",
@@ -121,8 +121,8 @@
   },
   {
     "path": "videos/straight_leg_raise.jpg",
-    "bytes": 72827,
-    "sha256": "fd636aaf0cb4d8d233cbc1dae278068319fd76f427efc19a4cb91876f407641e"
+    "bytes": 37445,
+    "sha256": "e1ff08377b098a9460f561085cf5a87710de2964d206d7b807978123b2a9e410"
   },
   {
     "path": "videos/straight_leg_raise.mp4",

@@ -680,6 +680,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 <dialog id="patientReview" class="patient-review" aria-labelledby="patientReviewTitle"><div class="patient-review-header"><span id="patientReviewTitle">Your exercise summary</span><button type="button" id="closePatientReview">Close</button></div><div id="patientReviewContent"></div></dialog>
 
 <script type="module">
+import {showExerciseGuide} from './exercise-guides/guide-player.js?v=magnific-1';
 import {LivePositionCounter,readPositionFrame} from './tools/position-recogniser/live.mjs';
 let positionModel=null,positionCounter=null;
 const positionCanvas=document.createElement('canvas');positionCanvas.width=positionCanvas.height=128;
@@ -844,10 +845,8 @@ for(const id of ["patientName","patientDob"]){$(id).addEventListener("change",()
 let phase = 1;   // the week section the open exercise came from; written into the record
 let renderedDay = todayKey();
 function currentPhase() { const d = daysPostOp($("opdate").value, new Date()); return d === null || d < 0 ? null : phaseForDay(d); }
-function exerciseDemoLink(ex) {
-  const path=ex.id === "seated_extension" ? "fitness-avatar/v2/seated_extension.mp4" : `videos/${ex.id}.mp4`;
-  return `<a class="exercise-demo" href="./exercise-guides/${path}" target="_blank" rel="noopener" aria-label="Watch example: ${esc(ex.title)} (opens in a new tab)">Watch example ↗</a>`;
-}
+function exerciseDemoLink(ex) { return ""; }
+
 function renderWeeks() {
   const now = currentPhase();
   $("weeknav").innerHTML = Object.keys(LIB).map(p => `<a href="#week${p}" class="${+p === now ? "now" : ""}">${esc(PHASES[p])}${+p === now ? " · now" : ""}</a>`).join("");
@@ -997,6 +996,7 @@ $("voiceTest").onclick = async () => {
 async function openExercise(ex) {
   if (!isExerciseAvailable(ex)) return;
   if (!["left", "right"].includes($("side").value)) { location.href="./#side"; return; }
+  if (!await showExerciseGuide(ex)) return;
   await preparePositionModel(ex.id);
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; resetHand(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   $("voiceStatus").textContent = "";
