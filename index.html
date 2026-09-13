@@ -579,7 +579,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
         <label class="setting-check"><input type="checkbox" id="savefiles" checked><span>Save session files to Downloads<small>Download the session files when you finish. Your browser controls where downloads are saved.</small></span></label>
       </fieldset>
       <fieldset class="setting-box"><legend>Repetition counting</legend>
-        <label class="f">Count repetitions by<select id="countby"><option value="position">Position recognition (prototype)</option></select></label>
+        <div class="f"><span>Repetition counting</span><strong>Position recognition (prototype)</strong><input type="hidden" id="countby" value="position"></div>
 
         <p class="small-note" id="countDescription" aria-live="polite"></p>
         <p class="small-note">Counting runs on this device. Hold the resting position for 3 seconds after starting. Uncertain movements remain unconfirmed.</p>
