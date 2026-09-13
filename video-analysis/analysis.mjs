@@ -1,12 +1,12 @@
 // Pure measurement and segmentation functions. All thresholds are prototype rules.
-export const RULE_VERSION = 'slr-prototype-8';
+export const RULE_VERSION = 'slr-prototype-9';
 const median = xs => {const s = [...xs].sort((a,b)=>a-b); return s[Math.floor(s.length/2)];};
 export function angle(a,b,c) {
   const u=[a.x-b.x,a.y-b.y],v=[c.x-b.x,c.y-b.y];
   const d=Math.hypot(...u)*Math.hypot(...v);
   return d<1e-8 ? NaN : Math.acos(Math.max(-1,Math.min(1,(u[0]*v[0]+u[1]*v[1])/d)))*180/Math.PI;
 }
-export const QUALITY_RULES={minVisibility:0.5,minPresence:0.5,minSegmentPixels:20};
+export const QUALITY_RULES={minVisibility:0.2,minPresence:0.2,minSegmentPixels:20};
 export function assessPose(poses,width,height,side,minVisibility=QUALITY_RULES.minVisibility){
   if(!Number.isFinite(minVisibility)||minVisibility<0.1||minVisibility>0.95)throw Error('Visibility threshold must be between 10% and 95%.');
   const empty=reason=>({valid:false,frameStatus:'rejected',rejectionReasons:reason,bend:null,hipAngle:null,hipFlexion:null,visibility:null});

@@ -1,6 +1,7 @@
-import {recordedCount} from './patient-progress.js?v=pose-gate-1';
-import {EXERCISE_NAMES,METRICS,finite,postOpDay,measurementSeries} from './progress-data.mjs?v=pose-gate-1';
+import {recordedCount} from './patient-progress.js?v=recording-voice-2';
+import {EXERCISE_NAMES,METRICS,finite,postOpDay,measurementSeries} from './progress-data.mjs?v=recording-voice-2';
 import {esc,shortDate,dayLabel} from './progress-shared.mjs';
+import {MIN_COUNT_COVERAGE,trackingCoverage,videoRepetitionCount,trackingFeedback} from './measurement-quality.mjs';
 const positive=n=>finite(n)!==null&&n>0?n:null;
 const nonnegative=n=>finite(n)!==null&&n>=0?n:null;
 const round=n=>Math.round(n*10)/10;
@@ -29,11 +30,11 @@ export function basicExerciseSummary(record,history=[]) {
  const info=facts[record.exercise]||{title:EXERCISE_NAMES[record.exercise]||'Exercise',focus:'Follow the exercise plan agreed with your physiotherapist.'};
  const report=record.exercise_analysis?.exercise===record.exercise?record.exercise_analysis:null,metrics=report?.metrics||{},reps=Array.isArray(report?.reps)?report.reps:[];
  const day=postOpDay(String(record.started_at||'').slice(0,10),record.operation_date);
- const coverage=nonnegative(metrics.repetitionTrackingCoverage)??nonnegative(report?.coverage);
- const videoCount=report&&(reps.length>0||coverage>0)?reps.length:null,liveCount=recordedCount(record);
+ const coverage=trackingCoverage(report);
+ const videoCount=videoRepetitionCount(report),liveCount=recordedCount(record);
  const count=videoCount??liveCount;
  const partial=!!report&&((positive(report.config?.start)??0)>0 || (positive(metrics.analysedDuration)!==null&&positive(record.duration_s)!==null&&metrics.analysedDuration<record.duration_s-1));
- const countNote=videoCount!==null?`Complete repetitions seen${partial?' in the analysed part':' in the video'}${liveCount!==null&&liveCount!==videoCount?`. ${counterLabel(record)}: ${liveCount}.`:'.'}`:`${counterLabel(record)}${report?'; video count unavailable':''}`;
+ const countNote=count===null?'Tracking was not clear enough to measure repetitions. This does not mean you performed none.':videoCount!==null?`Complete repetitions seen${partial?' in the analysed part':' in the video'}${coverage<MIN_COUNT_COVERAGE?'; more may have been missed':''}${liveCount!==null&&liveCount!==videoCount?`. ${counterLabel(record)}: ${liveCount}.`:'.'}`:`${counterLabel(record)}${report?'; video count unavailable':''}`;
  // Never attach the background camera counter's tempo to the patient's spoken count.
  const counter=record.count_source==='knee_tracker'?record.tracking:(!record.count_source||record.count_source==='monitoring')?record.monitoring:null;
  const tempo=report?(reps.length?positive(metrics.meanCycleDuration)??average(reps.map(p=>positive(p.cycleDuration))):null):(liveCount>=2?positive(counter?.tempo_s_per_rep):null);
@@ -61,8 +62,9 @@ export function basicExerciseSummary(record,history=[]) {
  const metric=METRICS[record.exercise]?.find(m=>m.id===info.key),previous=report&&metric?previousMeasurement(record,history,metric):null;
  const comparison=previous?`${previous.delta===0?'About the same':`About ${Math.abs(previous.delta)}° ${previous.delta>0?'more':'less'}`} ${info.direction} than your previous measured session (${shortDate(previous.date)}${previous.day!==null?', '+dayLabel(previous.day):''}).`:null;
  const pain=nonnegative(record.patient?.pain_0_10),difficulty=nonnegative(record.patient?.difficulty_1_5);
- let quality=report?'Angles are camera estimates. Keep the same camera position when comparing sessions.':'Live angles are estimates. Select Analyse exercise to add the movement details.';
+ let quality=report?'Angles are camera estimates. Keep the same camera position when comparing sessions.':record.recording?.captured?'Your video was captured. Movement analysis is being prepared below. Live angles are estimates.':'Live angles are estimates. Select Analyse exercise to add the movement details.';
  if(report&&(coverage===null||coverage<.8))quality=coverage===null?'Some movements may not have been captured clearly. Read these figures as estimates.':coverage===0?'The video did not capture enough clear movement to measure it. The live count, if available, is shown instead.':`The camera could follow ${Math.round(coverage*100)}% of the analysed movement samples. Some repetitions or angles may have been missed.`;
+ if(report&&(coverage===null||coverage<MIN_COUNT_COVERAGE))quality+=' '+trackingFeedback(report);
  if(report&&record.exercise==='seated_extension')quality+=' A hands-on check is needed to measure clinical extension lag.';
  if(partial)quality+=` Angles and video repetitions cover ${timeWords(metrics.analysedDuration)} of the recording; total time is for the whole session.`;
  return {title:info.title,day,date:String(record.started_at||'').slice(0,10),side:report?.config?.side||record.measurement?.side,count,countNote,duration:timeWords(record.duration_s),tempo,cadence,stages,movement,focus:info.focus,source:info.source,comparison,quality,analysed:!!report,

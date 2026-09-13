@@ -19,14 +19,14 @@ The movement checks are specific to the three active exercises:
 | Heel slide | Ankle displacement and knee movement relative to the hip, then return. |
 | Seated knee extension | Lower-leg displacement with a relatively stable thigh, then return. |
 
-Thresholds are normalised to the visible leg length. The initial settings in
-`pose-gate.js` require hip, knee and ankle visibility of at least 0.65, presence
-of at least 0.5 when provided, and fresh observations within 450 ms. An incomplete
+Thresholds are normalised to the visible leg length. The current settings in
+`pose-gate.js` require hip, knee and ankle visibility of at least 0.20, presence
+of at least 0.20 when provided, and fresh observations within 450 ms. An incomplete
 movement is discarded after a longer pose gap. Existing completed counts are
 preserved while the model reacquires the leg. Candidates with insufficient
 evidence are recorded as unconfirmed, rather than becoming raw-count fallbacks.
 
-The skeleton uses a separate display threshold of 0.4 and draws each segment
+The skeleton uses a display threshold of 0.20 and draws each segment
 whose endpoints are visible. A visible knee and ankle can therefore be drawn
 without a visible hip, face or torso. Confirming an exercise still requires the
 selected hip, knee and ankle. The display does not infer missing joints or keep
@@ -71,3 +71,5 @@ MediaPipe's landmark coordinates and confidence fields are described in the
 The underlying approach is described in
 [BlazePose: On-device Real-time Body Pose Tracking (Bazarevsky et al., 2020)](https://arxiv.org/abs/2006.10204).
 Neither source validates this exercise-specific filter or its thresholds.
+
+On 13 September 2026, the user requested a drastic reduction in tracking thresholds. Live pose detection, pose presence, tracking confidence, joint visibility, skeleton visibility and recorded-video analysis now use 0.20 confidence settings. The live gate records version `leg-gate-2`, and video reports record `exercise-prototype-10`, so comparisons can distinguish the changed settings. This accepts less certain landmark positions. Image bounds, segment geometry, freshness and a complete movement of the selected leg are still required.

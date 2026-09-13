@@ -1,4 +1,4 @@
-import {recordedCount} from './patient-progress.js?v=pose-gate-1';
+import {recordedCount} from './patient-progress.js?v=recording-voice-2';
 export const EXERCISE_NAMES = {straight_leg_raise:'Straight leg raise',seated_extension:'Seated knee extension',heel_slide:'Heel slides'};
 export const finite = n => typeof n === 'number' && Number.isFinite(n) ? n : null;
 const values = xs => xs.map(finite).filter(n=>n!==null);

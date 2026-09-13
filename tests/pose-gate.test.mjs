@@ -42,7 +42,7 @@ test('the other leg cannot validate a repetition',()=>{const g=new LegMotionGate
 test('right leg selection uses right landmarks',()=>{const g=new LegMotionGate('straight_leg_raise','right');rest(g,0,{side:'right'});cycle(g,{side:'right'});assert.equal(g.reps,1);});
 test('camera translation does not look like a leg excursion',()=>{const g=new LegMotionGate('straight_leg_raise','left');rest(g);for(let i=0;i<70;i++){let t=1+i*.05;g.observe(landmarks({translate:.05*Math.sin(i/10)}),t,1000,700);if(i===25)g.candidate(t);}assert.equal(g.reps,0);});
 test('low visibility, missing landmarks and stale results never confirm candidates',()=>{
- for(const mode of ['low','missing','stale']){const g=new LegMotionGate('straight_leg_raise','left');rest(g);if(mode==='low')g.observe(landmarks({visibility:.2}),1,1000,700);else if(mode==='missing')g.observe(null,1,1000,700);g.candidate(1.5);assert.equal(g.reps,0);assert.equal(g.events[0].status,'unconfirmed');}
+ for(const mode of ['low','missing','stale']){const g=new LegMotionGate('straight_leg_raise','left');rest(g);if(mode==='low')g.observe(landmarks({visibility:.1}),1,1000,700);else if(mode==='missing')g.observe(null,1,1000,700);g.candidate(1.5);assert.equal(g.reps,0);assert.equal(g.events[0].status,'unconfirmed');}
 });
 test('a gap discards the unfinished cycle and preserves completed repetitions',()=>{
  const g=new LegMotionGate('straight_leg_raise','left');rest(g);cycle(g);g.observe(landmarks({lift:.5}),4.75,1000,700);g.candidate(4.75);g.advance(5.4);rest(g,5.5);assert.equal(g.reps,1);assert.equal(g.events.at(-1).status,'unconfirmed');cycle(g,{from:6.3});assert.equal(g.reps,2);
@@ -63,6 +63,21 @@ test('progress uses the confirmed count and does not rewrite historical raw coun
 });
 
 import { drawSkeleton, pickSide } from '../kneerec.js';
+import { inspectExerciseLeg } from '../pose-gate.js';
+test('leg framing distinguishes an off-screen ankle from a fully visible selected leg',()=>{
+ const p=landmarks();assert.equal(inspectExerciseLeg(p,'left',1000,700).clear,true);
+ p[27].x=1.2;const view=inspectExerciseLeg(p,'left',1000,700);assert.equal(view.clear,false);assert.match(view.message,/left ankle is outside/);
+ const g=new LegMotionGate('straight_leg_raise','left');g.observe(p,0,1000,700);
+ assert.equal(g.summary().count_status,'unavailable');assert.equal(g.summary().rejection_counts['ankle:outside_frame'],1);
+ rest(g,1);assert.equal(g.summary().calibrated,true);assert.equal(g.summary().count_status,'observed');
+});
+test('requested 20 percent threshold accepts weaker joints while still rejecting out-of-frame points',()=>{
+ const p=landmarks({visibility:.25});for(const i of [23,25,27])p[i].presence=.25;
+ assert.equal(inspectExerciseLeg(p,'left',1000,700).clear,true);
+ const g=new LegMotionGate('straight_leg_raise','left');for(let i=0;i<15;i++)g.observe(p,i*.05,1000,700);
+ assert.ok(g.reference);assert.equal(g.summary().settings.visibility,.2);assert.equal(g.summary().settings.presence,.2);
+ p[27].x=1.01;assert.equal(inspectExerciseLeg(p,'left',1000,700).clear,false);
+});
 function drawing() {const calls={lines:0,dots:0};return {calls,beginPath(){},moveTo(){},lineTo(){calls.lines++;},stroke(){},arc(){calls.dots++;},fill(){}};}
 test('lower-limb skeleton draws without face or torso landmarks',()=>{
  const p=Array(33);p[23]={x:.3,y:.4,visibility:.9};p[25]={x:.5,y:.5,visibility:.9};p[27]={x:.7,y:.7,visibility:.9};
@@ -74,6 +89,6 @@ test('knee and ankle alone still draw their segment',()=>{
  const ctx=drawing();drawSkeleton(ctx,p,1000,700);assert.equal(ctx.calls.lines,1);assert.equal(ctx.calls.dots,2);assert.equal(pickSide(p,1000,700,'left',.5),null);
 });
 test('uncertain, absent and off-screen landmarks are not drawn',()=>{
- const p=Array(33);p[25]={x:.5,y:.5,visibility:.9};p[27]={x:.7,y:.7,visibility:.2};p[23]={x:-.1,y:.4,visibility:1};p[15]={x:NaN,y:.2,visibility:1};
+ const p=Array(33);p[25]={x:.5,y:.5,visibility:.9};p[27]={x:.7,y:.7,visibility:.1};p[23]={x:-.1,y:.4,visibility:1};p[15]={x:NaN,y:.2,visibility:1};
  const ctx=drawing();drawSkeleton(ctx,p,1000,700);assert.equal(ctx.calls.lines,0);assert.equal(ctx.calls.dots,1);
 });

@@ -575,7 +575,7 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
 
   <section class="phasepick">
     <span class="eyebrow">Your programme, week by week</span>
-    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. After recording, select Analyse exercise for estimated angles, movement range, timings and clinical references. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
+    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. After recording, movement analysis starts automatically. You can replay or download your video and open the full report for estimated angles, movement range, timings and clinical references. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
     <nav class="weeknav" id="weeknav" aria-label="Jump to a week"></nav>
   </section>
 
@@ -586,7 +586,7 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
   <div class="safety">
     <b>Listen to your knee.</b> Mild discomfort is normal; sharp pain is not. Stop and contact your surgeon if you notice fever, calf pain, spreading numbness or wound drainage. This programme supports your physiotherapist's plan; it does not replace it.
   </div>
-  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. Camera repetitions require both optical movement and confirmation in your selected leg. After you finish, you can analyse the recording and share its measurements with your physiotherapist.  · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
+  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. Camera repetitions require both optical movement and confirmation in your selected leg. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: recording-voice-2 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
   <footer class="app-footer" aria-label="Company and app information">
     <div class="footer-heading"><div><span class="eyebrow">Cambridge Kinematics</span><h2>Supporting your recovery,<br>one day at a time.</h2></div><span class="footer-status">In development</span></div>
     <div class="footer-company"><strong>Cambridge Kinematics Limited</strong><p>A private limited company registered in England and Wales.</p><p>Cambridge, England</p></div>
@@ -629,6 +629,8 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
       <div class="setup" id="briefSetup"></div>
       <div class="hands" id="hands"><span id="handtext" role="status"></span><div class="bar" aria-hidden="true"><div class="fill" id="handfill"></div></div></div>
       <button type="button" class="gesture-retry" id="poseRetry" hidden>Retry camera tracking</button>
+      <button type="button" class="gesture-retry" id="voiceTest">Test Marin voice</button>
+      <p id="voiceStatus" class="small-note" role="status"></p>
     </div>
     <div class="handring" id="handring" hidden><div class="htext" id="htext"></div><div class="hbar"><div class="hfill" id="hfill"></div></div></div>
     <div class="countdown" id="countdown" hidden></div>
@@ -655,18 +657,18 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
 
 <script type="module">
 import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
-         FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=pose-gate-1";
-import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs";
+         FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=recording-voice-2";
+import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=recording-voice-2";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js";
 import { AppVoice, completionNotice } from "./app-voice.mjs";
-import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=pose-gate-1";
+import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=recording-voice-2";
 import { renderRecoverySummary } from "./recovery-summary.mjs?v=1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
-import { renderProgressToDate } from "./progress-to-date.mjs?v=pose-gate-1";
+import { renderProgressToDate } from "./progress-to-date.mjs?v=recording-voice-2";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=1";
-import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=pose-gate-1";
+import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=recording-voice-2";
 import { showExerciseGuide } from "./exercise-guides/guide-player.js";
-import { LegMotionGate } from "./pose-gate.js";
+import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=recording-voice-2";
 
 
 /* ---------------- Exercise library ----------------
@@ -879,12 +881,18 @@ async function chooseExercise(ex) {
   if (await showExerciseGuide(ex)) return openExercise(ex);
 }
 const appVoice = new AppVoice({onState: () => refreshHint()});
+$("voiceTest").onclick = async () => {
+  $("voiceStatus").textContent = "Preparing Marin…";
+  const ready = await appVoice.prepare();
+  $("voiceStatus").textContent = ready && appVoice.play() ? "Marin is playing. Check your device volume. This is a voice test; recording has not started." : "Audio could not play. Check your device sound and browser permissions, then try again.";
+};
 
 
 async function openExercise(ex) {
   if (!isExerciseAvailable(ex)) return;
   if (!["left", "right"].includes($("side").value)) { location.href="?view=settings#side"; return; }
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; resetHand(); handArmed = false; statusBefore = null;
+  $("voiceStatus").textContent = "";
   appVoice.prepare();
   appVoice.prepare("repetitions_complete"); appVoice.prepare("session_ended");
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
@@ -1079,7 +1087,12 @@ function previewStep() {
     let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
     previewAll = res?.landmarks?.[0] || null; previewPoseUpdated = true; previewPoseAt = now;
   }
-  const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.5) : null;
+  const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null;
+  if (current.kind !== "hold") {
+    const view = inspectExerciseLeg(now-previewPoseAt <= 450 ? previewAll : null, $("side").value, canvas.width, canvas.height);
+    $("track").textContent = view.message;
+    $("track").className = "track " + (view.clear ? "ok" : "off");
+  }
   if (previewAll && now-previewPoseAt <= 450) drawSkeleton(ctx, previewAll, canvas.width, canvas.height, {line:"rgba(61,220,132,.85)", lineWidth:Math.max(2,canvas.width/400), radius:Math.max(3,canvas.width/220)});
 
   if ($("showangle").checked) {
@@ -1146,7 +1159,7 @@ function step() {
     poseUpdated = true;
 
     lastAll = (res && res.landmarks && res.landmarks[0]) ? res.landmarks[0] : null;
-    if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.5);
+    if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.2);
     angle = trace.add(frameNo, t, lm); lastLm = lm; lastAngle = angle;
   } else if (landmarker) { lm = lastLm; angle = lastAngle; }
   peak = trace.quantile(0.95);   // "best today" is the 95th percentile of the trusted frames so far, not the single highest frame
@@ -1179,12 +1192,16 @@ function step() {
       if (f >= 1) { resetHand(); $("handring").hidden = true; finish(false); return; }
     }
   }
-  if (current.kind !== "hold") { $("reps").textContent = count; if (trackCounting() && frameNo % 15 === 0) showCounts(); }
+  if (current.kind !== "hold") { $("reps").textContent = count === 0 && !(legGate?.quality && legGate?.reference) ? "…" : count; if (trackCounting() && frameNo % 15 === 0) showCounts(); }
   const m = Math.floor(t / 60), s = Math.floor(t % 60); $("clock").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   if (current.kind !== "hold") {
     $("track").textContent = legGate?.message() || "Waiting for a clear view of your exercise leg.";
     $("track").className = "track " + (legGate?.quality && legGate?.reference ? "ok" : "");
     $("repsSub").textContent = "movements confirmed in your selected leg";
+    if (!prescribedDone && !statusBefore) {
+      $("status").textContent = !(legGate?.quality && legGate?.reference) ? "Counting is waiting. " + (legGate?.message() || "Keep your exercise leg in view.") : "Recording. Follow your exercise plan.";
+      $("status").className = "status";
+    }
   } else { $("track").textContent = lm ? "leg in view" : "keep the exercise leg in view"; }
   if ($("angleTile").style.display !== "none") {
     $("angle").textContent = Number.isNaN(angle) ? "—" : angle.toFixed(0);
@@ -1244,8 +1261,9 @@ async function finish(abandon = false) {
     exercise: current.id, prescribed_reps: current.count, prescribed_minutes: null, started_at: localIso(startedAt), duration_s: +duration.toFixed(1),
     fps: +(frameNo / Math.max(1, duration)).toFixed(1), video_file: videoBlob && $("savevideo").checked && $("savefiles").checked ? (videoBlob.type.includes("mp4") ? "video.mp4" : "video.webm") : "",
     measurement: summarise(trace, duration, target), monitoring: mon, patient_count: null, tracking: tr, pose_validation: pv, count_source: source, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
+    recording: { captured: !!videoBlob?.size, bytes: videoBlob?.size || 0, mime_type: videoBlob?.type || null },
 
-    software_version: SOFTWARE, app: { page: "app.html", phase, aim: current.aim } };
+    software_version: SOFTWARE, app: { page: "index.html", build: "recording-voice-2", phase, aim: current.aim } };
   if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles };
   rec.measurement.trace_preview = tracePreview(trace.rows);
   const slot = storeRecord(rec) - 1;   // stored now, before the questions, so walking away from the laptop loses nothing
@@ -1261,7 +1279,7 @@ async function finish(abandon = false) {
   };
   updateExerciseSummary();
   disposeAnalysis();
-  disposeAnalysis = mountExerciseAnalysis($("exerciseAnalysis"), { blob: videoBlob, metadata: { exercise: rec.exercise, side: $("side").value, duration, daysPostOp: rec.days_post_op, operationDate: op, startedAt: rec.started_at, prescribedReps: rec.prescribed_reps }, returnToSummary: true, onReport: report => { rec.exercise_analysis = report; updateRecord(slot, rec); updateExerciseSummary(); $("detailedVideoAnalysis").append($("exerciseAnalysis")); renderHome(); } });
+  disposeAnalysis = mountExerciseAnalysis($("exerciseAnalysis"), { blob: videoBlob, metadata: { exercise: rec.exercise, side: $("side").value, duration, daysPostOp: rec.days_post_op, operationDate: op, startedAt: rec.started_at, prescribedReps: rec.prescribed_reps }, returnToSummary: true, autoStart: true, onReport: report => { rec.exercise_analysis = report; updateRecord(slot, rec); updateExerciseSummary(); renderHome(); } });
   rec.patient.pain_0_10 = await ask("How painful was that?", "0 = no pain, 10 = worst pain", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   if (finishGen !== openGen) return;
   rec.patient.difficulty_1_5 = await ask("How hard was that?", "1 = easy, 5 = very hard", [1, 2, 3, 4, 5]);

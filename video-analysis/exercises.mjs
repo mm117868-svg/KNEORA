@@ -19,7 +19,7 @@ export function chooseSide(pairs, requested = 'auto', exercise = 'straight_leg_r
 function enrich(r, exercise) {
   r.exercise = exercise;
   r.exerciseName = EXERCISES[exercise].name;
-  r.ruleVersion = 'exercise-prototype-9';
+  r.ruleVersion = 'exercise-prototype-10';
   r.metricSchemaVersion = 2;
   for (const rep of r.reps) {
     const frames = r.trace.filter(s=>s.t>=rep.start && s.t<=rep.end);

@@ -27,6 +27,20 @@ test('heel slides show true return endpoint and plain repetition consistency',()
 test('failed video tracking does not claim zero performed repetitions or derive video tempo',()=>{
  const r=report(record(),{repetitionTrackingCoverage:0});r.exercise_analysis.reps=[];const s=basicExerciseSummary(r);assert.equal(s.count,10);assert.match(s.countNote,/video count unavailable/);assert.equal(s.tempo,null);assert.match(s.quality,/did not capture enough clear movement/);
 });
+test('sparse tracking with no detections is unavailable, including an old live zero',()=>{
+ const r=report(record('straight_leg_raise'),{repetitionTrackingCoverage:.072,rejectionCounts:{'ankle:outside_frame':505,'knee:low_visibility':560}});
+ r.exercise_analysis.config.side='right';r.exercise_analysis.reps=[];r.monitoring.repetitions=0;
+ const s=basicExerciseSummary(r);assert.equal(s.count,null);assert.match(s.countNote,/does not mean you performed none/);assert.match(s.quality,/7%/);assert.match(s.quality,/right ankle went outside/);
+ assert.match(renderBasicExerciseSummary(r),/Not measured/);
+});
+test('a positive observed count survives poor coverage and is labelled incomplete evidence',()=>{
+ const r=report(record(),{repetitionTrackingCoverage:.07});const s=basicExerciseSummary(r);
+ assert.equal(s.count,2);assert.match(s.countNote,/more may have been missed/);
+});
+test('uncalibrated live camera zero is unavailable without losing the original raw result',()=>{
+ const r=record();r.count_source='pose_gated_optical';r.pose_validation={repetitions:0,count_status:'unavailable'};
+ assert.equal(basicExerciseSummary(r).count,null);assert.equal(r.pose_validation.repetitions,0);
+});
 test('partial analysis is labelled and total session time is not shortened',()=>{
  const r=report(record(),{analysedDuration:40});r.exercise_analysis.config.start=50;const s=basicExerciseSummary(r);assert.equal(s.duration,'1 min 30 sec');assert.match(s.countNote,/analysed part/);assert.match(s.quality,/40 sec/);
 });
@@ -56,5 +70,18 @@ test('first completed analysis returns to the simple summary, later detailed rea
   page.send({origin:location.origin,source:iframe.contentWindow,data:complete});assert.equal(saved,1);assert.equal(dialog.open,false);assert.equal(page.heading.focused,true);assert.equal(button.textContent,'Open full video report');
   button.onclick();page.send({origin:location.origin,source:iframe.contentWindow,data:complete});assert.equal(saved,2);assert.equal(dialog.open,true);
   dispose();assert.equal(dialog.removed,true);
+ }finally{page.restore();}
+});
+test('automatic analysis starts without a modal, reports progress and retains a local download',()=>{
+ const page=fakePage();try{
+  let saved=0;const dispose=mountExerciseAnalysis(page.host,{blob:new Blob(['fixture']),metadata:{exercise:'heel_slide'},autoStart:true,onReport:()=>saved++});
+  const iframe=page.elements.find(e=>e.tag==='iframe'),dialog=page.elements.find(e=>e.tag==='dialog');
+  assert.ok(iframe);assert.ok(!dialog.open);assert.ok(page.elements.find(e=>e.textContent==='Download this recording').href.startsWith('blob:'));
+  page.send({origin:location.origin,source:iframe.contentWindow,data:{type:'exercise-analysis-ready'}});
+  page.send({origin:location.origin,source:iframe.contentWindow,data:{type:'exercise-analysis-status',token:'wrong',text:'Wrong message'}});
+  assert.ok(!page.elements.some(e=>e.textContent==='Wrong message'));
+  page.send({origin:location.origin,source:iframe.contentWindow,data:{type:'exercise-analysis-status',token:iframe.sent.token,text:'Analysing 5 / 10 seconds…'}});
+  assert.ok(page.elements.some(e=>e.textContent==='Analysing 5 / 10 seconds…'));
+  dispose();page.send({origin:location.origin,source:iframe.contentWindow,data:{type:'exercise-analysis-complete',token:iframe.sent.token,report:report(record()).exercise_analysis}});assert.equal(saved,0);
  }finally{page.restore();}
 });

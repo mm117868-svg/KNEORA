@@ -1,11 +1,18 @@
 import {assessPose, clinicalQAB, slrAssessment} from './analysis.mjs';
 import {EXERCISES, analyseExercise, chooseSide, compactReport} from './exercises.mjs';
 import {recoveryContext} from './evidence.mjs';
+import {videoRepetitionCount,trackingFeedback} from '../measurement-quality.mjs';
 const $=id=>document.getElementById(id),video=$('video');
 let fileURL,model,report,loading,cancelled=false,busy=false,sourceName='',duration=0,metadata={},bridgeToken=null;
 const embedded=new URLSearchParams(location.search).get('embedded')==='1';
 const fmt=(n,unit='°')=>Number.isFinite(n)?`${n.toFixed(1)}${unit}`:'Not available';
-function status(text){$('status').textContent=text;}
+let lastProgressSent=0;
+function status(text){
+  $('status').textContent=text;
+  if(embedded&&bridgeToken&&(!text.startsWith('Analysing ')||Date.now()-lastProgressSent>500)){
+    lastProgressSent=Date.now();window.parent.postMessage({type:'exercise-analysis-status',token:bridgeToken,text},location.origin);
+  }
+}
 function waitEvent(target,event,action,timeout=15000){return new Promise((resolve,reject)=>{
   let timer;const clean=()=>{clearTimeout(timer);target.removeEventListener(event,ok);target.removeEventListener('error',bad);};
   const ok=()=>{clean();resolve();},bad=()=>{clean();reject(Error('The browser could not decode this video. Try MP4 (H.264) or WebM.'));};
@@ -49,7 +56,7 @@ async function loadModel(){
   status('Loading movement tracking. Your video stays on this device.');
   const {FilesetResolver,PoseLandmarker}=await import('./vendor/vision_bundle.mjs');
   const files=await FilesetResolver.forVisionTasks(new URL('./vendor/wasm',import.meta.url).href);
-  model=await PoseLandmarker.createFromOptions(files,{baseOptions:{modelAssetPath:new URL('./vendor/pose_landmarker_full.task',import.meta.url).href,delegate:'CPU'},runningMode:'IMAGE',numPoses:2,minPoseDetectionConfidence:0.6});return model;
+  model=await PoseLandmarker.createFromOptions(files,{baseOptions:{modelAssetPath:new URL('./vendor/pose_landmarker_full.task',import.meta.url).href,delegate:'CPU'},runningMode:'IMAGE',numPoses:2,minPoseDetectionConfidence:0.2,minPosePresenceConfidence:0.2});return model;
 }
 function waitForModel(){
   if(!loading)loading=loadModel().catch(e=>{loading=null;throw e;});
@@ -109,7 +116,8 @@ function render(r){
   $('clinicalQAB').hidden=!slr;$('slrResult').hidden=!slr;
   for(const id of ['qabSLR','qabContraction','qabLag'])$(id).value='';
   if(slr)updateQAB();
-  $('summary').textContent=`${r.reps.length} complete repetitions measured. ${Math.round(r.metrics.repetitionTrackingCoverage*100)}% of sampled frames supported ${slr?'knee and hip':'knee'} tracking for this exercise. ${r.incomplete} interrupted or incomplete movements excluded. Any opening movement without a visible starting position is not counted.`;
+  const measuredCount=videoRepetitionCount(r);
+  $('summary').textContent=`${measuredCount===null?'Repetitions not measured. Tracking was not clear enough to establish a count. '+trackingFeedback(r):measuredCount+' complete repetitions observed.'} ${Math.round(r.metrics.repetitionTrackingCoverage*100)}% of sampled frames supported ${slr?'knee and hip':'knee'} tracking for this exercise. ${r.incomplete} interrupted or incomplete movements excluded. Any opening movement without a visible starting position is not counted.`;
   $('quality').textContent=r.metrics.warning+' '+r.limitations;
   $('sessionMetrics').replaceChildren();
   for(const [label,value] of [

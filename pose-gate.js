@@ -1,7 +1,7 @@
 /* Optical events are candidates. Pose observations can approve or reject them,
    but cannot create a repetition without an optical event. No clinical form score. */
-export const POSE_GATE_VERSION = 'leg-gate-1';
-export const GATE_SETTINGS = Object.freeze({ visibility: .65, presence: .5, maxGap: .45,
+export const POSE_GATE_VERSION = 'leg-gate-2';
+export const GATE_SETTINGS = Object.freeze({ visibility: .2, presence: .2, maxGap: .45,
   settleTime: .6, settleMotion: .025, onset: .035, excursion: .10, returnDistance: .035,
   returnDwell: .18, minDuration: .65, minLegPixels: 24, completionGrace: .12 });
 const SIDES = { left: [23, 25, 27], right: [24, 26, 28] };
@@ -11,12 +11,36 @@ const length = p => Math.hypot(...p);
 const distance = (a, b) => length(sub(a, b));
 const unit = (p, scale) => p.map(v => v/scale);
 
+export function inspectExerciseLeg(landmarks, side, width, height) {
+  const reasons = [], points = (SIDES[side] || []).map(i => landmarks?.[i]);
+  const names = ['hip', 'knee', 'ankle'];
+  points.forEach((p, i) => {
+    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) reasons.push(names[i] + ':missing');
+    else if (p.x < 0 || p.x > 1 || p.y < 0 || p.y > 1) reasons.push(names[i] + ':outside_frame');
+    else if (!Number.isFinite(p.visibility) || p.visibility < GATE_SETTINGS.visibility ||
+      (p.presence !== undefined && (!Number.isFinite(p.presence) || p.presence < GATE_SETTINGS.presence))) reasons.push(names[i] + ':low_visibility');
+  });
+  if (!points.length || !(width > 0 && height > 0)) reasons.push('leg:missing');
+  const outside = reasons.find(r => r.endsWith(':outside_frame'))?.split(':')[0];
+  let message = outside ? `Your ${side} ${outside} is outside the picture. Keep your hip, knee and foot in view.` :
+    reasons.length ? `The camera cannot clearly see your ${side} exercise leg. Keep your hip, knee and foot visible and check the light.` : `Your ${side} exercise leg is in view. Keep your hip, knee and foot visible throughout each movement.`;
+  if (!reasons.length) {
+    const [hip,knee,ankle] = points.map(p => [p.x*width,p.y*height]);
+    const thigh = distance(hip,knee), lower = distance(knee,ankle);
+    if (thigh+lower < GATE_SETTINGS.minLegPixels || Math.min(thigh,lower) < 6) {
+      reasons.push('leg:too_small'); message = 'Your exercise leg is too small in the picture. Move the camera closer while keeping your hip, knee and foot visible.';
+    }
+  }
+  return {clear:reasons.length===0, reasons, message};
+}
+
 export class LegMotionGate {
   constructor(exercise, side, rawSource = 'monitoring') {
     this.exercise = exercise; this.side = side; this.rawSource = rawSource; this.reset();
   }
   reset() {
     this.reps = 0; this.events = []; this.times = []; this.observations = 0; this.trustedObservations = 0;
+    this.calibrated = false; this.rejectionCounts = {}; this.view = null;
     this.reference = null; this.settling = []; this.cycle = null; this.completion = null;
     this.lastTrusted = null; this.lastObservation = null; this.previous = null; this.quality = false;
     this.state = SUPPORTED.has(this.exercise) && SIDES[this.side] ? 'waiting_for_leg' : 'unsupported';
@@ -35,11 +59,9 @@ export class LegMotionGate {
         (this.lastObservation !== null && t <= this.lastObservation)) return;
     this.advance(t); this.lastObservation = t; this.observations++;
     const points = SIDES[this.side].map(i => landmarks?.[i]);
-    const visible = points.every(p => p && Number.isFinite(p.x) && Number.isFinite(p.y) &&
-      p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1 &&
-      Number.isFinite(p.visibility) && p.visibility >= GATE_SETTINGS.visibility &&
-      (p.presence === undefined || (Number.isFinite(p.presence) && p.presence >= GATE_SETTINGS.presence)));
-    if (!visible || !(width > 0 && height > 0)) {
+    this.view = inspectExerciseLeg(landmarks, this.side, width, height);
+    for (const reason of this.view.reasons) this.rejectionCounts[reason] = (this.rejectionCounts[reason] || 0)+1;
+    if (!this.view.clear) {
       this.quality = false; this.state = 'leg_not_clear'; return;
     }
     const [hip, knee, ankle] = points.map(p => [p.x*width, p.y*height]);
@@ -63,7 +85,7 @@ export class LegMotionGate {
         const average = key => [0, 1].map(i => this.settling.reduce((s, q) => s+q[key][i], 0)/this.settling.length);
         this.reference = { ...p, thigh: average('thigh'), lower: average('lower'), whole: average('whole'),
           scale: this.settling.reduce((s, q) => s+q.scale, 0)/this.settling.length };
-        this.settling = []; this.state = 'ready';
+        this.settling = []; this.state = 'ready'; this.calibrated = true;
       }
       return;
     }
@@ -126,6 +148,9 @@ export class LegMotionGate {
       unconfirmed: this.events.filter(e => e.status === 'unconfirmed').length,
       pending: this.events.filter(e => e.status === 'pending').length,
       pose_observations: this.observations, trusted_pose_observations: this.trustedObservations,
+      calibrated: this.calibrated, tracking_coverage: this.observations ? this.trustedObservations/this.observations : 0,
+      count_status: this.reps > 0 ? 'observed' : this.calibrated && this.trustedObservations/this.observations >= .8 ? 'observed' : 'unavailable',
+      rejection_counts: {...this.rejectionCounts},
       settings: { ...GATE_SETTINGS }, events: this.events.map(e => ({ ...e })) };
   }
   countingBox(width, height) {
@@ -141,7 +166,7 @@ export class LegMotionGate {
     return [x, y, right-x, bottom-y].map(Math.round);
   }
   message() {
-    if (!this.quality) return 'Keep the whole exercise leg in view. Counting is waiting for a clear view.';
+    if (!this.quality) return (this.view && !this.view.clear ? this.view.message : 'Keep the whole exercise leg in view.')+' Counting is waiting.';
     if (!this.reference) return 'Hold your leg still briefly at the starting position.';
     return this.cycle ? 'Following your exercise leg. Return to the starting position.' : 'Ready. Only movement confirmed in your selected leg is counted.';
   }

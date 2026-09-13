@@ -1,0 +1,38 @@
+{
+  "voice": "marin",
+  "model": "gpt-4o-mini-tts",
+  "instructions": "Voice: A warm adult British woman with a soft, rounded tone and a natural contemporary British English accent.\nDelivery: Speak gently and conversationally, as if reassuring one person sitting beside you. Keep the volume even, soften the ends of phrases, and use subtle natural changes in pitch.\nPacing: Calm and unhurried, around 135 words per minute, with a comfortable breath between sentences. Leave a clear two-second pause between paragraphs.\nStyle: Kind, clear and quietly encouraging. Avoid a bright presenter voice, exaggerated enthusiasm, clipped syllables, sing-song rhythm, whispering or ASMR. Read only the supplied script, exactly as written.",
+  "generated_at": "2026-09-13T05:29:14.393915+00:00",
+  "provenance": "Generated with Marin through OpenAI.fm. Countdown split at pauses, preserving each spoken number, and placed in five one-second slots locally.",
+  "prompts": {
+    "countdown": {
+      "file": "countdown-440742165290.wav",
+      "duration_s": 5.0,
+      "words": [
+        "Five.",
+        "Four.",
+        "Three.",
+        "Two.",
+        "One."
+      ],
+      "cue_starts_s": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "speech_offset_s": 0.04
+    },
+    "session_ended": {
+      "file": "session_ended-7919d502a867.wav",
+      "duration_s": 8.112,
+      "text": "Your exercise session has ended. The recording has stopped. You may now move from your exercise position when you are ready."
+    },
+    "repetitions_complete": {
+      "file": "repetitions_complete-5830be8782b1.wav",
+      "duration_s": 8.16,
+      "text": "Your repetitions are now complete. The recording has stopped. You may now move from your exercise position when you are ready."
+    }
+  }
+}

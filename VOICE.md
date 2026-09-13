@@ -18,7 +18,7 @@ After recorder finalisation and camera shutdown, the app plays the completed-rep
 
 Double-click **Generate Marin app audio.command**. It asks for an OpenAI API key through a hidden local Terminal prompt, generates five short number clips, assembles a five-second WAV and generates the two end-of-session confirmations. The key is not saved, written to a browser file or logged. OpenAI API charges apply. Only the fixed prompt scripts and delivery instructions are sent, with no patient information.
 
-The recording is not yet generated in this checkout because no API key was configured. Until `audio/marin/manifest.json` and its audio file exist, the app clearly identifies the countdown as visual only. Reload the page after successful generation. A browser or device that blocks audio also keeps the visible countdown.
+The three app prompts are now included in `audio/marin/manifest.json` and the accompanying WAV files. They were generated with the selected Marin voice through OpenAI.fm on 13 September 2026. The countdown was split at the pauses and assembled into five one-second slots. Patients need no API key. Use **Test Marin voice** on the camera setup screen to check playback and unlock browser audio. The visible countdown remains available if a device blocks sound.
 
 Generated files are served locally with the app; no API key is needed by patients. The generator checks clip lengths, silence and a total duration of five seconds. Listen to the generated recording before release to confirm accent, wording and delivery. These checks do not validate camera tracking with a real patient.
 

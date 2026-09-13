@@ -1,10 +1,16 @@
 /* Patient overview uses live session measurements; post-recording analysis is stored separately. */
+import {videoRepetitionCount} from './measurement-quality.mjs';
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number = value => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
 export function recordedCount(record) {
   if (record.hold) return number(record.hold.cycles_completed);
   const source = record.count_source || 'monitoring';
-  return number((source === 'patient_voice' ? record.patient_count : source === 'knee_tracker' ? record.tracking : source === 'monitoring' ? record.monitoring : source === 'pose_gated_optical' ? record.pose_validation : null)?.repetitions);
+  const count = number((source === 'patient_voice' ? record.patient_count : source === 'knee_tracker' ? record.tracking : source === 'monitoring' ? record.monitoring : source === 'pose_gated_optical' ? record.pose_validation : null)?.repetitions);
+  if (count === 0 && source !== 'patient_voice') {
+    if (source === 'pose_gated_optical' && record.pose_validation?.count_status === 'unavailable') return null;
+    if (record.exercise_analysis?.exercise === record.exercise && videoRepetitionCount(record.exercise_analysis) === null) return null;
+  }
+  return count;
 }
 export function patientRecords(records, patient, operationDate) {
   return records.filter(r => r && r.patient_id === patient && (r.operation_date || '') === (operationDate || '') && Number.isFinite(Date.parse(r.started_at)))

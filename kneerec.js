@@ -66,7 +66,7 @@ export class JointFilter {
   }
 }
 
-export const STATS_MIN_VISIBILITY = 0.65;   // frames below this landmark visibility are shown live but kept out of the statistics
+export const STATS_MIN_VISIBILITY = 0.2;   // frames below this landmark visibility are shown live but kept out of the statistics
 export const MAX_RATE_DEG_S = 600;          // a knee does not move faster than this; a bigger one-frame step is a wrong landmark
 
 /* Per-frame angle series. The joints are filtered first (One Euro); the angle then passes a rate guard that
@@ -145,10 +145,10 @@ export function angleChartSvg(rows, w = 900, h = 260, dark = true) {
 
 export const POSE_CONNECTIONS = [[0,1],[1,2],[2,3],[3,7],[0,4],[4,5],[5,6],[6,8],[9,10],[11,12],[11,13],[13,15],[15,17],[15,19],[15,21],[17,19],[12,14],[14,16],[16,18],[16,20],[16,22],[18,20],[11,23],[12,24],[23,24],[23,25],[24,26],[25,27],[26,28],[27,29],[28,31],[29,31],[27,31],[30,32],[28,30],[28,32]];
 
-export function visiblePosePoint(p, minVisibility = .4) {
+export function visiblePosePoint(p, minVisibility = .2) {
   return !!p && Number.isFinite(p.x) && Number.isFinite(p.y) && p.x >= 0 && p.x <= 1 &&
     p.y >= 0 && p.y <= 1 && Number.isFinite(p.visibility) && p.visibility >= minVisibility &&
-    (p.presence === undefined || (Number.isFinite(p.presence) && p.presence >= .5));
+    (p.presence === undefined || (Number.isFinite(p.presence) && p.presence >= .2));
 }
 
 /* Draw each visible segment independently. The face, torso and opposite limb are
@@ -196,7 +196,7 @@ export async function loadPose({ wasmLocal = "./vendor/wasm", modelDirs = ["./mo
   let model = null, chosen = order[0], local = false;
   for (const v of order) { for (const d of modelDirs) { const cand = `${d}/pose_landmarker_${v}.task`; if (await head(cand)) { model = cand; chosen = v; local = true; break; } } if (model) break; }
   if (!model) { model = MODEL_URL(order[0]); chosen = order[0]; }
-  const make = d => PoseLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: model, delegate: d }, runningMode: "VIDEO", numPoses: 1, minPoseDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+  const make = d => PoseLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: model, delegate: d }, runningMode: "VIDEO", numPoses: 1, minPoseDetectionConfidence: 0.2, minPosePresenceConfidence: 0.2, minTrackingConfidence: 0.2 });
   let landmarker;
   try { landmarker = await make("GPU"); } catch (e) { log("GPU delegate unavailable, using CPU: " + e.message); landmarker = await make("CPU"); }
   try { const c = document.createElement("canvas"); c.width = 256; c.height = 256; c.getContext("2d").fillRect(0, 0, 256, 256); landmarker.detectForVideo(c, Math.round(performance.now())); } catch (e) { }   // warm up
