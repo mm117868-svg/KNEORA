@@ -153,6 +153,7 @@ for (const exercise of ['straight_leg_raise', 'seated_extension', 'heel_slide'])
       frameNo: 250, SOFTWARE: 'test', phase: 1, trace: {rows: []},
       daysPostOp: () => 12, localIso: date => date.toISOString(), summarise: () => ({}), tracePreview: () => [],
       storeRecord: record => records.push(record), updateRecord: (slot, record) => updates.push({slot, record}),
+      refreshExerciseCompletion(){assert.equal(records.length,1);h.events.push('completion updated');},
       loadRecords: () => records, patientRecords: records => records, esc: value => value,
       renderBasicExerciseSummary: record => record.exercise_analysis ? 'Analysed summary' : 'Live summary',
       renderDetailedExerciseSummary: record => record.exercise_analysis ? 'Full measured report' : 'Waiting for analysis',
@@ -171,7 +172,7 @@ for (const exercise of ['straight_leg_raise', 'seated_extension', 'heel_slide'])
     assert.equal(analysis.metadata.exercise, exercise);
     assert.equal(analysis.metadata.side, 'left');
     assert.ok(analysis.blob.size > 0);
-    assert.deepEqual(h.events, ['stop requested', 'camera stopped', 'repetitions_complete', 'analysis mounted', 'patient question']);
+    assert.deepEqual(h.events, ['stop requested', 'camera stopped', 'repetitions_complete', 'completion updated', 'analysis mounted', 'patient question']);
     assert.equal($('simpleExerciseSummary').innerHTML, 'Live summary');
     const report = {exercise, reps: [{duration: 5}], metrics: {maximumObservedBend: 90}};
     analysis.onReport(report);

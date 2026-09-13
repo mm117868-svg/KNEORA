@@ -130,6 +130,23 @@ export function dayAfterSurgery(day, operationDate) {
 export function savedSetComplete(records, exercise, day) {
   return records.some(r=>r.exercise===exercise&&String(r.started_at).slice(0,10)===day&&number(r.prescribed_reps)>0&&recordedCount(r)!==null&&recordedCount(r)>=r.prescribed_reps);
 }
+function dailyChecksKey(patientId,operationDate) { return 'kr_daily_checks:'+JSON.stringify([patientId,operationDate]); }
+function readDailyChecks(patientId,operationDate,storage) {
+  try {
+    const checks=JSON.parse((storage||globalThis.localStorage).getItem(dailyChecksKey(patientId,operationDate))||'{}');
+    if(checks&&typeof checks==='object'&&!Array.isArray(checks))return checks;
+  } catch {}
+  return {};
+}
+export function completedExercisesForDay(records,{patientId,operationDate,day,storage}) {
+  const completed=new Set();
+  for(const record of patientRecords(records,patientId,operationDate)) {
+    if(savedSetComplete([record],record.exercise,day))completed.add(record.exercise);
+  }
+  const checks=readDailyChecks(patientId,operationDate,storage);
+  for(const [exercise,done] of Object.entries(checks[day]||{}))if(done===true)completed.add(exercise);
+  return completed;
+}
 function renderDailyChecklist(element,records,options,selected,onSelect){
   const surgery=parseDay(options.operationDate),today=new Date();
   if(!surgery){element.innerHTML='<h3>Your daily exercises</h3><p>Enter your operation date in Settings to choose a day after surgery.</p>';return;}
@@ -137,8 +154,8 @@ function renderDailyChecklist(element,records,options,selected,onSelect){
   let day=chosen===null||chosen<0?Math.max(0,elapsed):chosen;
   const maxDay=Math.max(84,elapsed+14,day), dateFor=d=>dayKey(new Date(surgery.getFullYear(),surgery.getMonth(),surgery.getDate()+d,12));
   const key=dateFor(day),phase=day<7?1:day<28?2:day<56?3:4,exercises=options.exercisesByPhase?.[phase]||[];
-  const storageKey='kr_daily_checks:'+JSON.stringify([options.patientId,options.operationDate]);
-  let checks={};try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');if(value&&typeof value==='object'&&!Array.isArray(value))checks=value;}catch{}
+  const storageKey=dailyChecksKey(options.patientId,options.operationDate);
+  const checks=readDailyChecks(options.patientId,options.operationDate);
   element.innerHTML=`<label class="recovery-day-picker">Day after surgery<select data-postop-day>${Array.from({length:maxDay+1},(_,i)=>`<option value="${i}"${i===day?' selected':''}>${i===0?'Day 0 · Surgery day':'Day '+i} · ${escapeHtml(parseDay(dateFor(i)).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}))}</option>`).join('')}</select></label><p class="recovery-check-status">${day>elapsed?'Future date. Exercises can be marked on the day.':'Tick each exercise when you have finished it.'}</p>${exercises.map(ex=>{const recorded=savedSetComplete(records,ex.id,key),manual=checks[key]?.[ex.id]===true;return `<label class="recovery-check-row"><input type="checkbox" data-exercise-check="${escapeHtml(ex.id)}"${recorded||manual?' checked':''}${recorded||!ex.available||day>elapsed?' disabled':''}><span>${escapeHtml(ex.title)}<small data-check-label>${!ex.available?'Pending: to be introduced in due course':recorded?'Recorded set complete':manual?'Marked done':'Not marked done'}</small></span></label>`;}).join('')}<p class="recovery-calendar-note">Ticks marked manually are your own record. They do not add a measured session or fill the activity calendar. Follow the exercises your physiotherapist has given you.</p><div class="recovery-check-status" data-check-message role="status"></div>`;
   element.querySelector('[data-postop-day]').onchange=e=>onSelect(dateFor(+e.target.value));
   element.querySelectorAll('[data-exercise-check]').forEach(input=>input.onchange=()=>{
