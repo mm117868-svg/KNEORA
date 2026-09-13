@@ -480,6 +480,15 @@ body:not(.settings-view) #home>.details,body:not(.settings-view) #home>.camera-o
 .footer-detail nav{margin-top:16px}.footer-bottom{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:24px}
 .app-footer :focus-visible{outline:2px solid #edb28a;outline-offset:4px}
 @media(max-width:759px){.app-footer{padding:24px 20px;margin-top:32px}.footer-notices{grid-template-columns:1fr;gap:0}.footer-notices details+details{border-top:0}.footer-heading,.footer-bottom{flex-wrap:wrap;gap:16px}.footer-bottom nav{gap:12px}}
+
+/* Stable navigation: identical links, order and dimensions in every patient view. */
+html{scrollbar-gutter:stable;scroll-padding-top:116px}
+.brandbar{position:sticky;top:0;z-index:10;align-self:start;background:var(--paper)}
+.patient-header-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:568px;flex-shrink:0}
+.patient-header-nav a{display:flex;align-items:center;justify-content:center;min-height:46px;padding:10px 8px;text-align:center;font-size:12px;line-height:1.35}
+.patient-header-nav a[aria-current="page"]{background:var(--ink);color:var(--bone)}
+@media(max-width:1023px){html{scroll-padding-top:160px}.brandbar{flex-direction:column;align-items:flex-start;gap:16px}.patient-header-nav{width:100%;flex-wrap:nowrap;justify-content:normal}}
+@media(max-width:759px){.brandbar{gap:12px}.patient-header-nav{gap:6px}.patient-header-nav a{font-size:11px;padding:8px 4px;min-height:46px}}
 </style>
 </head>
 <body>
@@ -491,7 +500,7 @@ body:not(.settings-view) #home>.details,body:not(.settings-view) #home>.camera-o
       <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M14 5 L14 19 L26 33" stroke="#1a1918" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter"/><circle cx="12.5" cy="23.5" r="4.6" fill="#d64026"/></svg>
       <b>Cambridge<br>Kinematics</b>
     </a>
-    <nav class="patient-header-nav" aria-label="Patient navigation"><span class="product-name">Knee Recovery</span><a class="settings-link" href="?view=settings">Settings</a><a class="summary-link" href="?view=summary#progress">Patient summary</a><a class="tracker-link" href="?view=progress#progress">Progress tracker</a><a class="tracker-back" href="index.html" hidden>Back to exercises</a></nav>
+    <nav class="patient-header-nav" aria-label="Patient navigation"><a class="home-link" href="./" data-page="home">Home</a><a class="settings-link" href="?view=settings" data-page="settings">Settings</a><a class="summary-link" href="?view=summary" data-page="summary">Patient summary</a><a class="tracker-link" href="?view=progress" data-page="progress">Progress tracker</a></nav>
   </header>
 
 
@@ -713,11 +722,9 @@ const SUMMARY_VIEW = new URLSearchParams(location.search).get("view") === "summa
 const PROGRESS_VIEW = SUMMARY_VIEW || new URLSearchParams(location.search).get("view") === "progress";
 document.body.classList.toggle("progress-view", PROGRESS_VIEW);
 document.body.classList.toggle("settings-view", SETTINGS_VIEW);
-document.querySelector(".settings-link").hidden = SETTINGS_VIEW;
+const activePage = SETTINGS_VIEW ? "settings" : SUMMARY_VIEW ? "summary" : PROGRESS_VIEW ? "progress" : "home";
+document.querySelector(`.patient-header-nav [data-page="${activePage}"]`).setAttribute("aria-current", "page");
 if (SETTINGS_VIEW) document.title = "Your settings · Cambridge Kinematics";
-document.querySelector(".tracker-back").hidden = !(PROGRESS_VIEW || SETTINGS_VIEW);
-document.querySelector(".tracker-link").hidden = PROGRESS_VIEW && !SUMMARY_VIEW;
-document.querySelector(".summary-link").hidden = SUMMARY_VIEW;
 if (PROGRESS_VIEW) document.title = SUMMARY_VIEW ? "Your patient summary · Cambridge Kinematics" : "Your progress tracker · Cambridge Kinematics";
 const NOPOSE = SETTINGS_VIEW || PROGRESS_VIEW || new URLSearchParams(location.search).has("nopose");
 
