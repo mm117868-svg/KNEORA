@@ -1,0 +1,50 @@
+{
+  "id": "heel_slide",
+  "title": "Heel slide",
+  "subtitle": "Bend your knee with control",
+  "duration": 30,
+  "active": true,
+  "reviewStatus": "Draft for clinical review",
+  "sources": [
+    "https://www.cuh.nhs.uk/patient-information/knee-exercises/",
+    "https://www.ulh.nhs.uk/patients/patient-information-library/total-knee-replacement-exercises/"
+  ],
+  "cues": [
+    {
+      "start": 0,
+      "end": 5,
+      "heading": "Get comfortable",
+      "text": "Lie on your back with your exercise leg straight."
+    },
+    {
+      "start": 5,
+      "end": 10,
+      "heading": "Slide your heel in",
+      "text": "Slide your heel towards your bottom, bending your knee."
+    },
+    {
+      "start": 10,
+      "end": 15,
+      "heading": "Keep contact",
+      "text": "Keep your heel on the bed. Move within your comfortable range."
+    },
+    {
+      "start": 15,
+      "end": 21,
+      "heading": "Slide back out",
+      "text": "Slowly slide your heel away until your leg is straight again."
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "heading": "One complete movement",
+      "text": "Keep your hips still. Do not force the bend or push through sharp pain."
+    },
+    {
+      "start": 25,
+      "end": 30,
+      "heading": "Follow your plan",
+      "text": "Use the range and repetitions your physiotherapist has prescribed."
+    }
+  ]
+}

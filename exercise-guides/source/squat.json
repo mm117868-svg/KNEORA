@@ -1,0 +1,50 @@
+{
+  "id": "squat",
+  "title": "Squat",
+  "subtitle": "A controlled bend and return",
+  "duration": 30,
+  "active": false,
+  "reviewStatus": "Draft for clinical review",
+  "sources": [
+    "https://www.rnoh.nhs.uk/patients-and-visitors/patient-information-guides/total-knee-replacement-exercise-pack",
+    "https://www.leedsth.nhs.uk/patients/resources/advanced-knee-and-ankle-exercises/"
+  ],
+  "cues": [
+    {
+      "start": 0,
+      "end": 5,
+      "heading": "Set your stance",
+      "text": "Stand with feet hip width apart. Use a stable support if needed."
+    },
+    {
+      "start": 5,
+      "end": 10,
+      "heading": "Bend with control",
+      "text": "Move your bottom backwards as you bend your hips and knees."
+    },
+    {
+      "start": 10,
+      "end": 15,
+      "heading": "Stay within your range",
+      "text": "Keep your heels down and your knees aligned with your toes."
+    },
+    {
+      "start": 15,
+      "end": 21,
+      "heading": "Return to standing",
+      "text": "Push through both feet and straighten your hips and knees smoothly."
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "heading": "Choose the right depth",
+      "text": "Go only as low as prescribed. Do not bounce or push through sharp pain."
+    },
+    {
+      "start": 25,
+      "end": 30,
+      "heading": "Follow your plan",
+      "text": "Only progress to this exercise when your physiotherapist has recommended it."
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "id": "standing_flexion",
+  "title": "Standing knee bend",
+  "subtitle": "Bend behind you with support",
+  "duration": 30,
+  "active": false,
+  "reviewStatus": "Draft for clinical review",
+  "sources": [
+    "https://www.cuh.nhs.uk/patient-information/knee-exercises/",
+    "https://www.worcsacute.nhs.uk/documents/documents/patient-information-leaflets-a-z/3126-lower-limb-strengthening-exercises"
+  ],
+  "cues": [
+    {
+      "start": 0,
+      "end": 5,
+      "heading": "Take a steady hold",
+      "text": "Stand tall, holding a stable worktop for support."
+    },
+    {
+      "start": 5,
+      "end": 10,
+      "heading": "Bend behind you",
+      "text": "Bend your exercise knee and bring that heel up behind you."
+    },
+    {
+      "start": 10,
+      "end": 15,
+      "heading": "Keep your thighs aligned",
+      "text": "Keep your thighs beside each other. Avoid leaning or arching your back."
+    },
+    {
+      "start": 15,
+      "end": 21,
+      "heading": "Return your foot",
+      "text": "Slowly lower your foot until it rests on the floor again."
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "heading": "Stay within your range",
+      "text": "Keep holding the support. Do not force the bend."
+    },
+    {
+      "start": 25,
+      "end": 30,
+      "heading": "Follow your plan",
+      "text": "Only do this if prescribed. Use your own repetitions and holds."
+    }
+  ]
+}

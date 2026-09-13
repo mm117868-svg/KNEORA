@@ -1,0 +1,50 @@
+{
+  "id": "single_leg_stance",
+  "title": "Single-leg balance",
+  "subtitle": "Balance beside a stable support",
+  "duration": 30,
+  "active": false,
+  "reviewStatus": "Draft for clinical review",
+  "sources": [
+    "https://www.nhs.uk/live-well/exercise/balance-exercises/",
+    "https://www.leedsth.nhs.uk/patients/resources/advanced-knee-and-ankle-exercises/"
+  ],
+  "cues": [
+    {
+      "start": 0,
+      "end": 5,
+      "heading": "Hold your support",
+      "text": "Stand beside a stable worktop and keep a hand on it."
+    },
+    {
+      "start": 5,
+      "end": 10,
+      "heading": "Lift the other foot",
+      "text": "Shift onto your exercise leg. Lift the other foot just clear of the floor."
+    },
+    {
+      "start": 10,
+      "end": 15,
+      "heading": "Stay tall and level",
+      "text": "Keep your pelvis level. Look ahead and keep holding the support."
+    },
+    {
+      "start": 15,
+      "end": 21,
+      "heading": "Put your foot down",
+      "text": "Gently return your lifted foot to the floor and rest."
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "heading": "Keep support close",
+      "text": "Do not let go until your physiotherapist says you are ready."
+    },
+    {
+      "start": 25,
+      "end": 30,
+      "heading": "Follow your plan",
+      "text": "Use your prescribed hold time. Stop if you feel unsteady or dizzy."
+    }
+  ]
+}

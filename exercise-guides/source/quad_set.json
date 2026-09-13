@@ -1,0 +1,50 @@
+{
+  "id": "quad_set",
+  "title": "Quad set",
+  "subtitle": "Tighten the front of your thigh",
+  "duration": 30,
+  "active": false,
+  "reviewStatus": "Draft for clinical review",
+  "sources": [
+    "https://www.cuh.nhs.uk/patient-information/knee-exercises/",
+    "https://www.ulh.nhs.uk/patients/patient-information-library/total-knee-replacement-exercises/"
+  ],
+  "cues": [
+    {
+      "start": 0,
+      "end": 5,
+      "heading": "Support your leg",
+      "text": "Lie comfortably with your exercise leg supported and straight."
+    },
+    {
+      "start": 5,
+      "end": 10,
+      "heading": "Tighten your thigh",
+      "text": "Pull your toes towards you and tighten the front of your thigh."
+    },
+    {
+      "start": 10,
+      "end": 15,
+      "heading": "Press gently down",
+      "text": "Gently press the back of your knee towards the bed."
+    },
+    {
+      "start": 15,
+      "end": 21,
+      "heading": "Relax the muscle",
+      "text": "Release the squeeze and let the thigh relax completely."
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "heading": "Keep breathing",
+      "text": "Keep your heel supported. Breathe normally throughout the squeeze."
+    },
+    {
+      "start": 25,
+      "end": 30,
+      "heading": "Follow your plan",
+      "text": "Use the hold time and repetitions in your prescribed exercise plan."
+    }
+  ]
+}

@@ -572,6 +572,7 @@ import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview
 import { VoiceCount, voiceAvailable, VOICE_VERSION } from "./voicecount.js";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js";
 import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=surgery-dot-1";
+import { showExerciseGuide } from "./exercise-guides/guide-player.js";
 
 /* ---------------- Exercise library ----------------
    kind 'reps': repetitions come from the pixel-motion counter in kneerec.js.
@@ -673,7 +674,7 @@ function renderWeeks() {
       <div class="ic"><svg viewBox="0 0 24 24">${ICONS[ex.icon]}</svg></div>
       <div><h3>${esc(ex.title)}</h3><p>${esc(ex.blurb)}</p><p class="meta">${isExerciseAvailable(ex) ? `${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}` : "To be introduced in due course"}</p></div>
       <div class="tag">${isExerciseAvailable(ex) ? esc(ex.tag) : "Pending"}</div></button>`).join("")}</div></section>`).join("");
-  $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; openExercise(LIB[phase][+b.dataset.i]); });
+  $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; chooseExercise(LIB[phase][+b.dataset.i]); });
 }
 function renderHome() {
   const d = daysPostOp($("opdate").value, new Date());
@@ -714,6 +715,11 @@ let hold = null;   // { phase: 'hold'|'rest', until, cycles }
 let voice = null;    // the patient-count layer: what the patient counted out loud. Never sees the picture.
 let tracker = null;  // the knee tracker: points followed in the box. Pixels and the clock only.
 let jsfeatLib = null;
+
+async function chooseExercise(ex) {
+  if (!isExerciseAvailable(ex) || !["left", "right"].includes($("side").value)) return openExercise(ex);
+  if (await showExerciseGuide(ex)) return openExercise(ex);
+}
 
 async function openExercise(ex) {
   if (!isExerciseAvailable(ex)) return;

@@ -1,0 +1,50 @@
+{
+  "id": "mini_squat",
+  "title": "Mini squat",
+  "subtitle": "A small bend with support",
+  "duration": 30,
+  "active": false,
+  "reviewStatus": "Draft for clinical review",
+  "sources": [
+    "https://www.rnoh.nhs.uk/patients-and-visitors/patient-information-guides/total-knee-replacement-exercise-pack",
+    "https://www.worcsacute.nhs.uk/documents/documents/patient-information-leaflets-a-z/3126-lower-limb-strengthening-exercises"
+  ],
+  "cues": [
+    {
+      "start": 0,
+      "end": 5,
+      "heading": "Hold a stable support",
+      "text": "Stand with feet hip width apart and hold a steady worktop."
+    },
+    {
+      "start": 5,
+      "end": 10,
+      "heading": "Make a small bend",
+      "text": "Bend your hips and knees a little, moving your bottom backwards."
+    },
+    {
+      "start": 10,
+      "end": 15,
+      "heading": "Keep your feet planted",
+      "text": "Keep both heels down, with your knees pointing in the same direction as your toes."
+    },
+    {
+      "start": 15,
+      "end": 21,
+      "heading": "Stand tall again",
+      "text": "Press through your feet and slowly straighten your hips and knees."
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "heading": "Keep it shallow",
+      "text": "Keep the bend shallow and comfortable. Avoid bouncing."
+    },
+    {
+      "start": 25,
+      "end": 30,
+      "heading": "Follow your plan",
+      "text": "Only do this if prescribed. Follow your physiotherapist's range and repetitions."
+    }
+  ]
+}

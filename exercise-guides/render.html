@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Exercise animation renderer</title><style>body{margin:0;background:#f7f6ef}canvas{display:block}#scene{display:none}</style></head><body><canvas id="scene"></canvas><canvas id="frame" width="1280" height="720"></canvas><script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script><script type="module">
+import {makeAvatar} from './avatar.js';
+import * as THREE from './vendor/three.module.js';
+import {GLTFExporter} from './vendor/GLTFExporter.js';
+const data=await(await fetch('./exercises.json')).json(),avatar=makeAvatar(document.querySelector('#scene')),canvas=document.querySelector('#frame'),ctx=canvas.getContext('2d');
+function text(s,x,y,size=20,color='#314940',bold=false){ctx.font=`${bold?'600':'400'} ${size}px Arial`;ctx.fillStyle=color;ctx.fillText(s,x,y);}
+function wrap(s,x,y,width,size=25,line=36,color='#314940',bold=false){ctx.font=`${bold?'600':'400'} ${size}px Arial`;let row='',out=[];for(const w of s.split(' ')){if(ctx.measureText(row+w).width>width&&row){out.push(row.trim());row='';}row+=w+' ';}if(row)out.push(row.trim());out.forEach((r,i)=>text(r,x,y+i*line,size,color,bold));return out.length;}
+function round(x,y,w,h,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
+window.renderFrame=(id,t)=>{const ex=data.find(e=>e.id===id);if(!ex)throw Error('Unknown exercise');const pose=avatar.pose(id,t),ci=ex.cues.findIndex(c=>t>=c.start&&t<c.end),cue=ex.cues[Math.max(0,ci)];ctx.fillStyle='#f7f6ef';ctx.fillRect(0,0,1280,720);
+ text('CAMBRIDGE KINEMATICS',36,37,17,'#547262',true);text('YOUR EXERCISE GUIDE',1028,37,14,'#547262',true);
+ text(ex.title,36,101,43,'#243d32',true);text(ex.subtitle,37,133,20,'#627064');
+ ctx.save();ctx.beginPath();ctx.roundRect(28,157,760,486,20);ctx.clip();ctx.drawImage(avatar.renderer.domElement,28,157);ctx.restore();
+ round(47,177,153,31,15,'#fffefa');text('3D demonstration',62,198,14,'#486456',true);
+ round(805,157,447,486,20,'#fffefa');
+ text(String(ci+1).padStart(2,'0')+' / 06',833,199,14,'#59796a',true);
+ wrap(cue.heading,833,246,386,32,39,'#243d32',true);
+ const n=wrap(cue.text,833,350,375,25,36,'#4d6052');
+ text('YOUR PLAN SETS THE PACE',833,577,13,'#557564',true);text('Range, holds and repetitions are individual.',833,606,16,'#667667');
+ round(28,660,1224,4,2,'#dce3d9');round(28,660,Math.max(2,1224*t/30),4,2,'#5e8975');
+ text('Only do exercises prescribed for you.',30,696,16,'#667667');text('Demonstration pace',811,696,15,'#667667');text('00:'+String(Math.floor(t)).padStart(2,'0')+' / 00:30',1128,696,15,'#486456',true);
+ return pose;};
+window.encodeFrame=(id,t)=>{window.renderFrame(id,t);return canvas.toDataURL('image/jpeg',.91).split(',')[1]};window.exportModel=async(id)=>{
+ avatar.pose(id,0);avatar.group.children.forEach((o,i)=>{o.name='person_part_'+i});const objects=avatar.group.children.filter(o=>o.visible);
+ const times=[],values=objects.map(()=>({p:[],q:[],s:[]}));
+ for(let frame=0;frame<=360;frame++){const t=frame/12;times.push(t);avatar.pose(id,t);objects.forEach((o,i)=>{values[i].p.push(...o.position.toArray());values[i].q.push(...o.quaternion.toArray());values[i].s.push(...o.scale.toArray());});}
+ avatar.pose(id,0);const out=new THREE.Scene();out.name=id;out.add(avatar.group.clone());for(const prop of [avatar.bed,avatar.chair,avatar.support])if(prop.visible)out.add(prop.clone());
+ const tracks=objects.flatMap((o,i)=>[new THREE.VectorKeyframeTrack(o.name+'.position',times,values[i].p),new THREE.QuaternionKeyframeTrack(o.name+'.quaternion',times,values[i].q),new THREE.VectorKeyframeTrack(o.name+'.scale',times,values[i].s)]);
+ const clip=new THREE.AnimationClip(id,30,tracks),bin=await new GLTFExporter().parseAsync(out,{binary:true,animations:[clip],trs:true});let s='';const bytes=new Uint8Array(bin);for(let i=0;i<bytes.length;i+=32768)s+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(s);
+};window.guideData=data;window.renderFrame('seated_extension',0);window.renderReady=true;
+</script></body></html>

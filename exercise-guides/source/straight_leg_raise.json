@@ -1,0 +1,50 @@
+{
+  "id": "straight_leg_raise",
+  "title": "Straight leg raise",
+  "subtitle": "Lift with your knee straight",
+  "duration": 30,
+  "active": true,
+  "reviewStatus": "Draft for clinical review",
+  "sources": [
+    "https://www.cuh.nhs.uk/patient-information/knee-exercises/",
+    "https://www.ulh.nhs.uk/patients/patient-information-library/total-knee-replacement-exercises/"
+  ],
+  "cues": [
+    {
+      "start": 0,
+      "end": 5,
+      "heading": "Set your position",
+      "text": "Lie on your back. Bend the other knee, with that foot supported."
+    },
+    {
+      "start": 5,
+      "end": 10,
+      "heading": "Tighten, then lift",
+      "text": "Tighten your exercise thigh. Keep the knee straight as you lift."
+    },
+    {
+      "start": 10,
+      "end": 15,
+      "heading": "Keep the knee straight",
+      "text": "Lift only a little. Keep your back relaxed and your pelvis still."
+    },
+    {
+      "start": 15,
+      "end": 21,
+      "heading": "Lower gently",
+      "text": "Lower the whole leg slowly back onto the bed."
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "heading": "Check your control",
+      "text": "If your knee bends as you lift, stop and ask your physiotherapist."
+    },
+    {
+      "start": 25,
+      "end": 30,
+      "heading": "Follow your plan",
+      "text": "Use your prescribed repetitions. Stop if you feel sharp pain."
+    }
+  ]
+}

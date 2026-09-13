@@ -1,0 +1,49 @@
+{
+  "id": "seated_extension",
+  "title": "Seated knee extension",
+  "subtitle": "Straighten, then lower slowly",
+  "duration": 30,
+  "active": true,
+  "reviewStatus": "Draft for clinical review",
+  "sources": [
+    "https://www.ulh.nhs.uk/patients/patient-information-library/total-knee-replacement-exercises/"
+  ],
+  "cues": [
+    {
+      "start": 0,
+      "end": 5,
+      "heading": "Sit upright",
+      "text": "Sit on a stable chair with both feet resting on the floor."
+    },
+    {
+      "start": 5,
+      "end": 10,
+      "heading": "Straighten the knee",
+      "text": "Lift the foot of your exercise leg by slowly straightening your knee."
+    },
+    {
+      "start": 10,
+      "end": 15,
+      "heading": "Keep your thigh supported",
+      "text": "Keep your thigh on the seat. Straighten only as far as comfortable."
+    },
+    {
+      "start": 15,
+      "end": 21,
+      "heading": "Lower with control",
+      "text": "Bend your knee slowly and return your foot to the floor."
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "heading": "Stay steady",
+      "text": "Keep your body upright. Avoid swinging your leg or leaning backwards."
+    },
+    {
+      "start": 25,
+      "end": 30,
+      "heading": "Follow your plan",
+      "text": "Use your prescribed repetitions and holds. Stop for sharp pain."
+    }
+  ]
+}
