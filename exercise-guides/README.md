@@ -41,7 +41,7 @@ The [style 2 fitness character](fitness-avatar/README.md) was built in Blender 4
 
 The `models/` files are glTF 2.0 binary models with named 57-second animations. They contain the skinned character and relevant furniture, with the skeleton and root transforms sampled at 12 frames per second. In Blender, import a GLB using **File > Import > glTF 2.0** to edit a particular exercise animation.
 
-`videos/` contains H.264 MP4s at 1280 × 720, 24 frames per second, with AAC narration, JPEG posters and WebVTT captions. The MP4s contain no patient recordings. Voice was rendered with the macOS Daniel voice. Narration is timed to the nine cues in `exercises.json`.
+`videos/` contains H.264 MP4s at 1280 × 720, 24 frames per second, with AAC narration, JPEG posters and WebVTT captions. The MP4s contain no patient recordings. Marin, with a soft British female delivery, is the selected replacement voice. The approved sample is saved locally. The full Marin batch has not yet been rendered: eight videos retain the original Daniel narration, and seated knee extension has the earlier Kokoro Emma sample. See [voice model and rebuilding notes](source/voice-model.md). Narration is timed to the nine cues in `exercises.json`.
 
 `exercises.json` is the canonical script and timing source. The individual JSON files in `source/` preserve the initial script drafts.
 
@@ -55,7 +55,7 @@ This branch is a local preview and has not been published. If merging into a gen
 
 ## Rebuilding
 
-Requirements: Python 3, Node.js with Playwright, Chrome, FFmpeg with libx264, and macOS `say` for regenerating narration. The existing MP4s and GLBs play without any build tools.
+Requirements: Python 3, Node.js with Playwright, Chrome, FFmpeg with libx264, and OpenAI API access for the selected Marin narration. The optional Kokoro fallback uses a local speech model. The existing MP4s and GLBs play without any build tools.
 
 Serve the repository root with the included server on port 8783, which supports video seeking. Run the following from that root, setting `GUIDES_FFMPEG` if FFmpeg is not on PATH:
 
@@ -66,7 +66,7 @@ python3 exercise-guides/source/serve.py
 In another terminal:
 
 ```sh
-python3 exercise-guides/source/make-audio.py
+"../voice-tools/venv/bin/python" exercise-guides/source/make-openai-audio.py --prompt-key
 export GUIDES_BASE_URL=http://127.0.0.1:8783
 node exercise-guides/source/render-videos.cjs
 node exercise-guides/source/export-models.cjs
@@ -77,6 +77,8 @@ node exercise-guides/source/export-models.cjs
 Three.js and its bundled loader/exporter utilities are MIT licensed; see [vendor/LICENSE](vendor/LICENSE). The human and clothing assets are CC0. See [asset provenance](fitness-avatar/source/asset-provenance.json). The exercise animation logic was created for this project.
 
 ## Verification
+
+The following checks describe the original Blender video release. Marin narration remains pending and will be checked separately when rendered.
 
 All nine MP4s decode completely to 1,368 frames at 24 fps, with audio, a 57-second duration and nine matching caption cues. Browser checks passed for desktop and mobile playback, model scrubbing, watch/skip, cancellation, focus restoration and camera access only after continuing. Video seeking and HTTP 206 range responses passed.
 

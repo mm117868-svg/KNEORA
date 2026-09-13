@@ -1,2 +1,3 @@
 qa/
 source/*-voice.wav
+source/__pycache__/

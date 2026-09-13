@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-13",
+  "selectedVoice": "marin",
+  "selectedModel": "gpt-4o-mini-tts",
+  "approvedSampleSeconds": 15.912,
+  "fullBatchStatus": "awaiting_openai_api_access",
+  "preparedExercises": 9,
+  "preparedCues": 81,
+  "dryRun": "passed_without_network_requests",
+  "missingCredentialFailure": "passed",
+  "syntheticPipelineCheck": {
+    "failedBatchPreservesVideo": true,
+    "successfulBatchPreservesAnimationStream": true,
+    "nineCues": true,
+    "backupRetained": true,
+    "actualApiAudioGenerated": false
+  },
+  "browserPreview": {
+    "audioReadyState": 4,
+    "audioDuration": 15.912
+  }
+}

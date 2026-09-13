@@ -1,0 +1,90 @@
+{
+  "engine": "kokoro-onnx",
+  "model": "Kokoro v1.0, full precision ONNX",
+  "voice": "bf_emma",
+  "language": "en-gb",
+  "date": "2026-09-13",
+  "clips": [
+    {
+      "id": "seated_extension",
+      "duration": 57,
+      "peak": 0.89,
+      "cues": [
+        {
+          "cue": 1,
+          "text": "Sit on a stable chair with both feet resting on the floor.",
+          "start": 0.12,
+          "speechSeconds": 4.203,
+          "modelSpeed": 0.78,
+          "availableSeconds": 6.7
+        },
+        {
+          "cue": 2,
+          "text": "Keep your bottom on the seat, thighs supported and knees facing forwards.",
+          "start": 7.12,
+          "speechSeconds": 5.099,
+          "modelSpeed": 0.78,
+          "availableSeconds": 5.7
+        },
+        {
+          "cue": 3,
+          "text": "Lift the foot of your exercise leg by slowly straightening your knee.",
+          "start": 13.12,
+          "speechSeconds": 4.949,
+          "modelSpeed": 0.78,
+          "availableSeconds": 5.7
+        },
+        {
+          "cue": 4,
+          "text": "Keep your thigh on the seat. Straighten only as far as comfortable.",
+          "start": 19.12,
+          "speechSeconds": 4.992,
+          "modelSpeed": 0.78,
+          "availableSeconds": 5.7
+        },
+        {
+          "cue": 5,
+          "text": "Bend your knee slowly and return your foot to the floor.",
+          "start": 25.12,
+          "speechSeconds": 3.541,
+          "modelSpeed": 0.78,
+          "availableSeconds": 5.7
+        },
+        {
+          "cue": 6,
+          "text": "Keep your body upright. Avoid swinging your leg or leaning backwards.",
+          "start": 31.12,
+          "speechSeconds": 5.12,
+          "modelSpeed": 0.78,
+          "availableSeconds": 5.7
+        },
+        {
+          "cue": 7,
+          "text": "The thigh stays still while the lower leg rises. Keep your back upright.",
+          "start": 37.12,
+          "speechSeconds": 5.355,
+          "modelSpeed": 0.78,
+          "availableSeconds": 5.7
+        },
+        {
+          "cue": 8,
+          "text": "Bend your knee slowly and return your foot to the floor.",
+          "start": 43.12,
+          "speechSeconds": 3.541,
+          "modelSpeed": 0.78,
+          "availableSeconds": 5.7
+        },
+        {
+          "cue": 9,
+          "text": "Use your prescribed repetitions and holds. Stop for sharp pain.",
+          "start": 49.12,
+          "speechSeconds": 5.035,
+          "modelSpeed": 0.78,
+          "availableSeconds": 7.7
+        }
+      ]
+    }
+  ],
+  "modelSha256": "7d5df8ecf7d4b1878015a32686053fd0eebe2bc377234608764cc0ef3636a6c5",
+  "voicesSha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d"
+}

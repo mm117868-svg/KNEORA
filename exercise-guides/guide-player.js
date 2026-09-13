@@ -24,7 +24,7 @@ function initialise(){
 export function showExerciseGuide(exercise){
  initialise();if(finish)finish(false);const video=dialog.querySelector('video');previousFocus=document.activeElement;
  dialog.querySelector('h2').textContent=exercise.title;dialog.querySelector('.guide-watch').textContent='Watch how to do it';dialog.querySelector('.guide-skip').textContent='Skip and start';dialog.querySelector('.guide-error').hidden=true;
- video.poster=new URL('videos/'+exercise.id+'.jpg',root);video.src=new URL('videos/'+exercise.id+'.mp4',root);video.querySelector('track').src=new URL('videos/'+exercise.id+'.vtt',root);video.load();
+ video.poster=new URL('videos/'+exercise.id+'.jpg',root);video.src=new URL('videos/'+exercise.id+'.mp4?v=emma-v1',root);video.querySelector('track').src=new URL('videos/'+exercise.id+'.vtt',root);video.load();
  dialog.showModal();dialog.querySelector('.guide-watch').focus();
  return new Promise(resolve=>{finish=proceed=>{video.pause();video.removeAttribute('src');video.querySelector('track').removeAttribute('src');video.load();finish=null;dialog.close();previousFocus?.focus();resolve(proceed);};});
 }
