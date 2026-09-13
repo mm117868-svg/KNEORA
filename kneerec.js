@@ -185,7 +185,8 @@ async function head(url) { try { const r = await fetch(url, { method: "HEAD" });
 
 /* Library, wasm and model are served from this folder (vendor/ and models/) so the page works offline.
    Anything missing locally is fetched from the same version on the CDN. Returns { landmarker, library, model, variant }. */
-export async function loadPose({ wasmLocal = "./vendor/wasm", modelDirs = ["./models", "../models"], variant = null, log = () => {} } = {}) {
+export async function loadPose({ wasmLocal = "./vendor/wasm", modelDirs = ["./models", "../models"], variant = null, runningMode = "VIDEO", log = () => {} } = {}) {
+  if (!["IMAGE", "VIDEO"].includes(runningMode)) throw Error("Unsupported pose running mode.");
   let mod;
   try { mod = await import("./vendor/vision_bundle.mjs"); } catch (e) { mod = await import(CDN + "/vision_bundle.mjs"); }
   const { PoseLandmarker, FilesetResolver } = mod;
@@ -196,10 +197,10 @@ export async function loadPose({ wasmLocal = "./vendor/wasm", modelDirs = ["./mo
   let model = null, chosen = order[0], local = false;
   for (const v of order) { for (const d of modelDirs) { const cand = `${d}/pose_landmarker_${v}.task`; if (await head(cand)) { model = cand; chosen = v; local = true; break; } } if (model) break; }
   if (!model) { model = MODEL_URL(order[0]); chosen = order[0]; }
-  const make = d => PoseLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: model, delegate: d }, runningMode: "VIDEO", numPoses: 1, minPoseDetectionConfidence: 0.2, minPosePresenceConfidence: 0.2, minTrackingConfidence: 0.2 });
+  const make = d => PoseLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: model, delegate: d }, runningMode, numPoses: 1, minPoseDetectionConfidence: 0.2, minPosePresenceConfidence: 0.2, minTrackingConfidence: 0.2, outputSegmentationMasks: false });
   let landmarker;
   try { landmarker = await make("GPU"); } catch (e) { log("GPU delegate unavailable, using CPU: " + e.message); landmarker = await make("CPU"); }
-  try { const c = document.createElement("canvas"); c.width = 256; c.height = 256; c.getContext("2d").fillRect(0, 0, 256, 256); landmarker.detectForVideo(c, Math.round(performance.now())); } catch (e) { }   // warm up
+  try { const c = document.createElement("canvas"); c.width = 256; c.height = 256; c.getContext("2d").fillRect(0, 0, 256, 256); runningMode === "IMAGE" ? landmarker.detect(c) : landmarker.detectForVideo(c, Math.round(performance.now())); } catch (e) { }   // warm up
   return { landmarker, library: wasm === wasmLocal ? "local library" : "library from CDN", model: `${chosen} model${local ? "" : " from Google"}`, variant: chosen };
 }
 

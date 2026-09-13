@@ -2,6 +2,8 @@
 
 All new spoken prompts and guidance use **Marin**, with the soft, warm British female delivery selected on 13 September 2026. `voice-profile.json` is the shared voice and delivery configuration, copied from the approved exercise-library settings. This applies to countdowns, exercise guidance, spoken feedback and future app audio.
 
+When referring to the treated limb, scripts say **your operated knee** or **your operated leg**. **Your replaced knee** is appropriate when knee replacement is established. Left/right wording must use the saved operated-leg setting. References to the other leg or to both knees must remain accurate. This wording is applied to the written script before narration is generated. The canonical exercise scripts and prepared Marin text files have been updated; existing exercise-video audio needs regeneration to speak the new wording. The countdown and completion recordings do not identify a particular knee and remain applicable.
+
 Use generated audio through `app-voice.mjs`. Do not fall back to an operating-system voice or a different AI voice. Keep the written instruction available, and describe the speech as AI-generated. Voice commands and microphone access are not part of the exercise flow.
 
 ## Countdown

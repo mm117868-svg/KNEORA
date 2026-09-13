@@ -7,5 +7,6 @@
   "prompts": {
     "repetitions_complete": "Your repetitions are now complete. The recording has stopped. You may now move from your exercise position when you are ready.",
     "session_ended": "Your exercise session has ended. The recording has stopped. You may now move from your exercise position when you are ready."
-  }
+  },
+  "wording_policy": "When a script refers to the treated knee or leg, say \"your operated knee\" or \"your operated leg\". \"Your replaced knee\" may be used when knee replacement is established. Do not call the treated limb \"the exercise leg\". Keep references to the other leg and to both knees explicit and correct. Use left or right only from the saved operated-leg setting. Apply this wording when writing the script; the speech model must read the approved script exactly."
 }

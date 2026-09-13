@@ -2,7 +2,7 @@
   {
     "id": "heel_slide",
     "title": "Heel slide",
-    "subtitle": "Bend your knee with control",
+    "subtitle": "Bend your operated knee with control",
     "duration": 57,
     "active": true,
     "reviewStatus": "Draft for clinical review",
@@ -15,7 +15,7 @@
         "start": 0,
         "end": 7,
         "heading": "Get comfortable",
-        "text": "Lie on your back with your exercise leg straight."
+        "text": "Lie on your back with your operated leg straight."
       },
       {
         "start": 7,
@@ -27,7 +27,7 @@
         "start": 13,
         "end": 19,
         "heading": "Slide your heel in",
-        "text": "Slide your heel towards your bottom, bending your knee."
+        "text": "Slide your heel towards your bottom, bending your operated knee."
       },
       {
         "start": 19,
@@ -39,7 +39,7 @@
         "start": 25,
         "end": 31,
         "heading": "Slide back out",
-        "text": "Slowly slide your heel away until your leg is straight again."
+        "text": "Slowly slide your heel away until your operated leg is straight again."
       },
       {
         "start": 31,
@@ -51,13 +51,13 @@
         "start": 37,
         "end": 43,
         "heading": "Watch the slide again",
-        "text": "The heel stays in contact as the knee bends, then slides back out."
+        "text": "The heel stays in contact as your operated knee bends, then slides back out."
       },
       {
         "start": 43,
         "end": 49,
         "heading": "Return and rest",
-        "text": "Slowly slide your heel away until your leg is straight again."
+        "text": "Slowly slide your heel away until your operated leg is straight again."
       },
       {
         "start": 49,
@@ -72,7 +72,7 @@
   {
     "id": "straight_leg_raise",
     "title": "Straight leg raise",
-    "subtitle": "Lift with your knee straight",
+    "subtitle": "Lift with your operated knee straight",
     "duration": 57,
     "active": true,
     "reviewStatus": "Draft for clinical review",
@@ -90,44 +90,44 @@
       {
         "start": 7,
         "end": 13,
-        "heading": "Prepare the exercise leg",
-        "text": "Keep your exercise leg straight, with your toes pointing towards the ceiling."
+        "heading": "Prepare your operated leg",
+        "text": "Keep your operated leg straight, with your toes pointing towards the ceiling."
       },
       {
         "start": 13,
         "end": 19,
         "heading": "Tighten, then lift",
-        "text": "Tighten your exercise thigh. Keep the knee straight as you lift."
+        "text": "Tighten the thigh of your operated leg. Keep your operated knee straight as you lift."
       },
       {
         "start": 19,
         "end": 25,
-        "heading": "Keep the knee straight",
+        "heading": "Keep your operated knee straight",
         "text": "Lift only a little. Keep your back relaxed and your pelvis still."
       },
       {
         "start": 25,
         "end": 31,
         "heading": "Lower gently",
-        "text": "Lower the whole leg slowly back onto the bed."
+        "text": "Lower your whole operated leg slowly back onto the bed."
       },
       {
         "start": 31,
         "end": 37,
         "heading": "Check your control",
-        "text": "If your knee bends as you lift, stop and ask your physiotherapist."
+        "text": "If your operated knee bends as you lift, stop and ask your physiotherapist."
       },
       {
         "start": 37,
         "end": 43,
         "heading": "Watch the lift again",
-        "text": "Tighten the thigh first. Lift the leg as one piece, keeping the knee straight."
+        "text": "Tighten the thigh of your operated leg first. Lift your operated leg as one piece, keeping your operated knee straight."
       },
       {
         "start": 43,
         "end": 49,
         "heading": "Return and rest",
-        "text": "Lower the whole leg slowly back onto the bed."
+        "text": "Lower your whole operated leg slowly back onto the bed."
       },
       {
         "start": 49,
@@ -165,38 +165,38 @@
       {
         "start": 13,
         "end": 19,
-        "heading": "Straighten the knee",
-        "text": "Lift the foot of your exercise leg by slowly straightening your knee."
+        "heading": "Straighten your operated knee",
+        "text": "Lift the foot of your operated leg by slowly straightening your operated knee."
       },
       {
         "start": 19,
         "end": 25,
-        "heading": "Keep your thigh supported",
-        "text": "Keep your thigh on the seat. Straighten only as far as comfortable."
+        "heading": "Keep the thigh of your operated leg supported",
+        "text": "Keep the thigh of your operated leg on the seat. Straighten only as far as comfortable."
       },
       {
         "start": 25,
         "end": 31,
         "heading": "Lower with control",
-        "text": "Bend your knee slowly and return your foot to the floor."
+        "text": "Bend your operated knee slowly and return your foot to the floor."
       },
       {
         "start": 31,
         "end": 37,
         "heading": "Stay steady",
-        "text": "Keep your body upright. Avoid swinging your leg or leaning backwards."
+        "text": "Keep your body upright. Avoid swinging your operated leg or leaning backwards."
       },
       {
         "start": 37,
         "end": 43,
         "heading": "Watch the movement again",
-        "text": "The thigh stays still while the lower leg rises. Keep your back upright."
+        "text": "The thigh stays still while the lower part of your operated leg rises. Keep your back upright."
       },
       {
         "start": 43,
         "end": 49,
         "heading": "Return and rest",
-        "text": "Bend your knee slowly and return your foot to the floor."
+        "text": "Bend your operated knee slowly and return your foot to the floor."
       },
       {
         "start": 49,
@@ -211,7 +211,7 @@
   {
     "id": "quad_set",
     "title": "Quad set",
-    "subtitle": "Tighten the front of your thigh",
+    "subtitle": "Tighten the front of the thigh of your operated leg",
     "duration": 57,
     "active": false,
     "reviewStatus": "Draft for clinical review",
@@ -223,8 +223,8 @@
       {
         "start": 0,
         "end": 7,
-        "heading": "Support your leg",
-        "text": "Lie comfortably with your exercise leg supported and straight."
+        "heading": "Support your operated leg",
+        "text": "Lie comfortably with your operated leg supported and straight."
       },
       {
         "start": 7,
@@ -235,20 +235,20 @@
       {
         "start": 13,
         "end": 19,
-        "heading": "Tighten your thigh",
-        "text": "Pull your toes towards you and tighten the front of your thigh."
+        "heading": "Tighten the thigh of your operated leg",
+        "text": "Pull your toes towards you and tighten the front of the thigh of your operated leg."
       },
       {
         "start": 19,
         "end": 25,
         "heading": "Press gently down",
-        "text": "Gently press the back of your knee towards the bed."
+        "text": "Gently press the back of your operated knee towards the bed."
       },
       {
         "start": 25,
         "end": 31,
         "heading": "Relax the muscle",
-        "text": "Release the squeeze and let the thigh relax completely."
+        "text": "Release the squeeze and let the thigh of your operated leg relax completely."
       },
       {
         "start": 31,
@@ -260,13 +260,13 @@
         "start": 37,
         "end": 43,
         "heading": "Watch the squeeze again",
-        "text": "Tighten the front of the thigh. Only a small movement may be visible."
+        "text": "Tighten the front of the thigh of your operated leg. Only a small movement may be visible."
       },
       {
         "start": 43,
         "end": 49,
         "heading": "Return and rest",
-        "text": "Release the squeeze and let the thigh relax completely."
+        "text": "Release the squeeze and let the thigh of your operated leg relax completely."
       },
       {
         "start": 49,
@@ -306,7 +306,7 @@
         "start": 13,
         "end": 19,
         "heading": "Bend behind you",
-        "text": "Bend your exercise knee and bring that heel up behind you."
+        "text": "Bend your operated knee and bring that heel up behind you."
       },
       {
         "start": 19,
@@ -586,7 +586,7 @@
         "start": 13,
         "end": 19,
         "heading": "Lift the other foot",
-        "text": "Shift onto your exercise leg. Lift the other foot just clear of the floor."
+        "text": "Shift onto your operated leg. Lift the other foot just clear of the floor."
       },
       {
         "start": 19,
@@ -610,7 +610,7 @@
         "start": 37,
         "end": 43,
         "heading": "Watch the balance again",
-        "text": "Move your weight onto the exercise leg, then lift the other foot a little."
+        "text": "Move your weight onto your operated leg, then lift the other foot a little."
       },
       {
         "start": 43,
