@@ -15,3 +15,11 @@ video leaves the device. No passcode gate; noindex.
 
 Serve with GitHub Pages (Settings > Pages > Deploy from branch, root).
 Built by `tools/pages.py` in the knee-recovery folder; edit there, not here.
+
+## Recorded exercise analyser
+
+`video-analysis/` contains the standalone recorded straight leg raise analyser, with local MediaPipe assets, per-joint measurements, frame-quality filtering, TXT/CSV/JSON reports and an explicitly unvalidated SLR video estimate. Clinical QAB entries remain separate. Videos stay in the browser. Open `video-analysis/` from the home-page footer or see `video-analysis/README.md` for local setup, methods and limitations.
+
+The recorded analyser is maintained as a separate addition to this static build. Future regeneration with `tools/pages.py` should preserve this directory and its footer link.
+
+Run its tests with `node --test video-analysis/analysis.test.mjs`.
