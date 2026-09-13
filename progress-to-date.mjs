@@ -1,4 +1,4 @@
-import {EXERCISE_NAMES,METRICS,finite,seriesFor,dailyRows,metricSummary,formatValue,localDate,dayNumber,dayAt,postOpDay} from './progress-data.mjs?v=recording-voice-2';
+import {EXERCISE_NAMES,METRICS,finite,seriesFor,dailyRows,metricSummary,formatValue,localDate,dayNumber,dayAt,postOpDay} from './progress-data.mjs?v=high-five-small-1';
 import {esc,tile,dayLabel,shortDate,chart,csvDownload,download} from './progress-shared.mjs';
 import {RECOVERY_SOURCES,REFERENCES} from './recovery-references.mjs';
 import {readProms,scopedProms,promOverview,PROM_NAMES} from './patient-measures.mjs';

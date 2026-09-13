@@ -1,6 +1,6 @@
 /* Patient overview uses live session measurements; post-recording analysis is stored separately. */
 import {calendarFollowups,followupLink} from './questionnaire-schedule.mjs';
-import {videoRepetitionCount} from './measurement-quality.mjs';
+import {videoRepetitionCount} from './measurement-quality.mjs?v=high-five-small-1';
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number = value => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
 export function recordedCount(record) {
@@ -20,7 +20,7 @@ export function patientRecords(records, patient, operationDate) {
 export function comparableRecords(records, record, metric = 'bend') {
   return records.filter(r => r.exercise === record.exercise && r.patient_id === record.patient_id && (r.operation_date || '') === (record.operation_date || '') &&
     (r.pose_validation?.side || r.measurement?.side || '') === (record.pose_validation?.side || record.measurement?.side || '') &&
-    (metric !== 'reps' || ((r.count_source || 'monitoring') === (record.count_source || 'monitoring') && (r.pose_validation?.version || '') === (record.pose_validation?.version || '') && (r.pose_validation?.raw_source || '') === (record.pose_validation?.raw_source || '') && !!r.hold === !!record.hold)));
+    (metric !== 'reps' || ((r.count_source || 'monitoring') === (record.count_source || 'monitoring') && (r.pose_validation?.version || '') === (record.pose_validation?.version || '') && (r.pose_validation?.raw_source || '') === (record.pose_validation?.raw_source || '') && !!r.pose_validation?.small_movement === !!record.pose_validation?.small_movement && !!r.hold === !!record.hold)));
 }
 const bend = r => number(r.measurement?.p95_flexion_deg);
 const date = r => new Date(r.started_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});

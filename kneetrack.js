@@ -14,7 +14,7 @@
    rather than from how fast the changed pixels are moving, so a pause, a slow repetition or a passing
    shadow does not add or drop a count. */
 
-export const TRACK_VERSION = "kneetrack-0.1.0";
+export const TRACK_VERSION = "kneetrack-0.2.0";
 
 const PW = 160;            // the picture is counted at this width, as in the pixel-motion counter
 const GRID = 7;            // points across the box
@@ -44,15 +44,21 @@ export function loadTracker() {
    when the path comes back through the low third having passed through the high third, which is the same
    moment in every repetition whatever the speed. Nothing is compared with a stored movement. */
 export class SwingCounter {
-  constructor(fps) { this.aS = 1 - Math.exp(-1 / (0.15 * fps)); this.aE = 1 - Math.exp(-1 / (6 * fps)); this.reset(); }
-  reset() { this.p = 0; this.s = 0; this.hi = 0; this.lo = 0; this.high = false; this.reps = 0; this.times = []; this.amps = []; this.ready = false; }
+  constructor(fps, minAmplitude=MIN_AMP, {orientFromStart=false}={}) { this.orientFromStart=orientFromStart; this.minAmplitude=minAmplitude; this.aS = 1 - Math.exp(-1 / (0.15 * fps)); this.aE = 1 - Math.exp(-1 / (6 * fps)); this.reset(); }
+  reset() { this.origin=null; this.direction=0; this.p = 0; this.s = 0; this.hi = 0; this.lo = 0; this.high = false; this.reps = 0; this.times = []; this.amps = []; this.ready = false; }
   update(p, t) {
+    if (this.orientFromStart) {
+      this.origin ??= p;
+      const excursion = p-this.origin;
+      if (!this.direction && Math.abs(excursion)>=this.minAmplitude) this.direction=Math.sign(excursion);
+      p=this.direction ? excursion*this.direction : 0;
+    }
     this.s += this.aS * (p - this.s);                       // the path, smoothed
     if (!this.ready) { this.hi = this.lo = this.s; this.ready = true; }
     this.hi = this.s > this.hi ? this.s : this.hi + this.aE * (this.s - this.hi);   // the envelope of the swing
     this.lo = this.s < this.lo ? this.s : this.lo + this.aE * (this.s - this.lo);
     const amp = this.hi - this.lo; let rep = 0;
-    if (amp >= MIN_AMP) {
+    if (amp >= this.minAmplitude) {
       const up = this.lo + 0.7 * amp, down = this.lo + 0.3 * amp;
       if (this.s >= up) this.high = true;
       else if (this.s <= down && this.high) {
@@ -68,12 +74,13 @@ export class SwingCounter {
 }
 
 export class KneeTracker {
-  constructor(fw, fh, fps) {
-    this.fw = fw; this.fh = fh; this.fps = fps; this.scale = PW / fw; this.ph = Math.round(fh * this.scale);
-    this.counter = new SwingCounter(fps); this.rows = []; this.hist = []; this.path = 0; this.drift = 0;
+  constructor(fw, fh, fps, {smallMovement=false}={}) {
+    this.pw=smallMovement?640:PW; this.smallMovement=smallMovement;
+    this.fw = fw; this.fh = fh; this.fps = fps; this.scale = this.pw / fw; this.ph = Math.round(fh * this.scale);
+    this.counter = new SwingCounter(fps,smallMovement ? .35 : MIN_AMP,{orientFromStart:smallMovement}); this.rows = []; this.hist = []; this.path = 0; this.drift = 0;
     this.aD = 1 - Math.exp(-1 / (8 * fps));    // the slow wander of the whole leg is taken out of the path
     this.n = 0; this.kept = 0; this.sinceSeed = 0; this.ready = false; this.tracking = false;
-    this.work = document.createElement("canvas"); this.work.width = PW; this.work.height = this.ph;
+    this.work = document.createElement("canvas"); this.work.width = this.pw; this.work.height = this.ph;
     this.wctx = this.work.getContext("2d", { willReadFrequently: true });
   }
 
@@ -82,8 +89,8 @@ export class KneeTracker {
     this.jsfeat = jsfeat;
     const max = GRID * GRID;
     this.prevPyr = new jsfeat.pyramid_t(PYR); this.currPyr = new jsfeat.pyramid_t(PYR);
-    this.prevPyr.allocate(PW, this.ph, jsfeat.U8_t | jsfeat.C1_t);
-    this.currPyr.allocate(PW, this.ph, jsfeat.U8_t | jsfeat.C1_t);
+    this.prevPyr.allocate(this.pw, this.ph, jsfeat.U8_t | jsfeat.C1_t);
+    this.currPyr.allocate(this.pw, this.ph, jsfeat.U8_t | jsfeat.C1_t);
     this.prevXY = new Float32Array(max * 2); this.currXY = new Float32Array(max * 2);
     this.status = new Uint8Array(max); this.ready = true;
   }
@@ -95,7 +102,7 @@ export class KneeTracker {
     let k = 0;
     for (let i = 1; i <= GRID; i++) for (let j = 1; j <= GRID; j++) {
       const x = bx + bw * i / (GRID + 1), y = by + bh * j / (GRID + 1);
-      if (x < 2 || y < 2 || x > PW - 3 || y > this.ph - 3) continue;
+      if (x < 2 || y < 2 || x > this.pw - 3 || y > this.ph - 3) continue;
       this.prevXY[k * 2] = x; this.prevXY[k * 2 + 1] = y; k++;
     }
     this.n = k; this.sinceSeed = 0;
@@ -105,9 +112,9 @@ export class KneeTracker {
   update(source, frame, t, box) {
     if (!this.ready) return 0;
     const J = this.jsfeat;
-    this.wctx.drawImage(source, 0, 0, PW, this.ph);
-    const img = this.wctx.getImageData(0, 0, PW, this.ph);
-    J.imgproc.grayscale(img.data, PW, this.ph, this.currPyr.data[0]);
+    this.wctx.drawImage(source, 0, 0, this.pw, this.ph);
+    const img = this.wctx.getImageData(0, 0, this.pw, this.ph);
+    J.imgproc.grayscale(img.data, this.pw, this.ph, this.currPyr.data[0]);
     this.currPyr.build(this.currPyr.data[0], true);
 
     let step = [0, 0], kept = 0;
@@ -117,12 +124,21 @@ export class KneeTracker {
       for (let i = 0; i < this.n; i++) {
         if (!this.status[i]) continue;
         const x = this.currXY[i * 2], y = this.currXY[i * 2 + 1];
-        if (x < 0 || y < 0 || x >= PW || y >= this.ph) continue;
+        if (x < 0 || y < 0 || x >= this.pw || y >= this.ph) continue;
         const a = x - this.prevXY[i * 2], b = y - this.prevXY[i * 2 + 1];
         if (Math.abs(a) > 24 || Math.abs(b) > 24) continue;           // a point that jumped has lost the knee
         dx.push(a); dy.push(b); kept++;
       }
-      if (kept >= 4) step = [median(dx), median(dy)];
+      if (kept >= 4) {
+        // In small-movement mode the wide box may contain mostly stationary
+        // background. Use a coherent moving group, rather than its static median.
+        if(this.smallMovement){
+          const groups=Array.from({length:8},()=>[]);
+          for(let i=0;i<dx.length;i++)if(Math.hypot(dx[i],dy[i])>=.04){const bin=Math.floor((Math.atan2(dy[i],dx[i])+Math.PI)/(2*Math.PI)*8)%8;groups[bin].push([dx[i],dy[i]]);}
+          const group=groups.sort((a,b)=>b.length-a.length)[0];
+          if(group.length>=4)step=[median(group.map(p=>p[0])),median(group.map(p=>p[1]))];
+        }else step = [median(dx), median(dy)];
+      }
     }
     this.kept = kept; this.tracking = kept >= 4;
 
@@ -157,7 +173,7 @@ export class KneeTracker {
     const tracked = this.rows.filter(r => r[4] >= 4).length;
     const amps = this.counter.amps;
     return {
-      repetitions: this.counter.reps, source: "knee_tracker", version: TRACK_VERSION,
+      repetitions: this.counter.reps, source: "knee_tracker", version: TRACK_VERSION, small_movement: this.smallMovement, working_width: this.pw, minimum_swing_px: this.counter.minAmplitude,
       tempo_s_per_rep: tempo ? +tempo.toFixed(2) : null,
       tracked_fraction: +(tracked / Math.max(1, this.rows.length)).toFixed(3),
       tracked_time_s: +(tracked / Math.max(1, this.rows.length) * duration).toFixed(1),

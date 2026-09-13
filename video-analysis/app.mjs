@@ -1,7 +1,7 @@
-import {assessPose, clinicalQAB, slrAssessment} from './analysis.mjs';
-import {EXERCISES, analyseExercise, chooseSide, compactReport} from './exercises.mjs';
+import {assessPose, clinicalQAB, slrAssessment} from './analysis.mjs?v=high-five-small-1';
+import {EXERCISES, analyseExercise, chooseSide, compactReport} from './exercises.mjs?v=high-five-small-1';
 import {recoveryContext} from './evidence.mjs';
-import {videoRepetitionCount,trackingFeedback} from '../measurement-quality.mjs';
+import {videoRepetitionCount,trackingFeedback} from '../measurement-quality.mjs?v=high-five-small-1';
 const $=id=>document.getElementById(id),video=$('video');
 let fileURL,model,report,loading,cancelled=false,busy=false,sourceName='',duration=0,metadata={},bridgeToken=null;
 const embedded=new URLSearchParams(location.search).get('embedded')==='1';
@@ -35,6 +35,7 @@ async function loadRecording(blob, info={}){
   if(fileURL)URL.revokeObjectURL(fileURL);
   sourceName=blob.name||info.fileName||'Live exercise recording';
   if(EXERCISES[info.exercise])$('exercise').value=info.exercise;
+  $('smallMovement').checked=!!info.smallMovement;
   if(['auto','left','right'].includes(info.side))$('side').value=info.side;
   $('daysPostOp').value=Number.isInteger(info.daysPostOp)&&info.daysPostOp>=0?info.daysPostOp:'';
   $('start').value='0';$('progress').value=0;settingsChanged();
@@ -74,7 +75,7 @@ $('cancel').onclick=()=>{cancelled=true;status('Cancelling analysis…');};
 $('run').onclick=run;
 async function run(){
   if(busy||!fileURL)return;
-  const config={exercise:$('exercise').value};
+  const config={exercise:$('exercise').value,smallMovement:$('smallMovement').checked};
   for(const key of ['start','targetLift','targetHold','targetLower','bendTolerance']){
     if(key!=='start'&&config.exercise!=='straight_leg_raise'){config[key]=key==='bendTolerance'?10:null;continue;}
     if(['targetLift','targetHold','targetLower'].includes(key)&&!$(key).value){config[key]=null;continue;}
@@ -174,7 +175,7 @@ function updateQAB(){
   if(!report||report.exercise!=='straight_leg_raise')return;
   const value=id=>$(id).value===''?null:Number($(id).value);
   report.clinicalScore=clinicalQAB({straightLegRaise:value('qabSLR'),quadricepsContraction:value('qabContraction'),extensionLag:value('qabLag')});
-  const q=report.clinicalScore;report.slrAssessment=slrAssessment(report,value('qabSLR'));const slr=report.slrAssessment;
+  const q=report.clinicalScore;report.slrAssessment=slrAssessment(report,value('qabSLR'));if(report.config.smallMovement){report.slrAssessment.videoEstimate=null;report.slrAssessment.reason='Small movement mode counts observed attempts. It does not establish the clinical SLR test criteria.';}const slr=report.slrAssessment;
   $('slrVideoScore').textContent=slr.videoEstimate===null?'Video estimate: not assessable':`Video estimate: ${slr.videoEstimate}/2 (unvalidated adaptation)`;
   $('slrClinicalScore').textContent=slr.clinicalScore===null?'Paper SLR component score: awaiting clinical assessment':`Clinician-entered SLR component score: ${slr.clinicalScore}/2`;
   $('slrReason').textContent=slr.reason;

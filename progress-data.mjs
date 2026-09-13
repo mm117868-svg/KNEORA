@@ -1,4 +1,4 @@
-import {recordedCount} from './patient-progress.js?v=recording-voice-2';
+import {recordedCount} from './patient-progress.js?v=high-five-small-1';
 export const EXERCISE_NAMES = {straight_leg_raise:'Straight leg raise',seated_extension:'Seated knee extension',heel_slide:'Heel slides'};
 export const finite = n => typeof n === 'number' && Number.isFinite(n) ? n : null;
 const values = xs => xs.map(finite).filter(n=>n!==null);
@@ -61,7 +61,7 @@ export function measurementSeries(r, metric) {
  const a=report(r), c=a?.config || {};
  const side=metric.source==='video'?c.side:r.pose_validation?.side||r.measurement?.side;
  const base=[r.patient_id,r.operation_date||'',r.exercise,metric.source];
- if(metric.source==='video')base.push(side||'unknown',a?.ruleVersion||'legacy',a?.method||'',a?.modelVersion||'',JSON.stringify(m(r).qualityRules||{}),c.minVisibility??null,c.bendTolerance??null,c.targetLift??null,c.targetHold??null,c.targetLower??null);
+ if(metric.source==='video')base.push(side||'unknown',a?.ruleVersion||'legacy',a?.method||'',a?.modelVersion||'',JSON.stringify(m(r).qualityRules||{}),c.minVisibility??null,!!c.smallMovement,c.bendTolerance??null,c.targetLift??null,c.targetHold??null,c.targetLower??null);
  if(metric.source==='live')base.push(side||'unknown',r.count_source||'monitoring',!!r.hold,r.measurement?.stats_min_visibility??null,r.pose_validation?.version||'',r.pose_validation?.raw_source||'');
  if(metric.source==='clinical')base.push(side||'unknown');
  return JSON.stringify(base);

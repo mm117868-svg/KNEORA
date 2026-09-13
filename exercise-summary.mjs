@@ -1,7 +1,7 @@
-import {recordedCount} from './patient-progress.js?v=recording-voice-2';
-import {EXERCISE_NAMES,METRICS,finite,postOpDay,measurementSeries} from './progress-data.mjs?v=recording-voice-2';
+import {recordedCount} from './patient-progress.js?v=high-five-small-1';
+import {EXERCISE_NAMES,METRICS,finite,postOpDay,measurementSeries} from './progress-data.mjs?v=high-five-small-1';
 import {esc,shortDate,dayLabel} from './progress-shared.mjs';
-import {MIN_COUNT_COVERAGE,trackingCoverage,videoRepetitionCount,trackingFeedback} from './measurement-quality.mjs';
+import {MIN_COUNT_COVERAGE,trackingCoverage,videoRepetitionCount,trackingFeedback} from './measurement-quality.mjs?v=high-five-small-1';
 const positive=n=>finite(n)!==null&&n>0?n:null;
 const nonnegative=n=>finite(n)!==null&&n>=0?n:null;
 const round=n=>Math.round(n*10)/10;
@@ -42,7 +42,8 @@ export function basicExerciseSummary(record,history=[]) {
  const videoCount=videoRepetitionCount(report),liveCount=recordedCount(record);
  const count=videoCount??liveCount;
  const partial=!!report&&((positive(report.config?.start)??0)>0 || (positive(metrics.analysedDuration)!==null&&positive(record.duration_s)!==null&&metrics.analysedDuration<record.duration_s-1));
- const countNote=count===null?'Tracking was not clear enough to measure repetitions. This does not mean you performed none.':videoCount!==null?`Complete repetitions seen${partial?' in the analysed part':' in the video'}${coverage<MIN_COUNT_COVERAGE?'; more may have been missed':''}${liveCount!==null&&liveCount!==videoCount?`. ${counterLabel(record)}: ${liveCount}.`:'.'}`:`${counterLabel(record)}${report?'; video count unavailable':''}`;
+ let countNote=count===null?'Tracking was not clear enough to measure repetitions. This does not mean you performed none.':videoCount!==null?`Complete repetitions seen${partial?' in the analysed part':' in the video'}${coverage<MIN_COUNT_COVERAGE?'; more may have been missed':''}${liveCount!==null&&liveCount!==videoCount?`. ${counterLabel(record)}: ${liveCount}.`:'.'}`:`${counterLabel(record)}${report?'; video count unavailable':''}`;
+ if(report?.config?.smallMovement||record.pose_validation?.small_movement)countNote+=' Small movements are counted as observed attempts; range is measured separately.';
  // Never attach the background camera counter's tempo to the patient's spoken count.
  const tempo=report?(reps.length?positive(metrics.meanCycleDuration)??average(reps.map(p=>positive(p.cycleDuration))):null):(liveCount>=2?liveRepetitionTempo(record):null);
  const cadence=tempo?60/tempo:null;

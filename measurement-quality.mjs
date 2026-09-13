@@ -7,6 +7,7 @@ export function trackingCoverage(report) {
 }
 export function videoRepetitionCount(report) {
   if (!Array.isArray(report?.reps)) return null;
+  if(report.config?.smallMovement && !report.reps.length)return null;
   return report.reps.length > 0 || trackingCoverage(report) >= MIN_COUNT_COVERAGE ? report.reps.length : null;
 }
 export function trackingFeedback(report) {

@@ -30,6 +30,7 @@ fs.mkdirSync(out, {recursive: true});
   await page.waitForFunction(()=>!!window.kr);
   await page.evaluate(()=>{
     window.testLift=0;window.testMissing=false;window.testPartial=true;window.opticalPending=0;
+    window.kr.setHand(()=>window.testHand?{gestures:[[{categoryName:"Open_Palm",score:.95}]],landmarks:[Array.from({length:21},(_,i)=>({x:.08+(i%4)*.02,y:.68+Math.floor(i/4)*.02}))]}:{gestures:[],landmarks:[]});
     window.kr.setPose(()=>{
       if(window.testMissing)return {landmarks:[]};
       const p=Array.from({length:33},()=>({x:0,y:0,visibility:0,presence:0}));
@@ -38,7 +39,7 @@ fs.mkdirSync(out, {recursive: true});
       p[25]={x:.28+.2*Math.cos(lift),y:.68-.3*Math.sin(lift),visibility:1,presence:1};
       p[27]={x:.28+.4*Math.cos(lift),y:.68-.6*Math.sin(lift),visibility:1,presence:1};
       p[15]={x:.1+.02*Math.sin(performance.now()/80),y:.1,visibility:1,presence:1};
-      if(window.testHand)p[0]={x:.1,y:.5,visibility:1,presence:1};
+      // No head or torso is provided to the hand-start test.
       for(const i of [23,25,27]){if(p[i].visibility)p[i].visibility=.25;p[i].presence=.25;}
       return {landmarks:[p]};
     });
@@ -105,7 +106,7 @@ fs.mkdirSync(out, {recursive: true});
   assert.ok(record.recording.captured&&record.recording.bytes>0,'a real MediaRecorder video was captured');
   assert.equal(await page.locator('.recording-stopped').innerText().then(t=>t.includes('Marin audio is unavailable')),false);
   assert.deepEqual(await page.evaluate(()=>window.playedPrompts.at(-1)),{duration:8.112,state:'running'});
-  assert.equal(record.pose_validation.raw_source,countMethod==='track'?'knee_tracker':'monitoring');
+  assert.equal(record.pose_validation.raw_source,['track','small'].includes(countMethod)?'knee_tracker':'monitoring');
   assert.equal(record.pose_validation.repetitions,1);
   assert.equal(record.monitoring.repetitions,6);
   assert.equal(record.pose_validation.rejected,3);

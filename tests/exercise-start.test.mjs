@@ -5,11 +5,12 @@ import vm from 'node:vm';
 import {AppVoice, completionNotice} from '../app-voice.mjs';
 import {finishRecording} from '../video-analysis/live.mjs';
 import {inspectExerciseLeg} from '../pose-gate.js';
+import {highFiveState,HIGH_FIVE_SETTINGS} from '../high-five.mjs';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const source = html.slice(html.indexOf('const HAND_HOLD_START_S'), html.indexOf('function cameraFailed(e)')) +
   html.slice(html.indexOf('let previewId = 0'), html.indexOf('function startSession()'));
-const pose = (raised = true) => Array.from({length: 33}, (_, i) => ({x: .5, y: i === 0 ? .5 : i === 15 && raised ? .2 : .75, visibility: 1}));
+const pose = (open=true,score=.95) => ({gestures:[[{categoryName:open?'Open_Palm':'Closed_Fist',score}]],landmarks:[Array.from({length:21},(_,i)=>({x:.1+(i%4)*.02,y:.7+Math.floor(i/4)*.02}))]});
 function previewHarness() {
   const elements = new Map();
   const $ = id => {
@@ -17,11 +18,12 @@ function previewHarness() {
     return elements.get(id);
   };
   let now = 0, starts = 0, spoken = 0, stopped = 0, detects = 0, landmarks = pose();
-  const context = vm.createContext({$, stream: {}, running: false, current:{kind:'reps'}, inspectExerciseLeg, performance: {now: () => now},
+  const context = vm.createContext({$, stream: {}, running: false, current:{kind:'reps'}, inspectExerciseLeg, highFiveState, HIGH_FIVE_SETTINGS, drawHands(){}, performance: {now: () => now},
     appVoice: {play(){spoken++; return true;}, stop(){stopped++;}}, refreshHint(){},
     video: {readyState: 4, currentTime: 0, videoWidth: 1280}, canvas: {width: 1280, height: 720}, ctx: {drawImage(){}},
     requestAnimationFrame(){return 1;}, cancelAnimationFrame(){}, pickSide(){return null;}, drawSkeleton(){},
-    landmarker: {detectForVideo(){detects++; return {landmarks: landmarks ? [landmarks] : []};}},
+    landmarker: {detectForVideo(){return {landmarks:[]};}},
+    handRecognizer:{recognizeForVideo(){detects++;return landmarks;}},
     startSession(){starts++; context.running = true;}});
   vm.runInContext(source, context);
   return {$, context, get starts(){return starts;}, get spoken(){return spoken;}, get stopped(){return stopped;}, get detects(){return detects;},
@@ -29,47 +31,43 @@ function previewHarness() {
     run(from, to, options) {for (let t = from; t <= to; t += 40) this.frame(t, options);},
     get counting(){return vm.runInContext('countdownStart !== null', context);}};
 }
-test('a continuous raised hand starts one five-second countdown, then recording', () => {
-  const h = previewHarness();
-  h.run(0, 2000); assert.equal(h.counting, false); assert.equal(h.starts, 0);
-  h.run(2040, 2240); assert.equal(h.counting, true); assert.equal(h.spoken, 1);
-  const begin = vm.runInContext('countdownStart', h.context);
-  h.run(2280, begin + 4960, {sample: pose(false)}); assert.equal(h.starts, 0);
-  h.frame(begin + 5000, {sample: pose(false)}); assert.equal(h.starts, 1); assert.equal(h.spoken, 1);
+test('an open palm starts the five-second countdown with no face or body landmarks',()=>{
+ const h=previewHarness();h.run(0,1960);assert.equal(h.counting,false);h.run(2000,2280);assert.equal(h.counting,true);assert.equal(h.spoken,1);
+ const begin=vm.runInContext('countdownStart',h.context);h.run(2320,begin+4960,{sample:pose(false)});assert.equal(h.starts,0);h.frame(begin+5000,{sample:pose(false)});assert.equal(h.starts,1);
 });
-test('lowered hands, missing landmarks and low confidence cannot start', () => {
-  for (const sample of [pose(false), null, pose().map(p => ({...p, visibility: .2}))]) {
-    const h = previewHarness(); h.run(0, 8000, {sample}); assert.equal(h.starts, 0); assert.equal(h.counting, false);
-  }
+test('fists, missing results and weak classifications cannot start',()=>{
+ for(const sample of [pose(false),null,pose(true,.2),{gestures:[],landmarks:[]}]){const h=previewHarness();h.run(0,8000,{sample});assert.equal(h.starts,0);assert.equal(h.counting,false);}
 });
-test('a brief raise interrupted by lost landmarks needs a fresh full hold', () => {
-  const h = previewHarness(); h.run(0, 1400); h.run(1440, 1680, {sample: null});
-  h.run(1720, 3000, {sample: pose()}); assert.equal(h.counting, false);
-  h.run(3040, 4000); assert.equal(h.counting, true);
+test('a lost hand interrupts the hold and needs another full two seconds',()=>{
+ const h=previewHarness();h.run(0,1400);h.run(1440,1680,{sample:null});h.run(1720,3000,{sample:pose()});assert.equal(h.counting,false);h.run(3040,4000);assert.equal(h.counting,true);
 });
-test('repeated camera frames cannot complete a raised-hand hold', () => {
-  const h = previewHarness(); h.run(0, 1400); const detects = h.detects;
-  h.run(1440, 8000, {fresh: false}); assert.equal(h.detects, detects); assert.equal(h.counting, false); assert.equal(h.starts, 0);
-  h.run(8040, 9400); assert.equal(h.counting, false);
+test('repeated camera frames cannot complete an open-palm hold',()=>{
+ const h=previewHarness();h.run(0,1400);const detects=h.detects;h.run(1440,8000,{fresh:false});assert.equal(h.detects,detects);assert.equal(h.counting,false);h.run(8040,9400);assert.equal(h.counting,false);
 });
-test('a camera stall cancels countdown and stops its audio', () => {
-  const h = previewHarness(); h.run(0, 2400); assert.equal(h.counting, true);
-  h.run(2440, 8400, {fresh: false}); assert.equal(h.counting, false); assert.equal(h.starts, 0); assert.ok(h.stopped > 0);
+test('a camera stall cancels the countdown and stops audio',()=>{
+ const h=previewHarness();h.run(0,2400);assert.equal(h.counting,true);h.run(2440,8400,{fresh:false});assert.equal(h.counting,false);assert.equal(h.starts,0);assert.ok(h.stopped>0);
 });
-test('tapping the countdown cancels it and resets the hand hold', () => {
-  const h = previewHarness(); h.run(0, 2400); h.$('countdown').listeners.pointerdown();
-  assert.equal(h.counting, false); assert.equal(h.stopped, 1);
-  h.run(2440, 3600); assert.equal(h.counting, false); assert.equal(h.starts, 0);
+test('tapping the countdown cancels it and resets the hold',()=>{
+ const h=previewHarness();h.run(0,2400);h.$('countdown').listeners.pointerdown();assert.equal(h.counting,false);assert.equal(h.stopped,1);h.run(2440,3600);assert.equal(h.counting,false);
 });
-test('camera tracking must be ready and no manual or speech-start control remains', () => {
-  const h = previewHarness(); h.context.landmarker = null; h.run(0, 10000); assert.equal(h.starts, 0); assert.equal(h.counting, false);
-  assert.doesNotMatch(html, /briefStart|id="handstart"|SpeechRecognition|speechSynthesis|voicecount\.js|id="voice"|id="speak"/);
-  assert.equal((html.match(/beginCountdown\(\)/g) || []).length, 2); // Declaration and raised-hand call only.
+test('hand recognition can start without the body model, but not without the hand model',()=>{
+ const h=previewHarness();h.context.landmarker=null;h.run(0,2400);assert.equal(h.counting,true);
+ const missing=previewHarness();missing.context.handRecognizer=null;missing.run(0,8000);assert.equal(missing.counting,false);
+ assert.doesNotMatch(html,/HAND_ABOVE_NOSE|handPosition\(|SpeechRecognition|speechSynthesis/);
 });
-test('unseen wrists do not arm hands-free finish as if the hand was lowered', () => {
-  const h = previewHarness(); const sample = pose(false); sample[15].visibility = 0;
-  assert.equal(h.context.handPosition(sample), null);
-  assert.equal(h.context.handPosition(pose(false)), 'lowered');
+test('holding the starting palm cannot finish until it has been released, then held again',()=>{
+ const h=previewHarness();for(let t=0;t<6000;t+=120)assert.equal(h.context.finishHand('open',t),0);
+ h.context.finishHand('absent',6000);h.context.finishHand('unknown',6200);h.context.finishHand('absent',6400);h.context.finishHand('absent',6600);h.context.finishHand('absent',6800);h.context.finishHand('absent',7000);
+ assert.equal(h.context.finishHand('open',7100),0);assert.equal(h.context.finishHand('open',10100),0,'a long missing interval must not complete a hold');
+ for(let t=10220;t<=13220;t+=120)h.context.finishHand('open',t);
+ assert.equal(h.context.finishHand('open',13340),1);
+});
+
+test('a gap between release observations cannot arm the finish gesture',()=>{
+ const h=previewHarness();h.context.finishHand('absent',0);h.context.finishHand('absent',2000);
+ assert.equal(vm.runInContext('handArmed',h.context),false);
+ h.context.finishHand('absent',2250);h.context.finishHand('absent',2500);
+ assert.equal(vm.runInContext('handArmed',h.context),true);
 });
 
 function audioHarness({voice = 'marin', duration = 5, status = 200} = {}) {

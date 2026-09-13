@@ -1,5 +1,5 @@
-import {EXERCISES} from './exercises.mjs';
-import {videoRepetitionCount,trackingFeedback} from '../measurement-quality.mjs';
+import {EXERCISES} from './exercises.mjs?v=high-five-small-1';
+import {videoRepetitionCount,trackingFeedback} from '../measurement-quality.mjs?v=high-five-small-1';
 
 // MediaRecorder emits its last data chunk before stop. Assemble only afterwards.
 export async function finishRecording(recorder, chunks) {
@@ -86,7 +86,7 @@ export function mountExerciseAnalysis(host,{blob,metadata,onReport,returnToSumma
       const header=document.createElement('div');header.className='analysis-dialog-header';
       const title=document.createElement('strong');title.textContent=EXERCISES[metadata.exercise].name+' analysis';
       const close=document.createElement('button');close.type='button';close.textContent='Back to exercise summary';close.onclick=()=>dialog.close();header.append(title,close);
-      iframe=document.createElement('iframe');iframe.title='Exercise measurements and clinical references';iframe.src='video-analysis/?embedded=1&release=automatic-summary-1';
+      iframe=document.createElement('iframe');iframe.title='Exercise measurements and clinical references';iframe.src='video-analysis/?embedded=1&release=high-five-small-1';
       iframe.onerror=()=>{if(!disposed)analysisFailed('The analyser could not load. Check your connection and try again.');};
       readyTimer=setTimeout(()=>{if(!disposed)analysisFailed('The analyser did not respond. Check your connection and try again.');},20000);
       dialog.append(header,iframe);document.body.append(dialog);

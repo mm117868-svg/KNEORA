@@ -1,6 +1,6 @@
 /* Optical events are candidates. Pose observations can approve or reject them,
    but cannot create a repetition without an optical event. No clinical form score. */
-export const POSE_GATE_VERSION = 'leg-gate-2';
+export const POSE_GATE_VERSION = 'leg-gate-3';
 export const GATE_SETTINGS = Object.freeze({ visibility: .2, presence: .2, maxGap: .45,
   settleTime: .6, settleMotion: .025, onset: .035, excursion: .10, returnDistance: .035,
   returnDwell: .18, minDuration: .65, minLegPixels: 24, completionGrace: .12 });
@@ -35,8 +35,8 @@ export function inspectExerciseLeg(landmarks, side, width, height) {
 }
 
 export class LegMotionGate {
-  constructor(exercise, side, rawSource = 'monitoring') {
-    this.exercise = exercise; this.side = side; this.rawSource = rawSource; this.reset();
+  constructor(exercise, side, rawSource = 'monitoring', {smallMovement=false} = {}) {
+    this.exercise = exercise; this.side = side; this.rawSource = rawSource; this.smallMovement=smallMovement; this.reset();
   }
   reset() {
     this.reps = 0; this.events = []; this.times = []; this.observations = 0; this.trustedObservations = 0;
@@ -81,29 +81,35 @@ export class LegMotionGate {
       const first = this.settling[0];
       if (first && Math.max(distance(p.thigh, first.thigh), distance(p.whole, first.whole))/first.scale > GATE_SETTINGS.settleMotion) this.settling = [];
       this.settling.push(p); this.state = 'hold_start_position';
-      if (this.settling.length >= 4 && t-this.settling[0].t >= GATE_SETTINGS.settleTime) {
+      if (this.settling.length >= (this.smallMovement?10:4) && t-this.settling[0].t >= (this.smallMovement?1.2:GATE_SETTINGS.settleTime)) {
         const average = key => [0, 1].map(i => this.settling.reduce((s, q) => s+q[key][i], 0)/this.settling.length);
         this.reference = { ...p, thigh: average('thigh'), lower: average('lower'), whole: average('whole'),
           scale: this.settling.reduce((s, q) => s+q.scale, 0)/this.settling.length };
+        if(this.smallMovement){
+          const deviations=this.settling.map(q=>Math.max(distance(q.thigh,this.reference.thigh),distance(q.whole,this.reference.whole))/this.reference.scale).sort((a,b)=>a-b);
+          const noise=deviations[Math.floor(deviations.length*.8)]||0;
+          this.reference.motionThresholds={noise,onset:Math.max(.005,noise*3,.7/p.scale),excursion:Math.max(.012,noise*6,2/p.scale),returnDistance:Math.max(.003,noise*2,.5/p.scale)};
+        }
         this.settling = []; this.state = 'ready'; this.calibrated = true;
       }
       return;
     }
     const ref = this.reference;
+    const thresholds=ref.motionThresholds||GATE_SETTINGS;
     const dk = unit(sub(thigh, ref.thigh), ref.scale), da = unit(sub(whole, ref.whole), ref.scale);
     const kneeMotion = length(dk), ankleMotion = length(da), lowerMotion = distance(lower, ref.lower)/ref.scale;
     const movement = this.exercise === 'seated_extension' ? lowerMotion : Math.max(ankleMotion, kneeMotion);
     const coherent = kneeMotion > 0 && ankleMotion > 0 && (dk[0]*da[0]+dk[1]*da[1])/(kneeMotion*ankleMotion) >= .5;
-    const expected = this.exercise === 'straight_leg_raise' ? ankleMotion >= .10 && kneeMotion >= .04 && coherent :
-      this.exercise === 'heel_slide' ? ankleMotion >= .10 && kneeMotion >= .035 : lowerMotion >= .10 && kneeMotion <= .10;
+    const expected = this.exercise === 'straight_leg_raise' ? ankleMotion >= thresholds.excursion && kneeMotion >= thresholds.excursion*.4 && coherent :
+      this.exercise === 'heel_slide' ? ankleMotion >= thresholds.excursion && kneeMotion >= thresholds.excursion*.35 : lowerMotion >= thresholds.excursion && kneeMotion <= .10;
     if (this.exercise === 'seated_extension' && kneeMotion > .18) { this.invalidate('thigh_moved'); return; }
-    if (!this.cycle && movement >= GATE_SETTINGS.onset) {
+    if (!this.cycle && movement >= thresholds.onset) {
       this.completion = null;
       this.cycle = { start: t, candidates: [], excursion: false, samples: 0, returnedAt: null };
     }
     if (!this.cycle) { this.state = 'ready'; return; }
     const cycle = this.cycle; cycle.samples++; cycle.excursion ||= expected; this.state = 'following_leg';
-    if (movement <= GATE_SETTINGS.returnDistance) {
+    if (movement <= thresholds.returnDistance) {
       cycle.returnedAt ??= t; this.state = 'returning';
       if (t-cycle.returnedAt >= GATE_SETTINGS.returnDwell) {
         const valid = cycle.excursion && t-cycle.start >= GATE_SETTINGS.minDuration && cycle.samples >= 5;
@@ -149,8 +155,9 @@ export class LegMotionGate {
       pending: this.events.filter(e => e.status === 'pending').length,
       pose_observations: this.observations, trusted_pose_observations: this.trustedObservations,
       calibrated: this.calibrated, tracking_coverage: this.observations ? this.trustedObservations/this.observations : 0,
-      count_status: this.reps > 0 ? 'observed' : this.calibrated && this.trustedObservations/this.observations >= .8 ? 'observed' : 'unavailable',
+      count_status: this.reps > 0 ? 'observed' : !this.smallMovement && this.calibrated && this.trustedObservations/this.observations >= .8 ? 'observed' : 'unavailable',
       rejection_counts: {...this.rejectionCounts},
+      small_movement: this.smallMovement, motion_thresholds: this.reference?.motionThresholds || null,
       settings: { ...GATE_SETTINGS }, events: this.events.map(e => ({ ...e })) };
   }
   countingBox(width, height) {

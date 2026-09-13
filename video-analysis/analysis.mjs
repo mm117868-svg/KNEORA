@@ -1,5 +1,6 @@
+import {cycleSensitivity} from './sensitivity.mjs';
 // Pure measurement and segmentation functions. All thresholds are prototype rules.
-export const RULE_VERSION = 'slr-prototype-9';
+export const RULE_VERSION = 'slr-prototype-10';
 const median = xs => {const s = [...xs].sort((a,b)=>a-b); return s[Math.floor(s.length/2)];};
 export function angle(a,b,c) {
   const u=[a.x-b.x,a.y-b.y],v=[c.x-b.x,c.y-b.y];
@@ -64,6 +65,8 @@ export function analyse(samples,config) {
   // Infer the lowered position across the selected recording, without a timed pause.
   // Three consecutive tracked frames suppress isolated angle spikes and never bridge gaps.
   const selected=samples.filter(s=>s.t>=config.start);
+  const sensitivity=cycleSensitivity(selected,s=>s.valid&&Number.isFinite(s.hipAngle)?180-s.hipAngle:null,config.smallMovement);
+  config={...config,cycleSensitivity:sensitivity};
   const candidates=[];
   for(let i=1;i<selected.length-1;i++){
     const window=selected.slice(i-1,i+2);
@@ -76,28 +79,28 @@ export function analyse(samples,config) {
     return {ruleVersion:RULE_VERSION,config,baseline:null,coverage:trace.length?trace.filter(s=>s.valid).length/trace.length:0,reps:[],incomplete:0,trace,metrics:summarise(trace,[],config,null)};
   }
   const lowestObserved=Math.max(...candidates.map(s=>s.hipAngle));
-  const reference=candidates.filter(s=>s.hipAngle>=lowestObserved-3);
-  const baseHip=median(reference.map(s=>s.hipAngle)),baseBend=median(reference.map(s=>s.bend));
+  const reference=candidates.filter(s=>s.hipAngle>=lowestObserved-sensitivity.band);
+  const baseHip=config.smallMovement&&sensitivity.resolved?180-sensitivity.baseline:median(reference.map(s=>s.hipAngle)),baseBend=median(reference.map(s=>s.bend));
   const trace=selected.map(s=>({...s,hipFlexion:Number.isFinite(s.hipAngle)?180-s.hipAngle:null,lift:Number.isFinite(s.hipAngle)?baseHip-s.hipAngle:null}));
   const reps=[];let pending=null,lastRest=null,incomplete=0,previousTime=null;
   for(const s of trace.filter(s=>s.t>=config.start)) {
     if(previousTime!==null && s.t-previousTime>0.25){if(pending){incomplete++;pending=null;}lastRest=null;}
     previousTime=s.t;
     if(!s.valid){if(pending){incomplete++;pending=null;}lastRest=null;continue;}
-    if(s.lift<=3){
+    if(s.lift<=sensitivity.return){
       if(pending){
         pending.push(s);const duration=s.t-pending[0].t;
-        if(duration>=0.8 && duration<=30){
+        if(duration>=0.8 && duration<=30 && (!config.smallMovement || (sensitivity.resolved && Math.max(...pending.map(p=>p.lift))>=sensitivity.minimumExcursion))){
           const peak=Math.max(...pending.map(p=>p.lift));
           const peakIndex=pending.findIndex(p=>p.lift===peak);
           // Longest consecutive time within the target zone, never summed across gaps.
           let run=0,hold=0;
           for(let i=1;i<pending.length;i++){
-            run=pending[i].lift>=(config.targetLift??peak)-3 && pending[i-1].lift>=(config.targetLift??peak)-3 ? run+pending[i].t-pending[i-1].t : 0;
+            run=pending[i].lift>=(config.targetLift??peak)-sensitivity.band && pending[i-1].lift>=(config.targetLift??peak)-sensitivity.band ? run+pending[i].t-pending[i-1].t : 0;
             hold=Math.max(hold,run);
           }
           let lowerIndex=peakIndex;
-          while(lowerIndex<pending.length-1 && pending[lowerIndex+1].lift>=peak-3)lowerIndex++;
+          while(lowerIndex<pending.length-1 && pending[lowerIndex+1].lift>=peak-sensitivity.band)lowerIndex++;
           const lower=s.t-pending[lowerIndex].t;
           // A sustained loss (at least 0.3 s) is more robust than one noisy maximum.
           let bendRun=0,bendLost=false;
@@ -121,11 +124,11 @@ export function analyse(samples,config) {
         pending=null;
       }
       lastRest=s;
-    }else if(!pending && s.lift>=6 && lastRest){pending=[lastRest,s];lastRest=null;}
+    }else if(!pending && s.lift>=sensitivity.onset && lastRest){pending=[lastRest,s];lastRest=null;}
     else if(pending){pending.push(s);if(s.t-pending[0].t>30){incomplete++;pending=null;lastRest=null;}}
   }
   if(pending)incomplete++;
-  return {ruleVersion:RULE_VERSION,config,baseline:{hipAngle:baseHip,kneeBend:baseBend,method:"automatic-lowest-observed",referenceFrames:reference.length},coverage:trace.length?trace.filter(s=>s.valid).length/trace.length:0,reps,incomplete,trace,metrics:summarise(trace,reps,config,{hipAngle:baseHip,kneeBend:baseBend})};
+  return {ruleVersion:RULE_VERSION,config,baseline:{hipAngle:baseHip,kneeBend:baseBend,method:config.smallMovement?"still-start-noise-calibration":"automatic-lowest-observed",referenceFrames:reference.length},coverage:trace.length?trace.filter(s=>s.valid).length/trace.length:0,reps,incomplete,trace,metrics:summarise(trace,reps,config,{hipAngle:baseHip,kneeBend:baseBend})};
 }
 
 export function clinicalQAB(components){

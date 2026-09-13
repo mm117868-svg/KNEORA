@@ -564,14 +564,14 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
         <label class="setting-check"><input type="checkbox" id="savefiles" checked><span>Save session files to Downloads<small>Download the session files when you finish. Your browser controls where downloads are saved.</small></span></label>
       </fieldset>
       <fieldset class="setting-box"><legend>Repetition counting</legend>
-        <label class="f">Count repetitions by<select id="countby"><option value="motion">Camera movement with leg confirmation</option><option value="track">Optical tracking with leg confirmation</option></select></label>
+        <label class="f">Count repetitions by<select id="countby"><option value="small">Small movements (early rehabilitation)</option><option value="motion">Camera movement with leg confirmation</option><option value="track">Optical tracking with leg confirmation</option></select></label>
 
         <p class="small-note" id="countDescription" aria-live="polite"></p>
         <p class="small-note">Counting runs on this device. A separate movement count is kept as a cross-check.</p>
       </fieldset>
       <fieldset class="setting-box session-settings"><legend>Start and finish sessions</legend>
-        <p class="small-note"><b>Start from your exercise position.</b> Keep your head and hand in the picture, raise one hand above your head and hold it for two seconds. A five-second on-screen countdown gives you time to lower your hand before recording starts.</p>
-        <p class="small-note">To finish, raise a hand for three seconds or select Finish. The app confirms when recording has stopped and you can move from your exercise position.</p>
+        <p class="small-note"><b>Start from your exercise position.</b> Show an open palm towards the camera anywhere in the picture and hold it for two seconds. A five-second Marin countdown gives you time to lower your hand before recording starts. Your head does not need to be visible.</p>
+        <p class="small-note">To finish, show an open palm for three seconds or select Finish. The app confirms when recording has stopped and you can move from your exercise position.</p>
         <p class="small-note">Spoken guidance uses Marin, an AI-generated voice with a soft, warm British female delivery. The countdown stays visible if audio is unavailable.</p>
         <p class="small-note">MediaPipe detects the hand gesture on this device. Camera access is needed; the microphone is not used.</p>
       </fieldset>
@@ -592,7 +592,7 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
   <div class="safety">
     <b>Listen to your knee.</b> Mild discomfort is normal; sharp pain is not. Stop and contact your surgeon if you notice fever, calf pain, spreading numbness or wound drainage. This programme supports your physiotherapist's plan; it does not replace it.
   </div>
-  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. Camera repetitions require both optical movement and confirmation in your selected leg. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: automatic-summary-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
+  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. Camera repetitions require both optical movement and confirmation in your selected leg. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: high-five-small-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
   <footer class="app-footer" aria-label="Company and app information">
     <div class="footer-heading"><div><span class="eyebrow">Cambridge Kinematics</span><h2>Supporting your recovery,<br>one day at a time.</h2></div><span class="footer-status">In development</span></div>
     <div class="footer-company"><strong>Cambridge Kinematics Limited</strong><p>A private limited company registered in England and Wales.</p><p>Cambridge, England</p></div>
@@ -634,7 +634,8 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
       <ol id="briefSteps"></ol>
       <div class="setup" id="briefSetup"></div>
       <div class="hands" id="hands"><span id="handtext" role="status"></span><div class="bar" aria-hidden="true"><div class="fill" id="handfill"></div></div></div>
-      <button type="button" class="gesture-retry" id="poseRetry" hidden>Retry camera tracking</button>
+      <button type="button" class="gesture-retry" id="poseRetry" hidden>Retry leg tracking</button>
+      <button type="button" class="gesture-retry" id="handRetry" hidden>Retry hand recognition</button>
       <button type="button" class="gesture-retry" id="voiceTest">Test Marin voice</button>
       <p id="voiceStatus" class="small-note" role="status"></p>
     </div>
@@ -663,18 +664,19 @@ html{scrollbar-gutter:stable;scroll-padding-top:180px}
 
 <script type="module">
 import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
-         FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=recording-voice-2";
-import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=automatic-summary-1";
-import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js";
+         FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=high-five-small-1";
+import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=high-five-small-1";
+import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js?v=high-five-small-1";
 import { AppVoice, completionNotice } from "./app-voice.mjs";
-import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=automatic-summary-1";
+import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=high-five-small-1";
 import { renderRecoverySummary } from "./recovery-summary.mjs?v=followups-1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
-import { renderProgressToDate } from "./progress-to-date.mjs?v=recording-voice-2";
+import { renderProgressToDate } from "./progress-to-date.mjs?v=high-five-small-1";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
-import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=followups-1";
+import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=high-five-small-1";
 import { showExerciseGuide } from "./exercise-guides/guide-player.js";
-import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=recording-voice-2";
+import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=high-five-small-1";
+import {loadHighFive, highFiveState, drawHands, HIGH_FIVE_SETTINGS} from "./high-five.mjs";
 
 
 /* ---------------- Exercise library ----------------
@@ -742,7 +744,7 @@ const ICONS = {
 const PHASES = { 1: "Week 0–1", 2: "Week 1–4", 3: "Week 4–8", 4: "Week 8+" };
 const PHASE_DAYS = { 1: "days 0 to 6 after the operation", 2: "days 7 to 27", 3: "days 28 to 55", 4: "day 56 onwards" };
 const phaseForDay = d => d === null ? null : d < 7 ? 1 : d < 28 ? 2 : d < 56 ? 3 : 4;
-const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. Keep your head and raised hand visible for starting. Shorts or bare legs help. Hold briefly at the starting position while the counting box is placed around your selected leg. Include the complete leg movement in the picture.";
+const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. To start, show an open palm anywhere in the picture for two seconds. Your head can stay outside the picture. Shorts or bare legs help. Hold briefly at the starting position while the counting box is placed around your selected leg. Include the complete leg movement in the picture.";
 
 
 const $ = id => document.getElementById(id);
@@ -774,11 +776,11 @@ const flags = { showangle: "kr_app_angle", savevideo: "kr_app_video", savefiles:
 
 for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); renderHome(); }); }
 // Older saved counting choices fall back to movement; historical session records remain readable.
-if (!["motion", "track"].includes($("countby").value)) $("countby").value = "motion";
+if (!["small", "motion", "track"].includes($("countby").value)) $("countby").value = "motion";
 for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => {localStorage.setItem(flags[k], $(k).checked ? "1" : "0"); updateSettingsSummary();}); }
 
 if (!["left", "right"].includes($("side").value)) $("side").value = "";
-const countDescriptions = { motion: "Finds movement in the box and counts it only when the selected leg completes a matching movement. A clear view of the leg is needed.", track: "Follows image points using optical flow, then checks that the selected leg completed the movement." };
+const countDescriptions = { small: "Uses finer optical tracking and a short still starting position to detect small movements above the observed jitter. Counted attempts do not imply a particular range or clinical quality.", motion: "Finds movement in the box and counts it only when the selected leg completes a matching movement. A clear view of the leg is needed.", track: "Follows image points using optical flow, then checks that the selected leg completed the movement." };
 function updateSettingHelp() { $("countDescription").textContent = countDescriptions[$("countby").value] || countDescriptions.motion; }
 $("countby").addEventListener("change", updateSettingHelp); updateSettingHelp();
 
@@ -850,7 +852,7 @@ async function loadExercisePose() {
     landmarker = r.landmarker; poseState = "ready"; poseInfo = `${r.library}, ${r.model}`;
     $("engine").textContent = `Pose model ready (${poseInfo}).`;
   } catch (e) {
-    poseState = "failed"; $("engine").textContent = "Camera tracking could not load. Raised-hand start and camera repetition confirmation are unavailable until tracking is ready.";
+    poseState = "failed"; $("engine").textContent = "Camera tracking could not load. Camera repetition confirmation is unavailable until leg tracking is ready. The separate hand model can still start recording.";
     console.warn("MediaPipe: " + e.message);
   } finally { poseLoading = false; refreshHint(); }
 }
@@ -858,6 +860,16 @@ if (NOPOSE) $("engine").textContent = "Camera tracking is off on this page.";
 else loadExercisePose();
 $("poseRetry").onclick = () => { loadExercisePose(); refreshHint(); };
 
+
+let handRecognizer = null, handModelState = "idle", handModelLoading = false;
+async function loadHandModel() {
+  if (handModelLoading || handRecognizer) return;
+  handModelLoading = true; handModelState = "loading"; refreshHint();
+  try { handRecognizer = await loadHighFive(); handModelState = "ready"; }
+  catch(e) { handModelState = "failed"; console.warn("Hand model: " + e.message); }
+  finally { handModelLoading = false; refreshHint(); }
+}
+$("handRetry").onclick = () => loadHandModel();
 
 async function listCams() {
   try { const devs = await navigator.mediaDevices.enumerateDevices(); const cams = devs.filter(d => d.kind === "videoinput");
@@ -897,8 +909,9 @@ $("voiceTest").onclick = async () => {
 async function openExercise(ex) {
   if (!isExerciseAvailable(ex)) return;
   if (!["left", "right"].includes($("side").value)) { location.href="?view=settings#side"; return; }
-  current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; resetHand(); handArmed = false; statusBefore = null;
+  current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; resetHand(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   $("voiceStatus").textContent = "";
+  loadHandModel();
   appVoice.prepare();
   appVoice.prepare("repetitions_complete"); appVoice.prepare("session_ended");
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
@@ -912,7 +925,7 @@ async function openExercise(ex) {
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
   else { z.style.left = "0"; z.style.right = (100 - pct(ex.aim.deg)) + "%"; z.style.borderLeft = "none"; z.style.borderRight = "2px solid var(--green)"; $("angleSub").innerHTML = `straight is <b>0°</b>`; }
   $("angleTile").style.display = $("showangle").checked && poseState !== "off" && poseState !== "failed" ? "block" : "none";
-  $("status").textContent = "Get into position, then raise a hand to start."; $("status").className = "status";
+  $("status").textContent = "Get into position, then show an open palm to start."; $("status").className = "status";
   $("finish").disabled = true; $("reset").disabled = true; $("boxbtn").disabled = true; $("clock").textContent = "00:00";
   $("track").textContent = "camera starting"; $("track").className = "track off";
   $("done").className = "done"; $("done").innerHTML = ""; $("handring").hidden = true; $("countdown").hidden = true; $("countdown").innerHTML = "";
@@ -955,7 +968,8 @@ async function openCamera(gen) {
 /* ---------------- repetition-count layer ----------------
    The knee tracker and pixel-motion counter run independently. Both counts go into the record. */
 const countBy = () => current && current.kind === "hold" ? "timer" : $("countby").value;
-const trackWanted = () => countBy() === "track";
+const smallMovement = () => countBy() === "small";
+const trackWanted = () => ["track","small"].includes(countBy());
 const trackCounting = () => !!(tracker && tracker.ready && trackWanted());
 
 /* the tracker library is fetched from this site once, before the session starts */
@@ -973,42 +987,52 @@ function showCounts() {
 
 }
 
-/* The instructions reflect whether a raised hand can actually start recording. */
+/* The hand model is independent of body-pose tracking. */
 function refreshHint() {
   if (!stream || running) return;
   $("poseRetry").hidden = poseState !== "failed" && poseState !== "off";
+  $("handRetry").hidden = handModelState !== "failed";
   let text;
-  if (landmarker) {
-    text = "In position? Raise one hand above your head and hold for 2 seconds to start. Keep your head and hand in the picture. Lower your hand during the 5-second countdown.";
-    $("status").textContent = "Raise a hand for 2 seconds to start recording.";
-    if ($("showangle").checked) $("angleTile").style.display = "block";
-  } else if (poseState === "loading") {
-    text = "Getting camera tracking ready. Recording will wait until tracking is ready and you raise a hand.";
-    $("status").textContent = "Camera tracking is loading. Recording has not started.";
+  if (handRecognizer) {
+    text = "Show an open palm towards the camera anywhere in the picture. Hold your high five for 2 seconds to start. Your head and upper body do not need to be visible. Lower your hand during the countdown.";
+    $("status").textContent = "Show an open palm for 2 seconds to start recording.";
+  } else if (handModelState === "failed") {
+    text = "Hand recognition could not load. Select Retry hand recognition to continue.";
+    $("status").textContent = "Hand recognition is unavailable. Recording has not started.";
   } else {
-    text = "Camera tracking is unavailable, so raised-hand start is not ready. Retry camera tracking to continue.";
-    $("status").textContent = "Camera tracking is needed to start recording.";
+    text = "Preparing hand recognition. You will be able to start with an open palm anywhere in the picture.";
+    $("status").textContent = "Loading hand recognition. Recording has not started.";
   }
-  text += appVoice.state === "ready" ? " Marin will count down: five, four, three, two, one." : appVoice.state === "missing" ? " The countdown is visual only until the Marin recording is installed." : " The countdown stays visible if audio is unavailable.";
-  if (trackWanted()) text += jsfeatLib ? " Repetitions will be counted by following your knee." : " The knee tracker is loading; movement counting is available as a fallback.";
+  if (!landmarker) text += " Leg tracking is not ready yet; repetition confirmation will wait for it.";
+  text += appVoice.state === "ready" ? " Marin will count down: five, four, three, two, one." : " The countdown stays visible if audio is unavailable.";
   $("handtext").textContent = text;
 }
 
-/* ---------------- hands-free start and finish ----------------
-   Fresh MediaPipe landmarks control start and finish only. They do not alter the exercise counter.
-   A two-second raised hand starts a five-second countdown; a three-second raised hand finishes. */
-const HAND_HOLD_START_S = 2, HAND_HOLD_FINISH_S = 3, COUNTDOWN_S = 5, HAND_ABOVE_NOSE = 0.15;
-const HAND_SAMPLE_MAX_GAP_MS = 1000;
+/* ---------------- open-palm start and finish ----------------
+   A separate hand model recognises Open_Palm anywhere in the frame. */
+const HAND_HOLD_START_S = 2, HAND_HOLD_FINISH_S = 3, COUNTDOWN_S = 5;
+const HAND_SAMPLE_MAX_GAP_MS = 500;
 let handSince = null, handLastSample = null, countdownStart = null, previewN = 0, handArmed = false, statusBefore = null;
-function handPosition(all) {
-  const visible = p => p && (p.visibility ?? 0) > 0.5 && Number.isFinite(p.x) && Number.isFinite(p.y) && p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1;
-  const nose = all?.[0];
-  if (!visible(nose)) return null;
-  const wrists = [all[15], all[16]];
-  if (wrists.some(w => visible(w) && w.y < nose.y - HAND_ABOVE_NOSE)) return "raised";
-  return wrists.every(visible) ? "lowered" : null;
+let lastHandAt = -Infinity, lastHandResult = null, handReleasedAt = null, handReleaseSample = null;
+function sampleHand(now) {
+  if (!handRecognizer || now-lastHandAt < HIGH_FIVE_SETTINGS.sampleMs) return null;
+  lastHandAt = now;
+  try { lastHandResult = handRecognizer.recognizeForVideo(video, Math.round(now)); }
+  catch { lastHandResult = null; }
+  return highFiveState(lastHandResult);
 }
-function handRaised(all) { return handPosition(all) === "raised"; }
+function finishHand(state, now) {
+  if (handReleaseSample !== null && (now-handReleaseSample > HAND_SAMPLE_MAX_GAP_MS || now < handReleaseSample)) handReleasedAt = null;
+  handReleaseSample = now;
+  if (!handArmed) {
+    if (state === "absent" || state === "other") {
+      handReleasedAt ??= now;
+      if (now-handReleasedAt >= HIGH_FIVE_SETTINGS.releaseMs) handArmed = true;
+    } else handReleasedAt = null;
+    return 0;
+  }
+  return handHold(state === "open", HAND_HOLD_FINISH_S, now);
+}
 function resetHand() { handSince = null; handLastSample = null; }
 function handHold(raised, holdS, now) {
   if (!raised) { resetHand(); return 0; }
@@ -1024,12 +1048,12 @@ function showHand(f, finishing) {
   if (el.hidden) { el.hidden = false; el.className = "handring" + (finishing ? " finish" : ""); }
   $("hfill").style.width = (f * 100) + "%";
   const left = Math.ceil((finishing ? HAND_HOLD_FINISH_S : HAND_HOLD_START_S) * (1 - f));
-  $("htext").textContent = finishing ? `Keep your hand up to finish… ${left}` : `Hand seen. Keep it up… ${left}`;
-  if (finishing) { if (statusBefore === null) statusBefore = $("status").textContent; $("status").textContent = `Hand up: keep it there to finish… ${left}`; }
+  $("htext").textContent = finishing ? `Hold your open palm to finish… ${left}` : `Open palm seen. Hold it still… ${left}`;
+  if (finishing) { if (statusBefore === null) statusBefore = $("status").textContent; $("status").textContent = `Open palm: hold it still to finish… ${left}`; }
 }
 function restoreStatus() { if (statusBefore !== null) { $("status").textContent = statusBefore; statusBefore = null; } }
 function beginCountdown() {
-  if (countdownStart !== null || running || !stream || !landmarker) return;
+  if (countdownStart !== null || running || !stream || !handRecognizer) return;
   countdownStart = performance.now(); resetHand(); showHand(0, false);
   const audioStarted = appVoice.play();
   $("brief").classList.remove("up"); $("countdown").hidden = false;
@@ -1069,9 +1093,9 @@ function cameraFailed(e) {
   };
 }
 /* live picture behind the instructions so the patient can get into position; nothing is measured or recorded yet.
-   Pose overlays are display only, while fresh landmarks watch for a raised hand. */
+   Body overlays are display only. The independent hand model watches for an open palm. */
 let previewId = 0, previewLastVideoTime = -1, previewLastFrameAt = null, previewAll = null, previewPoseAt = -Infinity;
-function preview() { cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; previewStep(); }
+function preview() { cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; previewStep(); }
 
 function previewStep() {
   if (running || !stream) return;
@@ -1088,10 +1112,10 @@ function previewStep() {
   }
   previewLastVideoTime = video.currentTime; previewLastFrameAt = now;
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  let previewPoseUpdated = false;
+
   if (landmarker && ++previewN % 3 === 0 && video.videoWidth > 0) {
     let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
-    previewAll = res?.landmarks?.[0] || null; previewPoseUpdated = true; previewPoseAt = now;
+    previewAll = res?.landmarks?.[0] || null; previewPoseAt = now;
   }
   const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null;
   if (current.kind !== "hold") {
@@ -1109,8 +1133,10 @@ function previewStep() {
     if (leg) drawLeg(ctx, leg, {thigh:"#3ddc84", shank:"#3ddc84", label:false});
   }
   if (countdownStart !== null) { if (tickCountdown(now)) startSession(); return; }
-  if (previewPoseUpdated) {
-    const f = handHold(handRaised(previewAll), HAND_HOLD_START_S, now);
+  const gesture = sampleHand(now);
+  if (now-lastHandAt <= 450) drawHands(ctx, lastHandResult, canvas.width, canvas.height);
+  if (gesture !== null) {
+    const f = handHold(gesture === "open", HAND_HOLD_START_S, now);
     $("handfill").style.width = (f * 100) + "%"; showHand(f, false);
     if (f >= 1) beginCountdown();
   }
@@ -1118,7 +1144,7 @@ function previewStep() {
 
 function startSession() {
   if (!stream || running) return;
-  cancelAnimationFrame(previewId); cancelCountdown(); handArmed = false; statusBefore = null;
+  cancelAnimationFrame(previewId); cancelCountdown(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   const fps = stream.getVideoTracks()[0].getSettings().frameRate || 30;
   trace = new AngleTrace(1, canvas.height); monitor = new FlowMonitor(canvas.width, canvas.height, fps);
   frameNo = 0; lastVideoTime = -1; prescribedDone = false; startedAt = new Date(); t0 = performance.now(); poseMs = 0; poseSkip = 1; lastLm = null; lastAngle = NaN; lastAll = null; peak = NaN; low = NaN;
@@ -1128,8 +1154,8 @@ function startSession() {
   }
   if (current.kind === "hold") hold = { phase: "hold", until: t0 + current.hold * 1000, cycles: 0 };
   tracker = null;
-  if (trackWanted() && jsfeatLib) { tracker = new KneeTracker(canvas.width, canvas.height, fps); tracker.attach(jsfeatLib); }
-  legGate = new LegMotionGate(current.id, $("side").value, tracker ? "knee_tracker" : "monitoring");
+  if (trackWanted() && jsfeatLib) { tracker = new KneeTracker(canvas.width, canvas.height, fps, {smallMovement:smallMovement()}); tracker.attach(jsfeatLib); }
+  legGate = new LegMotionGate(current.id, $("side").value, tracker ? "knee_tracker" : "monitoring", {smallMovement:smallMovement()});
   gateBoxReference = null; manualCountingBox = false; monitor.locked = true;
   running = true; $("brief").classList.remove("up"); $("finish").disabled = false; $("reset").disabled = current.kind === "hold"; $("boxbtn").disabled = false;
   $("status").textContent = current.kind === "hold" ? "Follow the timer." : "Keep going."; $("status").className = "status";
@@ -1154,7 +1180,7 @@ function step() {
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
   // measurement layer: frame -> landmarks -> angle. Gets the frame and the clock only.
-  let lm = null, angle = NaN, poseUpdated = false;
+  let lm = null, angle = NaN;
   if (landmarker && frameNo % poseSkip === 0 && video.videoWidth > 0) {
     const t1 = performance.now();
     let res = null;
@@ -1162,7 +1188,6 @@ function step() {
     legGate?.observe(res?.landmarks?.[0] || null, t, canvas.width, canvas.height);
     poseMs += 0.2 * ((performance.now() - t1) - poseMs); poseSkip = Math.max(1, Math.min(60, Math.ceil(poseMs / 25)));
     lastPoseAt = now;
-    poseUpdated = true;
 
     lastAll = (res && res.landmarks && res.landmarks[0]) ? res.landmarks[0] : null;
     if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.2);
@@ -1187,16 +1212,11 @@ function step() {
 
   if (count >= current.count && !prescribedDone) { prescribedDone = true; $("status").textContent = `That's your ${current.count}. Finish when you're ready, or carry on.`; $("status").className = "status ok"; }
 
-  // hands-free finish: a hand held high above the head for three seconds. It arms only after the hand that
-  // started the session has come down, so a slow arm after the countdown cannot end it.
-  if (landmarker && poseUpdated) {
-    const raised = handRaised(lastAll);
-    if (!handArmed) { if (handPosition(lastAll) === "lowered") handArmed = true; }
-    else {
-      const f = handHold(raised, HAND_HOLD_FINISH_S, now);
-      showHand(f, true);
-      if (f >= 1) { resetHand(); $("handring").hidden = true; finish(false); return; }
-    }
+  // The starting palm must first disappear or close before a new high five can finish.
+  const gesture = sampleHand(now);
+  if (gesture !== null) {
+    const f = finishHand(gesture, now); showHand(f, true);
+    if (f >= 1) { resetHand(); $("handring").hidden = true; finish(false); return; }
   }
   if (current.kind !== "hold") { $("reps").textContent = count === 0 && !(legGate?.quality && legGate?.reference) ? "…" : count; if (trackCounting() && frameNo % 15 === 0) showCounts(); }
   const m = Math.floor(t / 60), s = Math.floor(t % 60); $("clock").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
@@ -1219,6 +1239,7 @@ function step() {
 
   if (lastAll && now-lastPoseAt <= 450) drawSkeleton(ctx, lastAll, canvas.width, canvas.height, { line: "rgba(61,220,132,.85)", lineWidth: Math.max(2, canvas.width / 400), radius: Math.max(3, canvas.width / 220) });
   if ($("showangle").checked && lm && now-lastPoseAt <= 450 && trace.lastLm) drawLeg(ctx, trace.lastLm, { thigh: "#3ddc84", shank: "#3ddc84", radius: Math.max(5, canvas.width / 120), lineWidth: Math.max(4, canvas.width / 200), label: false });
+  if (now-lastHandAt <= 450) drawHands(ctx, lastHandResult, canvas.width, canvas.height);
   const [bx, by, bw, bh] = monitor.box; ctx.strokeStyle = "rgba(255,255,255,.3)"; ctx.lineWidth = 2; ctx.strokeRect(bx, by, bw, bh);
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
 }
@@ -1269,7 +1290,7 @@ async function finish(abandon = false) {
     measurement: summarise(trace, duration, target), monitoring: mon, patient_count: null, tracking: tr, pose_validation: pv, count_source: source, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
     recording: { captured: !!videoBlob?.size, bytes: videoBlob?.size || 0, mime_type: videoBlob?.type || null },
 
-    software_version: SOFTWARE, app: { page: "index.html", build: "automatic-summary-1", phase, aim: current.aim } };
+    software_version: SOFTWARE, app: { page: "index.html", build: "high-five-small-1", phase, aim: current.aim } };
   if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles };
   rec.measurement.trace_preview = tracePreview(trace.rows);
   const slot = storeRecord(rec) - 1;   // stored now, before the questions, so walking away from the laptop loses nothing
@@ -1283,7 +1304,7 @@ async function finish(abandon = false) {
   };
   updateExerciseSummary();
   disposeAnalysis();
-  disposeAnalysis = mountExerciseAnalysis($("exerciseAnalysis"), { blob: videoBlob, metadata: { exercise: rec.exercise, side: $("side").value, duration, daysPostOp: rec.days_post_op, operationDate: op, startedAt: rec.started_at, prescribedReps: rec.prescribed_reps }, returnToSummary: true, autoStart: true, onReport: report => { rec.exercise_analysis = report; updateRecord(slot, rec); updateExerciseSummary(); renderHome(); } });
+  disposeAnalysis = mountExerciseAnalysis($("exerciseAnalysis"), { blob: videoBlob, metadata: { exercise: rec.exercise, side: $("side").value, duration, daysPostOp: rec.days_post_op, operationDate: op, startedAt: rec.started_at, prescribedReps: rec.prescribed_reps, smallMovement:smallMovement() }, returnToSummary: true, autoStart: true, onReport: report => { rec.exercise_analysis = report; updateRecord(slot, rec); updateExerciseSummary(); renderHome(); } });
   rec.patient.pain_0_10 = await ask("How painful was that?", "0 = no pain, 10 = worst pain", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   if (finishGen !== openGen) return;
   rec.patient.difficulty_1_5 = await ask("How hard was that?", "1 = easy, 5 = very hard", [1, 2, 3, 4, 5]);
@@ -1333,7 +1354,7 @@ canvas.addEventListener("pointerup", () => { if (!dragging) return; let [x, y, w
 function pos(e) { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) * canvas.width / r.width, (e.clientY - r.top) * canvas.height / r.height]; }
 
 /* ?debug exposes the live objects for bench checks; nothing in the app reads this */
-if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor() { return monitor; }, get legGate() { return legGate; }, get tracker() { return tracker; }, get trace() { return trace; }, get frameNo() { return frameNo; }, get current() { return current; }, get running() { return running; }, get poseMs() { return poseMs; }, get poseSkip() { return poseSkip; }, get poseInfo() { return poseInfo; }, get countingDown() { return countdownStart !== null; }, video, step, previewStep, setPose: fn => { landmarker = { detectForVideo: fn }; } };
+if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor() { return monitor; }, get legGate() { return legGate; }, get tracker() { return tracker; }, get trace() { return trace; }, get frameNo() { return frameNo; }, get current() { return current; }, get running() { return running; }, get poseMs() { return poseMs; }, get poseSkip() { return poseSkip; }, get poseInfo() { return poseInfo; }, get handModelState() { return handModelState; }, setHand: fn => { handRecognizer = {recognizeForVideo:fn}; handModelState = "ready"; }, get countingDown() { return countdownStart !== null; }, video, step, previewStep, setPose: fn => { landmarker = { detectForVideo: fn }; } };
 
 $("back").onclick = closeExercise;
 $("finish").onclick = () => finish(false);
