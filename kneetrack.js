@@ -14,7 +14,7 @@
    rather than from how fast the changed pixels are moving, so a pause, a slow repetition or a passing
    shadow does not add or drop a count. */
 
-export const TRACK_VERSION = "kneetrack-0.2.0";
+export const TRACK_VERSION = "kneetrack-0.3.0";
 
 const PW = 160;            // the picture is counted at this width, as in the pixel-motion counter
 const GRID = 7;            // points across the box
@@ -76,6 +76,7 @@ export class SwingCounter {
 export class KneeTracker {
   constructor(fw, fh, fps, {smallMovement=false}={}) {
     this.pw=smallMovement?640:PW; this.smallMovement=smallMovement;
+    this.grid=smallMovement?14:GRID; // Preserve sampling density in the wider leg box.
     this.fw = fw; this.fh = fh; this.fps = fps; this.scale = this.pw / fw; this.ph = Math.round(fh * this.scale);
     this.counter = new SwingCounter(fps,smallMovement ? .35 : MIN_AMP,{orientFromStart:smallMovement}); this.rows = []; this.hist = []; this.path = 0; this.drift = 0;
     this.aD = 1 - Math.exp(-1 / (8 * fps));    // the slow wander of the whole leg is taken out of the path
@@ -87,7 +88,7 @@ export class KneeTracker {
   /* jsfeat is loaded before the session starts; nothing here fetches anything */
   attach(jsfeat) {
     this.jsfeat = jsfeat;
-    const max = GRID * GRID;
+    const max = this.grid * this.grid;
     this.prevPyr = new jsfeat.pyramid_t(PYR); this.currPyr = new jsfeat.pyramid_t(PYR);
     this.prevPyr.allocate(this.pw, this.ph, jsfeat.U8_t | jsfeat.C1_t);
     this.currPyr.allocate(this.pw, this.ph, jsfeat.U8_t | jsfeat.C1_t);
@@ -100,8 +101,8 @@ export class KneeTracker {
   seed(box) {
     const [bx, by, bw, bh] = box.map(v => v * this.scale);
     let k = 0;
-    for (let i = 1; i <= GRID; i++) for (let j = 1; j <= GRID; j++) {
-      const x = bx + bw * i / (GRID + 1), y = by + bh * j / (GRID + 1);
+    for (let i = 1; i <= this.grid; i++) for (let j = 1; j <= this.grid; j++) {
+      const x = bx + bw * i / (this.grid + 1), y = by + bh * j / (this.grid + 1);
       if (x < 2 || y < 2 || x > this.pw - 3 || y > this.ph - 3) continue;
       this.prevXY[k * 2] = x; this.prevXY[k * 2 + 1] = y; k++;
     }
@@ -178,7 +179,7 @@ export class KneeTracker {
       tracked_fraction: +(tracked / Math.max(1, this.rows.length)).toFixed(3),
       tracked_time_s: +(tracked / Math.max(1, this.rows.length) * duration).toFixed(1),
       mean_swing_px: amps.length ? +(amps.reduce((a, b) => a + b, 0) / amps.length).toFixed(2) : 0,
-      points: GRID * GRID, trace_file: "track.csv"
+      points: this.grid * this.grid, trace_file: "track.csv"
     };
   }
 

@@ -92,3 +92,13 @@ test('uncertain, absent and off-screen landmarks are not drawn',()=>{
  const p=Array(33);p[25]={x:.5,y:.5,visibility:.9};p[27]={x:.7,y:.7,visibility:.1};p[23]={x:-.1,y:.4,visibility:1};p[15]={x:NaN,y:.2,visibility:1};
  const ctx=drawing();drawSkeleton(ctx,p,1000,700);assert.equal(ctx.calls.lines,0);assert.equal(ctx.calls.dots,1);
 });
+
+test('automatic counting region stays broad for a distant leg and fits inside the camera frame',()=>{
+ for(const [width,height] of [[1280,720],[720,1280]])for(const centre of [.08,.5,.92]){
+  const g=new LegMotionGate('straight_leg_raise','left');
+  g.reference={hip:[width*(centre-.04),height*.55],knee:[width*centre,height*.55],ankle:[width*(centre+.04),height*.55],scale:width*.08};
+  const [x,y,w,h]=g.countingBox(width,height);
+  assert.ok(w>=width*.85&&h>=height*.85);assert.ok(x>=0&&y>=0&&x+w<=width&&y+h<=height);
+  for(const [px,py] of [g.reference.hip,g.reference.knee,g.reference.ankle])assert.ok(px>=x&&px<=x+w&&py>=y&&py<=y+h);
+ }
+});

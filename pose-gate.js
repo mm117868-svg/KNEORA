@@ -1,6 +1,6 @@
 /* Optical events are candidates. Pose observations can approve or reject them,
    but cannot create a repetition without an optical event. No clinical form score. */
-export const POSE_GATE_VERSION = 'leg-gate-3';
+export const POSE_GATE_VERSION = 'leg-gate-4';
 export const GATE_SETTINGS = Object.freeze({ visibility: .2, presence: .2, maxGap: .45,
   settleTime: .6, settleMotion: .025, onset: .035, excursion: .10, returnDistance: .035,
   returnDwell: .18, minDuration: .65, minLegPixels: 24, completionGrace: .12 });
@@ -163,15 +163,21 @@ export class LegMotionGate {
   countingBox(width, height) {
     if (!this.reference) return null;
     const { hip, knee, ankle, scale } = this.reference;
-    // Include the whole excursion, not just the resting foot. Pose confirmation
-    // remains necessary because this rectangle can contain other moving objects.
-    const pad = scale*.45, points = [hip, knee, ankle];
-    const x = Math.max(0, Math.min(...points.map(p => p[0]))-pad);
-    const y = Math.max(0, Math.min(...points.map(p => p[1]))-pad);
-    const right = Math.min(width, Math.max(...points.map(p => p[0]))+pad);
-    const bottom = Math.min(height, Math.max(...points.map(p => p[1]))+pad);
-    return [x, y, right-x, bottom-y].map(Math.round);
+    // Keep the distant leg's movement corridor broad. Confirmation still uses
+    // only the selected leg; a larger rectangle does not approve other motion.
+    const pad = scale*.65, points = [hip, knee, ankle];
+    const fit = (axis, limit) => {
+      const low = Math.min(...points.map(p => p[axis]))-pad;
+      const high = Math.max(...points.map(p => p[axis]))+pad;
+      const span = Math.min(limit, Math.max(limit*.85, high-low));
+      const start = Math.max(0, Math.min((low+high-span)/2, limit-span));
+      const first = Math.floor(start), last = Math.min(limit, Math.ceil(start+span));
+      return [first,last-first];
+    };
+    const [x,w] = fit(0,width), [y,h] = fit(1,height);
+    return [x,y,w,h];
   }
+
   message() {
     if (!this.quality) return (this.view && !this.view.clear ? this.view.message : 'Keep the whole exercise leg in view.')+' Counting is waiting.';
     if (!this.reference) return 'Hold your leg still briefly at the starting position.';

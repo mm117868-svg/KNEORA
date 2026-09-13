@@ -72,6 +72,8 @@ The underlying approach is described in
 [BlazePose: On-device Real-time Body Pose Tracking (Bazarevsky et al., 2020)](https://arxiv.org/abs/2006.10204).
 Neither source validates this exercise-specific filter or its thresholds.
 
-On 13 September 2026, the user requested a drastic reduction in tracking thresholds. Live pose detection, pose presence, tracking confidence, joint visibility, skeleton visibility and recorded-video analysis now use 0.20 confidence settings. The live gate records version `leg-gate-3`, and video reports record `exercise-prototype-11`, so comparisons can distinguish the changed settings. This accepts less certain landmark positions. Image bounds, segment geometry, freshness and a complete movement of the selected leg are still required.
+On 13 September 2026, the user requested a drastic reduction in tracking thresholds. Live pose detection, pose presence, tracking confidence, joint visibility, skeleton visibility and recorded-video analysis now use 0.20 confidence settings. The live gate records version `leg-gate-4`, and video reports record `exercise-prototype-11`, so comparisons can distinguish the changed settings. This accepts less certain landmark positions. Image bounds, segment geometry, freshness and a complete movement of the selected leg are still required.
 
 Small movements mode uses a finer optical image and noise-adaptive excursion thresholds. See [Small movement mode](SMALL-MOVEMENTS.md) for the parameters and current validation limits. Set `TEST_COUNT_METHOD=small` to exercise this setting in the browser check.
+
+The larger automatic rectangle and display-only skeleton smoothing are described in [Live tracking area and skeleton](LIVE-DISPLAY.md).
