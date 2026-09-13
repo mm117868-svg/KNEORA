@@ -1,4 +1,4 @@
-import {recordedCount} from './patient-progress.js?v=high-five-small-1';
+import {recordedCount} from './patient-progress.js?v=position-1';
 import {EXERCISE_NAMES,METRICS,finite,postOpDay,measurementSeries} from './progress-data.mjs?v=high-five-small-1';
 import {esc,shortDate,dayLabel} from './progress-shared.mjs';
 import {MIN_COUNT_COVERAGE,trackingCoverage,videoRepetitionCount,trackingFeedback} from './measurement-quality.mjs?v=high-five-small-1';

@@ -41,3 +41,7 @@ The programme now offers only position recognition. It loads the matching local 
 Run `train.py --exercise heel_slide` after caching the supplied `11.49.20` recording in the private evaluation manifest. It writes a separate model under `position-recogniser/heel_slide/`. Open `index.html?exercise=heel_slide` for replay.
 
 The heel-slide cycle accepts either a confidently intermediate or bent position, then requires a stable return to rest. This counts smaller attempts without requiring the deepest bend shown in training. It does not measure therapeutic range, identify the operated leg, or confirm that the heel stayed on the surface. Existing straight-leg and seated-extension cycle rules remain unchanged. All three exercises now have separate local models.
+
+## Public deployment
+
+The three trained model JSON files are now bundled in `models/`, with SHA-256 hashes in `models/manifest.json`. Browser inference uses repository-relative URLs and needs no local model server. Original recordings and cached training frames are not included. Public demonstration pages accept a user-selected local video or camera; private example playback remains local only.

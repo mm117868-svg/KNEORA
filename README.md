@@ -1,19 +1,9 @@
 # Knee Recovery (test build)
 
 Static copy of the browser version of Knee Recovery (Cambridge Kinematics).
-`index.html` is the patient app, `bench.html` the bench page with every
-control exposed, `report.html` the physio report built from the records the
-browser holds. `kneerec.js` provides MediaPipe Pose for a whole-session knee
-angle and a raw pixel-motion counter. In the patient app, `pose-gate.js`
-accepts an optical repetition candidate only when the selected leg completes
-the expected movement and returns to its starting position. Pose cannot create
-a repetition on its own. `kneetrack.js` follows points on the knee in the
-picture and proposes one repetition for each full swing.
-Both camera counting methods use selected-leg confirmation for heel slides,
-straight leg raises and seated knee extension. The counting method is chosen
-in Settings. Raw optical counts remain available as a cross-check. The live
-skeleton draws each visible joint and segment, including partial lower limbs,
-throughout setup and exercise. Missing joints are not fabricated.
+`index.html` is the patient app. Heel slides, seated knee extensions and straight-leg raises now use separate bundled position-recognition models. The old repetition-method dropdown is removed. Counts are experimental movement attempts, not clinical range or form assessments. The models were developed on a small set of recordings from one person, and do not reliably confirm which leg moved. See [position model validation](tools/position-recogniser/VALIDATION.md).
+
+Model weights are served from `tools/position-recogniser/models/` and inference runs in the browser. Original training videos remain private. Pose remains available for the skeleton and angle estimates, separately from position counting. Historical optical-count records remain readable. `bench.html` and `report.html` retain technical tools.
 
 Camera processing runs in the visitor's browser. No passcode gate; noindex.
 See [the counting design and verification limits](POSE-GATE.md).

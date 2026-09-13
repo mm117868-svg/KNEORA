@@ -683,7 +683,7 @@ import {LivePositionCounter,readPositionFrame} from './tools/position-recogniser
 let positionModel=null,positionCounter=null;
 const positionCanvas=document.createElement('canvas');positionCanvas.width=positionCanvas.height=128;
 const positionCtx=positionCanvas.getContext('2d',{willReadFrequently:true});
-async function preparePositionModel(exercise){positionModel=null;if(!['straight_leg_raise','seated_extension','heel_slide'].includes(exercise))return;try{const r=await fetch(exercise==='straight_leg_raise'?'/position-recogniser/model.json':'/position-recogniser/'+exercise+'/model.json');if(!r.ok)throw Error('Model unavailable');positionModel=await r.json();}catch(e){console.warn('Position model unavailable');}}
+async function preparePositionModel(exercise){positionModel=null;if(!['straight_leg_raise','seated_extension','heel_slide'].includes(exercise))return;try{const r=await fetch(new URL('./tools/position-recogniser/models/'+exercise+'.json',import.meta.url));if(!r.ok)throw Error('Model unavailable');positionModel=await r.json();if(positionModel.exercise!==exercise)throw Error('Wrong model');}catch(e){positionModel=null;console.warn('Position model unavailable');}}
 
 import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=high-five-small-1";
@@ -692,13 +692,13 @@ import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js?v=wide-s
 import { ageYears, loadProfile, saveProfile } from "./patient-profile.mjs";
 import { bindShortDate } from "./short-date.mjs";
 import { AppVoice, completionNotice } from "./app-voice.mjs";
-import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=full-breakdown-1";
+import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=position-1";
 import { renderDetailedExerciseSummary } from "./exercise-details.mjs?v=full-breakdown-1";
 import { renderRecoverySummary } from "./recovery-summary.mjs?v=large-graph-1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
 import { renderProgressToDate } from "./progress-to-date.mjs?v=high-five-small-1";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
-import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=history-link-1";
+import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=position-1";
 import { showExerciseGuide } from "./exercise-guides/guide-player.js";
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-1";
 import {SkeletonAverage} from "./live-overlay.mjs";

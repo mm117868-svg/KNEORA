@@ -1,0 +1,17 @@
+{
+  "straight_leg_raise": {
+    "file": "straight_leg_raise.json",
+    "sha256": "54fae58fcd9faecc619e4460bad8f366d6f6934409f65d985b2ff3f7dd515bac",
+    "bytes": 505506
+  },
+  "seated_extension": {
+    "file": "seated_extension.json",
+    "sha256": "df31bc86027456331532f1a7ab1c61d4b62494ca9ca51c04d42260137ebe9a34",
+    "bytes": 506015
+  },
+  "heel_slide": {
+    "file": "heel_slide.json",
+    "sha256": "3ceb743a04afabdc4aaba387e21d64d63b9c8e32627d6f53d70461bffe18b1dd",
+    "bytes": 511921
+  }
+}
