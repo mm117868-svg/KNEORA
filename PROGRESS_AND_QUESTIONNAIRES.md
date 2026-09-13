@@ -67,3 +67,13 @@ Kittelson's active-flexion interquartile bands remain distinct from Kornuijt's 1
 The expandable measurement explanation distinguishes current recording estimates, separately entered symptoms and clinical results, and domains requiring additional assessment. It does not claim automatic strength, physiological activation, swelling, gait, clinical extension lag or full QAB measurement. No new patient records or clinical scoring rules are introduced.
 
 `tests/recovery-timeline-mobile.html` displays the actual panel in a 390-pixel iframe for responsive interface checks. This is browser layout verification, not physical-device or clinical validation.
+
+## Calendar follow-ups
+
+Questionnaires are reached from the footer's **Questionnaires & follow-ups** link and from calendar reminders. They no longer occupy a primary navigation tab. The recovery summary shows questionnaire outcomes only when results have been recorded.
+
+Patients enter the questionnaire, knee and postoperative day from their agreed clinical schedule. The app does not invent a default follow-up interval. Surgery is day 0; calendar dates are calculated with date-only arithmetic. Reminders are stored under `kr_questionnaire_followups_v1`, separately for each patient and operation date. Changing patient details selects a separate record, as with exercise history.
+
+The home calendar marks questionnaire dates with a blue dot. Exercise history shows a labelled event and its date, postoperative day and status. Opening the event selects its questionnaire and knee. Only an explicitly linked, completed official questionnaire result changes a reminder to **Result saved**; opening the app or completing exercises does not. Removing a reminder retains saved results. These are in-app reminders, not system notifications.
+
+Validation: `node --test tests/questionnaire-schedule.test.mjs tests/progress.test.mjs tests/recovery-measurements.test.mjs`. The reminder checks cover DST and leap dates, invalid input, patient isolation, explicit result linking, preserved records and storage failures. Browser interaction was checked in an isolated synthetic context at 1280 px and 390 px, including creation, reload, event navigation, completion status and horizontal overflow.
