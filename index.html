@@ -440,6 +440,21 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
 .camera-options[open] .settings-edit{display:none}
 .settings-done{margin-top:20px;background:var(--ink);color:var(--bone);border:0;padding:12px 20px;font:inherit;cursor:pointer}
 @media(max-width:759px){.today-exercises{padding:18px}.today-exercises h2{font-size:23px}}
+
+.overview-title{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:12px 0 16px}
+.overview-panel{padding:26px 0;border-top:1px solid var(--line);margin-top:24px}
+.progress .overview-panel h2{font-size:20px;color:var(--ink);letter-spacing:0;text-transform:none;margin-bottom:18px}
+.overview-details{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin:0 0 22px}
+.overview-details dt{font-size:12px;color:var(--muted);margin-bottom:7px}
+.overview-details dd{font-size:17px;font-weight:700;margin:0}
+.overview-panel a{display:inline-block;margin-top:16px;font-size:13px;font-weight:600}
+.overview-panel .small-note{max-width:none;margin-top:16px;font-size:12px;line-height:1.6}
+.overview-exercises{padding:0;list-style:none;margin:18px 0}
+.overview-exercises li,.overview-result{display:flex;justify-content:space-between;gap:20px;padding:16px 0;border-bottom:1px solid var(--line)}
+.overview-exercises span,.overview-result small{font-size:12px;color:var(--muted)}
+.overview-result h3{font-size:16px;margin:0 0 7px}
+.overview-result p{text-align:right;line-height:1.8}
+@media(max-width:759px){.overview-details{grid-template-columns:1fr 1fr}.patient-header-nav{flex-wrap:wrap;justify-content:flex-end}.overview-result{flex-wrap:wrap}.overview-result p{text-align:left}}
 </style>
 </head>
 <body>
@@ -451,7 +466,7 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
       <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M14 5 L14 19 L26 33" stroke="#1a1918" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter"/><circle cx="12.5" cy="23.5" r="4.6" fill="#d64026"/></svg>
       <b>Cambridge<br>Kinematics</b>
     </a>
-    <nav class="patient-header-nav" aria-label="Patient navigation"><span class="product-name">Knee Recovery</span><a class="tracker-link" href="?view=progress#progress">Progress tracker</a><a class="tracker-back" href="index.html" hidden>Back to exercises</a></nav>
+    <nav class="patient-header-nav" aria-label="Patient navigation"><span class="product-name">Knee Recovery</span><a class="summary-link" href="?view=summary#progress">Patient summary</a><a class="tracker-link" href="?view=progress#progress">Progress tracker</a><a class="tracker-back" href="index.html" hidden>Back to exercises</a></nav>
   </header>
 
 
@@ -588,7 +603,7 @@ import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js";
 import { VoiceCount, voiceAvailable, VOICE_VERSION } from "./voicecount.js";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js";
-import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=surgery-dot-1";
+import { patientRecords, renderPatientProgress, renderHomeActivity, sessionSummary, renderPatientOverview } from "./patient-progress.js?v=patient-overview-1";
 
 /* ---------------- Exercise library ----------------
    kind 'reps': repetitions come from the pixel-motion counter in kneerec.js.
@@ -659,11 +674,13 @@ const SETUP = "Camera side-on to the operated leg, about 2 m away, level with th
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const PROGRESS_VIEW = new URLSearchParams(location.search).get("view") === "progress";
+const SUMMARY_VIEW = new URLSearchParams(location.search).get("view") === "summary";
+const PROGRESS_VIEW = SUMMARY_VIEW || new URLSearchParams(location.search).get("view") === "progress";
 document.body.classList.toggle("progress-view", PROGRESS_VIEW);
 document.querySelector(".tracker-back").hidden = !PROGRESS_VIEW;
-document.querySelector(".tracker-link").hidden = PROGRESS_VIEW;
-if (PROGRESS_VIEW) document.title = "Your progress tracker · Cambridge Kinematics";
+document.querySelector(".tracker-link").hidden = PROGRESS_VIEW && !SUMMARY_VIEW;
+document.querySelector(".summary-link").hidden = SUMMARY_VIEW;
+if (PROGRESS_VIEW) document.title = SUMMARY_VIEW ? "Your patient summary · Cambridge Kinematics" : "Your progress tracker · Cambridge Kinematics";
 const NOPOSE = PROGRESS_VIEW || new URLSearchParams(location.search).has("nopose");
 
 /* ---------------- settings ---------------- */
@@ -704,7 +721,7 @@ function renderToday() {
   const now=currentPhase(),host=$("todayExercises"),days=daysPostOp($("opdate").value,new Date());
   host.innerHTML='<h2 id="todayTitle">Your exercises today</h2>';
   if(now===null){host.innerHTML+=`<p class="small-note">${days===null?'Enter your operation date to see the exercises for your current recovery week.':'Your operation date is in the future. Your current exercises will appear from the day of surgery.'}</p><a href="#opdate">${days===null?'Enter operation date':'Check operation date'}</a>`;return;}
-  host.innerHTML+=`<p class="small-note">Day ${days} after your operation · ${esc(PHASES[now])}. Follow the exercises your physiotherapist has given you.</p><div class="list"></div><div class="today-links"><a href="?view=progress#progress">View progress and daily checklist →</a><a href="#weeknav">Browse full programme ↓</a></div>`;
+  host.innerHTML+=`<p class="small-note">Day ${days} after your operation · ${esc(PHASES[now])}. Follow the exercises your physiotherapist has given you.</p><div class="list"></div><div class="today-links"><a href="?view=summary#progress">Patient summary →</a><a href="?view=progress#progress">View progress and daily checklist →</a><a href="#weeknav">Browse full programme ↓</a></div>`;
   const list=host.querySelector('.list');
   $("week"+now).querySelectorAll('.ex-card:not(:disabled)').forEach(card=>{const copy=card.cloneNode(true);copy.onclick=()=>{phase=now;openExercise(LIB[now][+copy.dataset.i]);};list.append(copy);});
   if(!list.children.length)list.innerHTML='<p class="small-note">The exercises in this phase are pending. Browse the full programme below and follow your physiotherapist’s plan.</p>';
@@ -717,6 +734,7 @@ function renderHome() {
   renderToday();
   updateSettingsSummary();
   const recs = patientRecords(loadRecords(), $("patient").value, $("opdate").value);
+  if (SUMMARY_VIEW) { const p=currentPhase(); renderPatientOverview($("progress"),recs,{patientId:$("patient").value,operationDate:$("opdate").value,side:$("side").value,phaseLabel:p?PHASES[p]:"",exercises:p?LIB[p].filter(isExerciseAvailable):[]}); return; }
   if (!PROGRESS_VIEW) { renderHomeActivity($("progress"), recs, $("patient").value, $("opdate").value); return; }
   renderPatientProgress($("progress"), recs, (record, records) => {
     $("patientReviewContent").innerHTML = sessionSummary(record, records);

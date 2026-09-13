@@ -162,3 +162,18 @@ export function renderHomeActivity(element, records, patientId, operationDate) {
   }
   draw();
 }
+
+
+export function renderPatientOverview(element, records, options = {}) {
+  const today=new Date(),elapsed=dayAfterSurgery(dayKey(today),options.operationDate),op=parseDay(options.operationDate);
+  const last=records.at(-1), since=new Date(today.getFullYear(),today.getMonth(),today.getDate()-6);
+  const recent=records.filter(r=>new Date(r.started_at)>=since&&new Date(r.started_at)<=today);
+  const activeDays=new Set(recent.map(r=>String(r.started_at).slice(0,10))).size;
+  const dayText=elapsed===null?'Add your operation date':elapsed<0?`${-elapsed} days until surgery`:elapsed===0?'Surgery day':`Day ${elapsed} after surgery`;
+  const latestByExercise=[...new Map(records.map(r=>[r.exercise,r])).values()].sort((a,b)=>Date.parse(b.started_at)-Date.parse(a.started_at)).slice(0,3);
+  element.innerHTML=`<div class="eyebrow">Patient summary</div><h1 class="overview-title">Your recovery at a glance</h1><p class="patient-lead">${escapeHtml(today.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}))} · Records saved on this device</p>
+  <section class="overview-panel"><h2>Your details</h2><dl class="overview-details"><div><dt>Patient ID or name</dt><dd>${escapeHtml(options.patientId||'Not entered')}</dd></div><div><dt>Operation date</dt><dd>${op?escapeHtml(op.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})):'Not entered'}</dd></div><div><dt>Recovery stage</dt><dd>${escapeHtml(dayText)}</dd></div><div><dt>Operated leg</dt><dd>${options.side==='left'?'Left':options.side==='right'?'Right':'Not selected'}</dd></div></dl><a href="./#patient">Edit your details and settings →</a></section>
+  <section class="overview-panel"><h2>Your recorded activity</h2><div class="patient-metrics">${tile('Saved sessions',records.length,'For this patient and operation')}${tile('Sessions in the last 7 days',recent.length)}${tile('Active days in the last 7 days',activeDays,'Days with a saved exercise session')}${tile('Latest session',last?date(last):'None yet',last?name(last):'Start an exercise to build your record')}</div><p class="small-note">These totals count saved exercise sessions. Opening the app or manually ticking an exercise does not add a recorded session.</p></section>
+  <section class="overview-panel"><h2>Your current exercises</h2><p>${escapeHtml(options.phaseLabel||'Enter your operation date to see your current recovery week.')}</p>${options.exercises?.length?`<ul class="overview-exercises">${options.exercises.map(ex=>`<li><strong>${escapeHtml(ex.title)}</strong><span>${ex.count} ${ex.kind==='hold'?'holds':'repetitions'}</span></li>`).join('')}</ul>`:'<p>No active exercises are listed for this recovery stage yet.</p>'}<p class="small-note">Follow the exercises your physiotherapist has given you.</p><a href="./#todayExercises">Go to today’s exercises →</a></section>
+  <section class="overview-panel"><h2>Latest results by exercise</h2>${latestByExercise.length?latestByExercise.map(r=>`<div class="overview-result"><div><h3>${escapeHtml(name(r))}</h3><small>${escapeHtml(date(r))} · ${escapeHtml(sourceLabel(r))}</small></div><p><strong>${display(recordedCount(r))}</strong> ${r.hold?'holds':'repetitions'}<br><strong>${bend(r)===null?'Not recorded':display(bend(r))+'°'}</strong> typical best bend</p></div>`).join(''):'<p>Your latest exercise results will appear here after you save a session.</p>'}<p class="small-note">Knee bend is a whole-session measurement. It does not assess movement quality. Performance scoring is not yet available.</p><a href="?view=progress#progress">Open the full progress tracker →</a></section>`;
+}
