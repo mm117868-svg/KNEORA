@@ -598,7 +598,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 
   <section class="phasepick">
     <span class="eyebrow">Your programme, week by week</span>
-    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. After recording, movement analysis starts automatically. Your short summary shows repetitions, the main movement measurements, pace and time spent. You can also replay or download your video. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
+    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. After recording, movement analysis starts automatically. Your full report shows repetitions, joint angles, cadence, fastest and slowest repetitions, hold times, movement speeds and total time, with a breakdown of each repetition. You can also replay or download your video. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
     <nav class="weeknav" id="weeknav" aria-label="Jump to a week"></nav>
   </section>
 
@@ -609,7 +609,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
   <div class="safety">
     <b>Listen to your knee.</b> Mild discomfort is normal; sharp pain is not. Stop and contact your surgeon if you notice fever, calf pain, spreading numbness or wound drainage. This programme supports your physiotherapist's plan; it does not replace it.
   </div>
-  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. Camera repetitions require both optical movement and confirmation in your selected leg. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: wide-smooth-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
+  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. Camera repetitions require both optical movement and confirmation in your selected leg. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: full-breakdown-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
   <footer class="app-footer" aria-label="Company and app information">
     <div class="footer-heading"><div><span class="eyebrow">Cambridge Kinematics</span><h2>Supporting your recovery,<br>one day at a time.</h2></div><span class="footer-status">In development</span></div>
     <div class="footer-company"><strong>Cambridge Kinematics Limited</strong><p>A private limited company registered in England and Wales.</p><p>Cambridge, England</p></div>
@@ -1361,7 +1361,7 @@ async function finish(abandon = false) {
     measurement: summarise(trace, duration, target), monitoring: mon, patient_count: null, tracking: tr, pose_validation: pv, count_source: source, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
     recording: { captured: !!videoBlob?.size, bytes: videoBlob?.size || 0, mime_type: videoBlob?.type || null },
 
-    software_version: SOFTWARE, app: { page: "index.html", build: "wide-smooth-1", phase, aim: current.aim } };
+    software_version: SOFTWARE, app: { page: "index.html", build: "full-breakdown-1", phase, aim: current.aim } };
   if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles };
   rec.measurement.trace_preview = tracePreview(trace.rows);
   const slot = storeRecord(rec) - 1;   // stored now, before the questions, so walking away from the laptop loses nothing
