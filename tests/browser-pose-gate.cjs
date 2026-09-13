@@ -125,8 +125,13 @@ fs.mkdirSync(out, {recursive: true});
   await page.screenshot({path:out+'/analysed-summary.png'});
   for(const view of ['settings','recovery-summary','progress-to-date','recovery-timeline','patient-measures','progress']){
     await page.goto(base+'?view='+view);
-    await page.waitForFunction(()=>document.querySelector('.patient-header-nav [aria-current="page"]'));
-    assert.equal(await page.locator('.patient-header-nav [aria-current="page"]').getAttribute('data-page'),view);
+    if(view==='patient-measures'){
+      await page.waitForFunction(()=>document.querySelector('.footer-bottom .measures-link[aria-current="page"]'));
+      assert.equal(await page.locator('#patientMeasures').isVisible(),true);
+    }else{
+      await page.waitForFunction(()=>document.querySelector('.patient-header-nav [aria-current="page"]'));
+      assert.equal(await page.locator('.patient-header-nav [aria-current="page"]').getAttribute('data-page'),view);
+    }
     await page.setViewportSize({width:390,height:844});
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,view+' mobile overflow');
   }
