@@ -3,7 +3,7 @@ import {localDate,postOpDay,dayNumber,dayAt,finite,METRICS} from './progress-dat
 import {readProms,scopedProms,PROM_NAMES} from './patient-measures.mjs';
 import {readMeasurements,scopedMeasurements,saveMeasurementSet,measurementSeriesKey,depthImport,SOURCE_NAMES,MOTION_NAMES,MODE_NAMES,POSITION_NAMES} from './recovery-measurements.mjs?v=endpoint-3-flexible';
 import {createEndpointCamera} from './recovery-camera.mjs?v=flexible-pair-1';
-import {maximumMovementTrend,combinedMovementChart} from './recovery-trends.mjs?v=full-rom-1';
+import {maximumMovementTrend,combinedMovementChart} from './recovery-trends.mjs?v=large-graph-1';
 import {AppVoice} from './app-voice.mjs';
 import {EndpointCountdown} from './endpoint-countdown.mjs?v=2';
 import {RECOVERY_SOURCES} from './recovery-references.mjs';
