@@ -15,7 +15,8 @@ function initialise(){
  watch.onclick=()=>{if(video.ended)video.currentTime=0;video.play().catch(()=>{dialog.querySelector('.guide-error').hidden=false});};
  video.addEventListener('play',()=>{watch.textContent='Restart video';watch.onclick=()=>{video.currentTime=0;video.play().catch(()=>{})};});
  video.addEventListener('ended',()=>{dialog.querySelector('.guide-skip').disabled=false;watch.textContent='Watch again';dialog.querySelector('.guide-skip').textContent='Start exercise';});
- video.addEventListener('error',()=>{if(video.getAttribute('src')){dialog.querySelector('.guide-error').hidden=false;dialog.querySelector('.guide-skip').disabled=false;}});
+ // a patient who has seen the demonstration before can start straight away; the button is never disabled
+ video.addEventListener('error',()=>{if(video.getAttribute('src')){dialog.querySelector('.guide-error').hidden=false;dialog.querySelector('.guide-skip').disabled=false;dialog.querySelector('.guide-skip').textContent='Start exercise';}});
  dialog.querySelector('.guide-skip').onclick=()=>finish?.(true);
  dialog.querySelector('.guide-close').onclick=()=>finish?.(false);
  dialog.addEventListener('cancel',e=>{e.preventDefault();e.stopPropagation();finish?.(false)});
@@ -23,7 +24,7 @@ function initialise(){
 }
 export function showExerciseGuide(exercise){
  initialise();if(finish)finish(false);const video=dialog.querySelector('video');previousFocus=document.activeElement;
- dialog.querySelector('h2').textContent=exercise.title;dialog.querySelector('.guide-watch').textContent='Watch how to do it';dialog.querySelector('.guide-skip').textContent='Start exercise';dialog.querySelector('.guide-error').hidden=true;dialog.querySelector('.guide-skip').disabled=true;
+ dialog.querySelector('h2').textContent=exercise.title;dialog.querySelector('.guide-watch').textContent='Watch how to do it';dialog.querySelector('.guide-skip').textContent='Skip and start exercise';dialog.querySelector('.guide-error').hidden=true;dialog.querySelector('.guide-skip').disabled=false;
  video.poster=new URL('videos/'+exercise.id+'.jpg?v=magnific-1',root);video.src=new URL('magnific/'+exercise.id+'.mp4?v=magnific-1',root);video.querySelector('track').src=new URL('videos/'+exercise.id+'.vtt',root);video.load();
  dialog.querySelector('.guide-note').textContent=exercise.id==='standing_flexion'?'Review draft: the video shows a support frame; narration refers to a worktop. Follow your prescribed range, hold time and repetitions.':'Follow your own prescribed range, hold time and repetitions.';
  dialog.showModal();dialog.querySelector('.guide-watch').focus();
