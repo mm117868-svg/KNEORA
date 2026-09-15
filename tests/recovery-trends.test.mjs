@@ -57,3 +57,18 @@ test('flat lines every ten degrees, labels still only every thirty',()=>{
  assert.equal((svg.match(/<line x1="58" x2="474"/g)||[]).length,16);   // 0 to 150 every ten
  assert.equal((svg.match(/°<\/text>/g)||[]).length,6);
 });
+
+test('published figures are drawn for context, clipped to the days shown and to the days each paper covers',()=>{
+ const svg=combinedMovementChart({bend:[{day:8,date:'2026-09-09',value:110}],straighten:[{day:8,date:'2026-09-09',value:9}]},8);
+ assert.match(svg,/data-graph-reference="published"/);
+ assert.equal((svg.match(/<polygon/g)||[]).length,1);            // one band, bending only
+ assert.match(svg,/stroke-dasharray="6 4"/);                     // the straightening mean, a line not a band
+ assert.match(svg,/Context, not a target/);
+ assert.doesNotMatch(svg,/NaN/);
+});
+test('a recovery past the published range keeps one band and invents nothing beyond it',()=>{
+ const svg=combinedMovementChart({bend:[{day:200,date:'2027-03-20',value:120}],straighten:[]},200);
+ assert.equal((svg.match(/<polygon/g)||[]).length,1);
+ assert.match(svg,/by day 90/);                                  // the band stops where Kittelson stops
+ assert.doesNotMatch(svg,/NaN/);
+});

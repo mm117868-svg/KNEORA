@@ -17,6 +17,44 @@ export function maximumMovementTrend(rows, motion, seriesKey, operationDate) {
   return {key, points, best};
 }
 
+/* Published figures, drawn faintly behind the patient's own points so a day's measurement can be read
+   against what is usual, rather than only against the last one. Display only: nothing here enters the
+   record, the session statistics or any score, no repetition is segmented, and the shapes are other
+   people's cohorts measured by clinicians, not a target this patient is asked to hit.
+
+   Bending, interquartile range: Kittelson AJ, Elings J, Colborn K, et al. Reference chart for knee flexion
+   following total knee arthroplasty. BMC Musculoskelet Disord 2020;21:482. GAMLSS centiles from 327
+   patients and 1,173 observations; the three anchors below are read from the published chart and joined
+   with straight lines, so only the anchors are published values.
+
+   Straightening, mean bend remaining: Kornuijt A, de Kort GJL, Das D, et al. Recovery of knee range of
+   motion after total knee arthroplasty in the first postoperative weeks. Musculoskelet Surg
+   2019;103:289-297, 137 patients. Two published points, so a line and not a band, and it stops where the
+   paper stops. */
+export const PUBLISHED_FLEXION_IQR = [[0, 70, 90], [30, 95, 115], [90, 109, 122]];
+export const PUBLISHED_EXTENSION_MEAN = [[1, 10.7], [56, 3.2]];
+
+function atDay(points, day) {
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1], b = points[i];
+    if (day <= b[0]) { const f = (day - a[0]) / (b[0] - a[0]); return [day, ...a.slice(1).map((v, k) => v + f * (b[k + 1] - v))]; }
+  }
+  return null;
+}
+/* only the days the chart actually shows, and never beyond the days the paper covers */
+function withinView(points, minDay, maxDay) {
+  const lo = Math.max(minDay, points[0][0]), hi = Math.min(maxDay, points.at(-1)[0]);
+  if (!(hi > lo)) return [];
+  return [atDay(points, lo), ...points.filter(p => p[0] > lo && p[0] < hi), atDay(points, hi)];
+}
+export function publishedContext(x, y, minDay, maxDay) {
+  const round = v => Math.round(v * 10) / 10;
+  const iqr = withinView(PUBLISHED_FLEXION_IQR, minDay, maxDay), ext = withinView(PUBLISHED_EXTENSION_MEAN, minDay, maxDay);
+  const band = iqr.length ? `<polygon points="${[...iqr.map(p => `${x(p[0])},${y(p[2])}`), ...[...iqr].reverse().map(p => `${x(p[0])},${y(p[1])}`)].join(' ')}" fill="var(--muted)" fill-opacity=".1" stroke="var(--muted)" stroke-opacity=".3"><title>Published middle half of patients: ${round(iqr[0][1])}\u2013${round(iqr[0][2])}\u00b0 on day ${Math.round(iqr[0][0])}, ${round(iqr.at(-1)[1])}\u2013${round(iqr.at(-1)[2])}\u00b0 by day ${Math.round(iqr.at(-1)[0])} (Kittelson 2020). Context, not a target.</title></polygon>` : '';
+  const line = ext.length ? `<polyline points="${ext.map(p => `${x(p[0])},${y(p[1])}`).join(' ')}" fill="none" stroke="var(--muted)" stroke-opacity=".75" stroke-width="1.5" stroke-dasharray="6 4"><title>Published mean bend remaining: ${round(ext[0][1])}\u00b0 on day ${Math.round(ext[0][0])} to ${round(ext.at(-1)[1])}\u00b0 at 8 weeks (Kornuijt 2019). Context, not a target.</title></polyline>` : '';
+  return band || line ? `<g data-graph-reference="published">${band}${line}</g>` : '';
+}
+
 export function combinedMovementChart(trends, elapsed) {
   const all = [...trends.bend, ...trends.straighten];
   const minDay = Math.min(0, ...all.map(p => p.day)), maxDay = Math.max(14, elapsed || 0, ...all.map(p => p.day));
@@ -31,8 +69,9 @@ export function combinedMovementChart(trends, elapsed) {
   for (let day = Math.ceil(minDay / dayStep) * dayStep; day <= maxDay; day += dayStep) dayLines.push(day);
   const minorDegrees = Array.from({length: high / 10 + 1}, (_, i) => i * 10).filter(value => value % 30);
   const title = (p, motion) => `${motion === 'bend' ? 'Bending' : 'Straightening'} · Day ${p.day} · ${esc(shortDate(p.date))}: ${Math.round(p.value*10)/10}°${motion === 'straighten' ? ' bend remaining' : ''}`;
-  return `<svg class="rs-movement-chart" viewBox="0 0 500 330" role="img" aria-label="Knee bending and straightening by days after surgery. ${trends.bend.length} bending and ${trends.straighten.length} straightening measurements. Both use degrees of knee bend; 0 degrees means straight.">
+  return `<svg class="rs-movement-chart" viewBox="0 0 500 330" role="img" aria-label="Knee bending and straightening by days after surgery. ${trends.bend.length} bending and ${trends.straighten.length} straightening measurements. Both use degrees of knee bend; 0 degrees means straight. A faint band and a dashed line show published figures from other patients for context.">
     <text x="58" y="20" class="chart-axis-title">Y · Knee bend (degrees)</text>
+    ${publishedContext(x, y, minDay, maxDay)}
     ${minorDegrees.map(value => `<line x1="58" x2="474" y1="${y(value)}" y2="${y(value)}" stroke="var(--line)" stroke-opacity=".38"/>`).join('')}
     ${dayLines.map(day => `<line x1="${x(day)}" x2="${x(day)}" y1="44" y2="268" stroke="var(--line)" stroke-opacity="${day % 7 ? '.38' : '.85'}"/>`).join('')}
     ${Array.from({length:high/30+1},(_,i)=>i*30).map(value => `<line x1="58" x2="474" y1="${y(value)}" y2="${y(value)}" stroke="var(--line)"/><text x="48" y="${y(value)+4}" text-anchor="end">${value}°</text>`).join('')}
