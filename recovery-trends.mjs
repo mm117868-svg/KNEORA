@@ -23,9 +23,18 @@ export function combinedMovementChart(trends, elapsed) {
   const high = Math.max(150, Math.ceil(Math.max(0, ...all.map(p => p.value)) / 30) * 30);
   const x = day => 58 + (day - minDay) / (maxDay - minDay) * 416, y = value => 268 - value / high * 216;
   const ticks = [...new Set(Array.from({length:5}, (_, i) => Math.round(minDay + (maxDay - minDay) * i / 4)))];
+  /* Gridlines. One upright line per day while the recovery is short enough to read that way; as the weeks
+     add up the step widens so the chart never fills with lines. Every seventh day is darker, so a week can
+     be counted at a glance. Flat lines every ten degrees, with the labelled thirties left as they were. */
+  const dayStep = [1, 2, 7, 14, 28].find(step => (maxDay - minDay) / step <= 28) || 56;
+  const dayLines = [];
+  for (let day = Math.ceil(minDay / dayStep) * dayStep; day <= maxDay; day += dayStep) dayLines.push(day);
+  const minorDegrees = Array.from({length: high / 10 + 1}, (_, i) => i * 10).filter(value => value % 30);
   const title = (p, motion) => `${motion === 'bend' ? 'Bending' : 'Straightening'} · Day ${p.day} · ${esc(shortDate(p.date))}: ${Math.round(p.value*10)/10}°${motion === 'straighten' ? ' bend remaining' : ''}`;
   return `<svg class="rs-movement-chart" viewBox="0 0 500 330" role="img" aria-label="Knee bending and straightening by days after surgery. ${trends.bend.length} bending and ${trends.straighten.length} straightening measurements. Both use degrees of knee bend; 0 degrees means straight.">
     <text x="58" y="20" class="chart-axis-title">Y · Knee bend (degrees)</text>
+    ${minorDegrees.map(value => `<line x1="58" x2="474" y1="${y(value)}" y2="${y(value)}" stroke="var(--line)" stroke-opacity=".38"/>`).join('')}
+    ${dayLines.map(day => `<line x1="${x(day)}" x2="${x(day)}" y1="44" y2="268" stroke="var(--line)" stroke-opacity="${day % 7 ? '.38' : '.85'}"/>`).join('')}
     ${Array.from({length:high/30+1},(_,i)=>i*30).map(value => `<line x1="58" x2="474" y1="${y(value)}" y2="${y(value)}" stroke="var(--line)"/><text x="48" y="${y(value)+4}" text-anchor="end">${value}°</text>`).join('')}
     <path d="M58 44V268H474" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
     ${ticks.map(day => `<text x="${x(day)}" y="290" text-anchor="middle">${day}</text>`).join('')}

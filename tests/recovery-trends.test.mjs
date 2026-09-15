@@ -40,3 +40,20 @@ test('the vertical axis shows 0 to 150 degrees even with no data or a small earl
  }
  const beyond=combinedMovementChart({bend:[{day:1,date:'2026-09-02',value:160}],straighten:[]},1);assert.match(beyond,/>180°<\/text>/);
 });
+
+const upright=svg=>[...svg.matchAll(/<line x1="([0-9.]+)" x2="\1"/g)].length;
+test('the grid has an upright line for every day of a short recovery, with the weeks darker',()=>{
+ const svg=combinedMovementChart({bend:[{day:8,date:'2026-09-09',value:110}],straighten:[]},8);
+ assert.equal(upright(svg),15);                                   // days 0 to 14 inclusive
+ assert.equal((svg.match(/stroke-opacity="\.85"/g)||[]).length,3); // days 0, 7 and 14
+ assert.doesNotMatch(svg,/NaN/);
+});
+test('a long recovery widens the day step instead of filling the chart with lines',()=>{
+ const svg=combinedMovementChart({bend:[{day:120,date:'2026-12-30',value:130}],straighten:[]},120);
+ assert.ok(upright(svg)<=28,`${upright(svg)} upright lines`);assert.doesNotMatch(svg,/NaN/);
+});
+test('flat lines every ten degrees, labels still only every thirty',()=>{
+ const svg=combinedMovementChart({bend:[],straighten:[]},7);
+ assert.equal((svg.match(/<line x1="58" x2="474"/g)||[]).length,16);   // 0 to 150 every ten
+ assert.equal((svg.match(/°<\/text>/g)||[]).length,6);
+});
