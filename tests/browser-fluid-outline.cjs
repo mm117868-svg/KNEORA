@@ -105,7 +105,7 @@ const CAMERA_AND_JUDGE = `(() => {${SHARED}
   await page.evaluate(() => { window.__raise = true; }); await page.waitForTimeout(2600); await page.evaluate(() => { window.__raise = false; });   // two seconds of raised hand, then the countdown
   await page.waitForFunction(() => !document.getElementById('finish').disabled, null, { timeout: 20000 });
   await page.waitForTimeout(1500);
-  const session = await judge(10); report('session', session); await picture('session.jpg');
+  const session = await judge(10); report('session', session); await picture('session.jpg'); await page.screenshot({path: path.join(out, 'page-session.png')});   // the whole page, to see the readout over the picture
   await page.waitForTimeout(12000);   // four more movements, for the counter
   const counted = await page.evaluate(() => ({ reps: document.getElementById('reps').textContent, track: document.getElementById('track').textContent })); console.log('counter     ', JSON.stringify(counted));
   await browser.close();

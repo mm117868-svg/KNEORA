@@ -9,20 +9,21 @@
    Small movements are the point. In the first weeks a bend may be a few degrees, so nothing here is a fixed
    range: the resting angle is learned from the patient, a movement is an excursion of at least `minDeg` away from
    it (5 degrees, about three times the jitter of the smoothed angle), and once the patient's own range is known
-   the entry threshold follows it at 40% of their usual excursion, so a large movement is not counted twice on a
-   wobble. Either direction counts: a knee extension lowers the bend, a heel slide raises it.
+   the entry threshold follows it at 25% of their usual excursion and the movement only ends once the leg is back
+   within 15% of its furthest point from rest, so sagging part of the way down during a hold neither ends the hold
+   nor counts twice. Either direction counts: a knee extension lowers the bend, a heel slide raises it.
 
    Fail-safes, so a doubtful movement is left out and never invented:
      the entry threshold is never less than six times the jitter measured while the resting angle was learned, so a
        noisy view needs a bigger movement before anything counts;
-     a movement whose return was not seen (the leg out of sight for more than two seconds) is not counted;
+     a movement whose return was not seen (the leg out of sight for more than four seconds) is not counted;
      a movement shorter than 0.3 s, or within 0.6 s of the last count, is not counted;
      if the leg settles somewhere new and stays there for twenty seconds (longer than any hold), that is taken as a change of position, not
        a movement: nothing is counted and the resting angle is learned again;
      the caller passes NaN whenever the pose model is unsure of the leg, which is treated as the leg out of sight.
 
    It counts movements completed. It does not judge their quality, and it never tells the patient off. */
-export const ANGLE_COUNTER = Object.freeze({smoothS: 0.15, restLearnS: 1.0, restFollowS: 2.5, minDeg: 5, enterShare: 0.4, exitShare: 0.35, settleS: 0.12, minAwayS: 0.3, minGapS: 0.6, maxLostS: 2, noiseTimes: 6, stuckS: 20});
+export const ANGLE_COUNTER = Object.freeze({smoothS: 0.15, restLearnS: 1.0, restFollowS: 2.5, minDeg: 5, enterShare: 0.25, exitShare: 0.15, settleS: 0.12, minAwayS: 0.3, minGapS: 0.6, maxLostS: 4, noiseTimes: 6, stuckS: 20});
 const median = a => { const s = [...a].sort((x, y) => x - y); return s.length % 2 ? s[s.length >> 1] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2; };
 
 export class AngleRepCounter {
@@ -35,7 +36,7 @@ export class AngleRepCounter {
   /* How long the current movement has been held, in seconds, for the on-screen hold timer. Not picky: the hold runs
      for as long as the leg is away from its resting position (off the bed, for a leg raise), wherever it is. */
   holdS(t) { return this.state === 'away' && this.holdSince !== null && Number.isFinite(t) ? Math.max(0, t - this.holdSince) : 0; }
-  message() { return !this.ready ? (this.restBand && this.smooth !== null && (this.smooth < this.restBand[0] || this.smooth > this.restBand[1]) ? 'Go to the starting position and stay there for a moment.' : 'Stay in your starting position for a moment.') : this.state === 'away' ? 'Movement seen. Return to the starting position.' : 'Counting your movements.'; }
+  message() { return !this.ready ? (this.restBand && this.smooth !== null && (this.smooth < this.restBand[0] || this.smooth > this.restBand[1]) ? 'Go to the starting position and stay there for a moment.' : 'Stay in your starting position for a moment.') : this.state === 'away' ? 'Movement seen. Hold, then return slowly.' : 'Counting your movements.'; }
 
   /* angle in degrees (NaN when the joint was not seen), t in seconds. Returns 1 when a repetition completes. */
   update(angle, t) {

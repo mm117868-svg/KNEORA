@@ -533,6 +533,10 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 .video-metrics .two{gap:8px}.video-metrics .tile{padding:10px 12px;background:rgba(5,10,20,.8);border-color:rgba(255,255,255,.3);border-radius:8px;min-width:105px}
 .video-metrics .tile .lab{color:#e0e5eb;font-size:10px;letter-spacing:.06em}.video-metrics .tile .val{font-size:40px}.video-metrics .tile .val small{color:#e0e5eb}
 .video-metrics .tile .sub,.video-metrics .tile.angle .bar{display:none}
+/* One readout, nothing on top of anything: the count large enough to read from the exercise position, the angles beneath it. */
+.video-metrics{width:clamp(190px,24%,300px)}.video-metrics .two{display:flex;gap:8px}.video-metrics .two>.tile{flex:1 1 0;min-width:0}
+.video-metrics .tile.reps{text-align:center;padding:12px 14px}.video-metrics .tile.reps .val{font-size:clamp(64px,8vw,104px);font-weight:800;color:#fff}.video-metrics .tile.reps .val small{font-size:.36em;margin-left:8px}
+.video-metrics .tile.reps.done .val{color:var(--green)}.video-metrics .two .tile .val{font-size:clamp(28px,3vw,40px)}
 #ex>.panel{padding:16px;gap:14px}.panel .brief{position:static;display:none;transform:none;transition:none;max-height:none;overflow:visible;border-radius:6px;padding:16px;box-shadow:none;flex:none}
 .panel .brief.up{display:block}.panel .brief h3{font-size:19px}.panel .brief .hands{background:none;padding:0;margin-top:12px;font-size:15px;line-height:1.5;border-radius:0}.panel .brief .gesture-retry{font:inherit;font-size:12px;padding:9px;min-height:40px;border-radius:4px}
 .sound-help{margin-top:14px;font-size:12px}.sound-help summary{cursor:pointer}.panel .tile.instr{display:block}.tile.instr summary{cursor:pointer;font-size:13px;font-weight:700;min-height:32px;display:flex;align-items:center;justify-content:space-between}.tile.instr summary::after{content:'+'}.tile.instr[open] summary::after{content:'−'}.tile.instr #briefSetup{font-size:12px;line-height:1.55;color:var(--dkmuted)}
@@ -637,8 +641,8 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 <section id="ex" aria-hidden="true">
   <div class="stage">
     <div class="camera-view" id="cameraView"><video id="video" playsinline muted aria-label="Live exercise camera"></video><canvas id="canvas" aria-hidden="true"></canvas><div class="video-metrics" aria-label="Live exercise measurements">
+    <div class="tile reps" id="repsTile"><div class="lab" id="repsLab">Repetitions</div><div class="val num"><span id="reps">0</span><small id="repsOf"></small></div><div class="sub" id="repsSub">&nbsp;</div></div>
     <div class="two">
-      <div class="tile reps" id="repsTile"><div class="lab" id="repsLab">Repetitions</div><div class="val num"><span id="reps">0</span><small id="repsOf"></small></div><div class="sub" id="repsSub">&nbsp;</div></div>
       <div class="tile angle" id="angleTile"><div class="lab">Knee bend</div><div class="val num"><span id="angle">—</span><small>°</small></div><div class="bar"><div class="zone" id="zone"></div><div class="fill" id="fill"></div></div><div class="sub" id="angleSub">0° is straight</div></div>
       <div class="tile angle" id="hipTile" hidden><div class="lab">Hip raise</div><div class="val num"><span id="hipAngle">—</span><small>°</small></div><div class="sub" id="hipSub">0° is the leg in line with your body</div></div>
     </div>
@@ -1425,19 +1429,17 @@ function step() {
 }
 function paintSession(now) {
   paintOverlay(now);
-  if (current.kind !== "hold" && repCounter) {   // the count, large enough to read from the exercise position
-    const k = canvas.width / 1280, w = 250 * k, h = 150 * k, x = canvas.width - w - 24 * k, y = 84 * k, done = repCounter.reps >= current.count;
-    ctx.save(); ctx.fillStyle = "rgba(5,10,20,.72)"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 18 * k) : ctx.rect(x, y, w, h); ctx.fill();
-    ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillStyle = done ? "#3ddc84" : "#fff"; ctx.font = `800 ${Math.round(92 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(String(repCounter.reps), x + w * .36, y + h * .72);
-    ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = `600 ${Math.round(34 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(`/ ${current.count}`, x + w * .74, y + h * .7);
-    ctx.font = `600 ${Math.round(17 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(done ? "DONE · FINISH WHEN READY" : "REPETITIONS", x + w / 2, y + h * .92);
-    /* The hold timer: how long to stay at the far end of the movement, then when to come back. A pacing cue only. */
-    const want = +$("holdtarget").value || 0, heldS = want ? repCounter.holdS((now - t0) / 1000) : 0;
-    if (want && heldS > 0.25) { const reached = heldS >= want, hy = y + h + 12 * k, hh = 74 * k;
-      ctx.fillStyle = reached ? "rgba(20,120,70,.9)" : "rgba(5,10,20,.72)"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, hy, w, hh, 18 * k) : ctx.rect(x, hy, w, hh); ctx.fill();
-      ctx.fillStyle = "#fff"; ctx.font = `800 ${Math.round(30 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(reached ? "NOW RETURN SLOWLY" : `HOLD  ${Math.min(want, Math.floor(heldS) + 1)} / ${want}`, x + w / 2, hy + hh * .5);
-      ctx.fillStyle = "rgba(255,255,255,.3)"; ctx.fillRect(x + 18 * k, hy + hh * .72, w - 36 * k, 8 * k); ctx.fillStyle = "#fff"; ctx.fillRect(x + 18 * k, hy + hh * .72, (w - 36 * k) * Math.min(1, heldS / want), 8 * k); }
-    ctx.restore();
+  if (current.kind !== "hold" && repCounter) {
+    $("repsTile").classList.toggle("done", repCounter.reps >= current.count);   // the count itself is the tile over the picture: one readout, never two
+    /* The hold timer: how long to stay away from the resting position, then when to come back. A pacing cue only.
+       Bottom centre of the picture, clear of the readout. */
+    const k = canvas.width / 1280, want = +$("holdtarget").value || 0, heldS = want ? repCounter.holdS((now - t0) / 1000) : 0;
+    if (want && heldS > 0.25) { const reached = heldS >= want, w = 420 * k, hh = 84 * k, x = (canvas.width - w) / 2, hy = canvas.height - hh - 28 * k;
+      ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = reached ? "rgba(20,120,70,.92)" : "rgba(5,10,20,.78)"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, hy, w, hh, 18 * k) : ctx.rect(x, hy, w, hh); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.font = `800 ${Math.round(34 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(reached ? "NOW RETURN SLOWLY" : `HOLD  ${Math.min(want, Math.floor(heldS) + 1)} / ${want}`, x + w / 2, hy + hh * .52);
+      ctx.fillStyle = "rgba(255,255,255,.3)"; ctx.fillRect(x + 22 * k, hy + hh * .72, w - 44 * k, 8 * k); ctx.fillStyle = "#fff"; ctx.fillRect(x + 22 * k, hy + hh * .72, (w - 44 * k) * Math.min(1, heldS / want), 8 * k);
+      ctx.restore(); }
   }
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
 }
@@ -1511,9 +1513,8 @@ async function finish(abandon = false) {
     if (JSON.stringify(loadRecords()[slot]?.patient?.exercise_context) !== JSON.stringify(rec.patient.exercise_context)) throw new Error("Device storage is unavailable.");
     updateExerciseSummary();
   });
-  rec.patient.pain_0_10 = await ask("How painful was that?", "0 = no pain, 10 = worst pain", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-  if (finishGen !== openGen) return;
-  rec.patient.difficulty_1_5 = await ask("How hard was that?", "1 = easy, 5 = very hard", [1, 2, 3, 4, 5]);
+  /* No questions after a session (Matthew, 19 Sep 2026): the pain and effort scores are no longer asked for. The
+     fields stay in the record as null so earlier records, which may carry them, still read. */
 
   if (finishGen !== openGen) return;
   const stamp = stampOf(startedAt), base = `${rec.patient_id}_${stamp}`;

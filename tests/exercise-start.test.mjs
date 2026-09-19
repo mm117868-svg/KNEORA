@@ -158,7 +158,7 @@ test('abandoned sessions do not announce completed repetitions', async () => {
 });
 
 for (const exercise of ['straight_leg_raise', 'seated_extension', 'heel_slide']) {
-  test(`${exercise}: finishing starts automatic analysis before patient answers, then saves and displays the report`, async () => {
+  test(`${exercise}: finishing starts automatic analysis, asks the patient nothing, then saves and displays the report`, async () => {
     const h = finishHarness(), records = [], updates = [];
     let analysis, answer;
     const elements = new Map();
@@ -176,7 +176,8 @@ for (const exercise of ['straight_leg_raise', 'seated_extension', 'heel_slide'])
       loadRecords: () => records, patientRecords: records => records, esc: value => value,
       renderBasicExerciseSummary: record => record.exercise_analysis ? 'Analysed summary' : 'Live summary',
       renderDetailedExerciseSummary: record => record.exercise_analysis ? 'Full measured report' : 'Waiting for analysis',
-      renderHome(){}, disposeAnalysis(){}, mountExerciseContext(){}, smallMovement: () => false,
+      renderHome(){}, disposeAnalysis(){}, mountExerciseContext(){ h.context.openGen++; },   // the page was left here: the test stops before the downloads
+      smallMovement: () => false,
       mountExerciseAnalysis(host, options){analysis = options; h.events.push('analysis mounted'); return () => {};},
       ask(){h.events.push('patient question'); return new Promise(resolve => {answer = resolve;});}
     });
@@ -191,7 +192,7 @@ for (const exercise of ['straight_leg_raise', 'seated_extension', 'heel_slide'])
     assert.equal(analysis.metadata.exercise, exercise);
     assert.equal(analysis.metadata.side, 'left');
     assert.ok(analysis.blob.size > 0);
-    assert.deepEqual(h.events, ['stop requested', 'camera stopped', 'repetitions_complete', 'completion updated', 'analysis mounted', 'patient question']);
+    assert.deepEqual(h.events, ['stop requested', 'camera stopped', 'repetitions_complete', 'completion updated', 'analysis mounted'], 'no pain or effort question is asked');
     assert.equal($('simpleExerciseSummary').innerHTML, 'Live summary');
     const report = {exercise, reps: [{duration: 5}], metrics: {maximumObservedBend: 90}};
     analysis.onReport(report);
@@ -199,6 +200,6 @@ for (const exercise of ['straight_leg_raise', 'seated_extension', 'heel_slide'])
     assert.equal(records[0].exercise_analysis, report);
     assert.equal($('simpleExerciseSummary').innerHTML, 'Analysed summary');
     assert.equal($('fullExerciseSummary').innerHTML, 'Full measured report');
-    h.context.openGen++; answer(null); await finishing;
+    await finishing; assert.equal(records[0].patient.pain_0_10, null); assert.equal(records[0].patient.difficulty_1_5, null);
   });
 }

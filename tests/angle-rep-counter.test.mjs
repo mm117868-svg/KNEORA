@@ -26,9 +26,9 @@ test('a big movement with a wobble at the top is one repetition, not two', () =>
   feed(() => 85, 2); for (let i = 0; i < 3; i++) { feed(x => 85 - 70 * stroke(x), 1.2); feed(x => 15 + 12 * Math.sin(x * 6 * Math.PI), 1.5); feed(x => 15 + 70 * stroke(x), 1.2); feed(() => 85, 1); }
   assert.equal(counter.reps, 3);
 });
-test('the leg out of sight for a second does not spoil a movement; out of sight for three, that movement is not counted', () => {
-  assert.equal(run({reps: 5, size: -60, lose: [6.5, 7.5]}).reps, 5);
-  const long = run({reps: 5, size: -60, lose: [7.0, 9.9]});   // lost from the middle of the second movement until it is over
+test('the leg out of sight for a second does not spoil a movement; out of sight for more than four, that movement is not counted', () => {
+  assert.equal(run({reps: 5, size: -60, lose: [6.5, 7.5]}).reps, 5); assert.equal(run({reps: 5, size: -60, lose: [7.0, 9.9]}).reps, 5, 'forgiving: three seconds out of sight, back at rest, still counts');
+  const long = run({reps: 5, size: -60, lose: [7.0, 12.5]});   // lost from the middle of the second movement until well into the third
   assert.equal(long.reps, 4); assert.ok(long.events.some(e => e.status === 'unconfirmed' && e.reason === 'leg_not_seen'));
 });
 test('the record says what was counted and how big the movements were', () => {
@@ -70,4 +70,10 @@ test('the hold timer is not picky: it runs for as long as the leg is away from r
   feed(() => 0, 2); feed(x => 40 * stroke(x), 1); feed(x => 40 - 15 * x, 2); feed(x => 25 + 10 * Math.sin(x * 9), 2);   // up, sagging, wobbling: still off the bed
   assert.ok(counter.holdS(t) > 4.3, `held ${counter.holdS(t).toFixed(1)} s`);
   feed(x => 30 * (1 - stroke(x)), 1); feed(() => 0, 1); assert.equal(counter.holdS(t), 0); assert.equal(counter.reps, 1); assert.ok(counter.events.at(-1).hold_s > 5);
+});
+test('forgiving hold: a leg raised 50 degrees that sags to 12 and wobbles is still one hold and one repetition', () => {
+  const counter = new AngleRepCounter(undefined, 'up', [-25, 25]); let t = 0; const feed = (angle, seconds) => { for (let k = 0; k < seconds * 15; k++) counter.update(angle(k / 15 / seconds), t += 1 / 15); };
+  for (let i = 0; i < 3; i++) { feed(() => 0, 2); feed(x => 50 * stroke(x), 1); feed(x => 50 - 38 * x, 2); feed(x => 12 + 4 * Math.sin(x * 8 * Math.PI), 3);
+    assert.ok(counter.holdS(t) > 5, `movement ${i + 1}: held ${counter.holdS(t).toFixed(1)} s`); feed(x => 12 * (1 - stroke(x)), 0.8); }
+  feed(() => 0, 1); assert.equal(counter.reps, 3);
 });
