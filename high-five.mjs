@@ -8,19 +8,28 @@ export async function loadHighFive() {
   try{return await GestureRecognizer.createFromOptions(files,options);}
   catch{return GestureRecognizer.createFromOptions(files,{...options,baseOptions:{...options.baseOptions,delegate:'CPU'}});}
 }
+/* The hand counts wherever it is in the picture, the edges and corners included. A hand raised at the top of
+   the picture often has its fingertips cut off, and the model then places those points just outside the
+   picture. What has to be inside is the palm: the wrist and the four knuckles. */
+const PALM=[0,5,9,13,17];
+export function handInPicture(hand) {
+  if(hand?.length!==21||!hand.every(p=>Number.isFinite(p?.x)&&Number.isFinite(p?.y)))return false;
+  const x=PALM.reduce((n,i)=>n+hand[i].x,0)/PALM.length,y=PALM.reduce((n,i)=>n+hand[i].y,0)/PALM.length;
+  return x>=0&&x<=1&&y>=0&&y<=1;
+}
 export function highFiveState(result) {
   if(!result||!Array.isArray(result.gestures)||!Array.isArray(result.landmarks))return 'unknown';
   if(!result.landmarks.length)return 'absent';
   for(let i=0;i<result.landmarks.length;i++){
     const hand=result.landmarks[i],gesture=result.gestures[i]?.[0];
-    const inFrame=hand?.length===21&&hand.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1);
-    if(inFrame&&gesture?.categoryName==='Open_Palm'&&Number.isFinite(gesture.score)&&gesture.score>=HIGH_FIVE_SETTINGS.score)return 'open';
+    if(handInPicture(hand)&&gesture?.categoryName==='Open_Palm'&&Number.isFinite(gesture.score)&&gesture.score>=HIGH_FIVE_SETTINGS.score)return 'open';
   }
   return 'other';
 }
 export function drawHands(ctx,result,width,height) {
   const links=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[0,17],[17,18],[18,19],[19,20]];
   ctx.strokeStyle=highFiveState(result)==='open'?'#ffe14d':'rgba(255,255,255,.85)';ctx.lineWidth=Math.max(2,width/500);
-  for(const hand of result?.landmarks||[])for(const [a,b] of links){const p=hand[a],q=hand[b];if(!p||!q||![p,q].every(v=>Number.isFinite(v.x)&&Number.isFinite(v.y)&&v.x>=0&&v.x<=1&&v.y>=0&&v.y<=1))continue;
+  // A point just outside the picture is still drawn to: the canvas clips the line at its edge.
+  for(const hand of result?.landmarks||[])for(const [a,b] of links){const p=hand[a],q=hand[b];if(!p||!q||![p,q].every(v=>Number.isFinite(v.x)&&Number.isFinite(v.y)))continue;
     ctx.beginPath();ctx.moveTo(p.x*width,p.y*height);ctx.lineTo(q.x*width,q.y*height);ctx.stroke();}
 }

@@ -1,6 +1,6 @@
 import {loadPose} from './kneerec.js?v=endpoint-heavy-images-1';
 import {kneeFrame,summariseEndpoint} from './recovery-measurements.mjs?v=endpoint-3-flexible';
-import {loadHighFive,highFiveState,drawHands} from './high-five.mjs';
+import {loadHighFive,highFiveState,drawHands} from './high-five.mjs?v=palm-anywhere-1';
 import {EndpointGesture} from './endpoint-gesture.mjs';
 import {EndpointPreviewAverage} from './endpoint-smoothing.mjs';
 export const ENDPOINT_CAPTURE_MS=6000;
@@ -13,11 +13,16 @@ export function cameraMessage(error){
  if(error?.name==='NotReadableError')return 'The camera is busy or unavailable. Close other apps using it, then try again.';
  return error?.message||'The camera could not start. Try again or use a sequence of photos.';
 }
-export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>{},onReady=()=>{},onCaptureStart=()=>{},onGesture=()=>{},onAngle=()=>{},onTrigger=null,modelLoader=loadPose,handLoader=loadHighFive,getStream=()=>navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}},audio:false})}){
+/* The patient watches the camera's own video, played by the browser, so the picture stays smooth however long
+   each pose inference takes. `canvas` lies over that video and carries only the outline of the measured leg and
+   the hand. Each picture to be measured is copied to `workCanvas`, which is never shown and never drawn on. */
+export function createEndpointCamera({video,canvas,workCanvas=null,onStatus=()=>{},onResult=()=>{},onReady=()=>{},onCaptureStart=()=>{},onGesture=()=>{},onAngle=()=>{},onTrigger=null,modelLoader=loadPose,handLoader=loadHighFive,getStream=()=>navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}},audio:false})}){
  let generation=0,stream=null,model=null,hands=null,raf=null,timer=null,bucket=null,lastVideo=-1,lastInference=0,side='left',modelName='';
  const gesture=new EndpointGesture();let gesturePaused=false;
  const smoother=new EndpointPreviewAverage();
  const ctx=canvas.getContext('2d');
+ // Outside a browser (the unit tests) there is no document, and one surface serves both purposes as it used to.
+ const work=workCanvas||(typeof document!=='undefined'?document.createElement('canvas'):canvas),workCtx=work===canvas?ctx:work.getContext('2d');
  function stop(){generation++;cancelAnimationFrame(raf);clearTimeout(timer);bucket=null;gesture.reset();smoother.reset();onAngle(null);stream?.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;model?.close();model=null;hands?.close();hands=null;onReady(false);onGesture({stage:'off',progress:0});}
  async function loadHands(token){
   let timeout,expired=false;
@@ -46,11 +51,14 @@ export function createEndpointCamera({video,canvas,onStatus=()=>{},onResult=()=>
     if(video.readyState<2||video.currentTime===lastVideo){if(now-lastInference>500){smoother.reset();onAngle(null);}return;}
     if(now-lastInference<80)return;
     lastVideo=video.currentTime;lastInference=now;
-    canvas.width=video.videoWidth;canvas.height=video.videoHeight;ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    // Setting a canvas size clears it, so sizes are only touched when the camera's own size changes.
+    for(const surface of work===canvas?[canvas]:[work,canvas])if(surface.width!==video.videoWidth||surface.height!==video.videoHeight){surface.width=video.videoWidth;surface.height=video.videoHeight;}
+    workCtx.drawImage(video,0,0,work.width,work.height);
+    if(work!==canvas)ctx.clearRect(0,0,canvas.width,canvas.height);
     try{
-     // The canvas is a fresh still image. IMAGE detection runs independently on
-     // each picture, before any smoothed overlay is drawn onto that canvas.
-     const result=model.detect(canvas),frame=kneeFrame(result.landmarks,canvas.width,canvas.height,side);
+     // The work canvas is a fresh still image. IMAGE detection runs independently on
+     // each picture, and no overlay is ever drawn onto the picture that is measured.
+     const result=model.detect(work),frame=kneeFrame(result.landmarks,work.width,work.height,side);
      const lm=result.landmarks?.length===1?result.landmarks[0]:null,ids=side==='left'?[23,25,27]:[24,26,28];
      const preview=smoother.update(frame.angle,lm?ids.map(id=>lm[id]):null,now);onAngle(preview);
      if(preview){ctx.strokeStyle='#dc682e';ctx.fillStyle='#fff';ctx.lineWidth=5;ctx.beginPath();preview.points.forEach((p,i)=>{i?ctx.lineTo(p.x*canvas.width,p.y*canvas.height):ctx.moveTo(p.x*canvas.width,p.y*canvas.height);});ctx.stroke();for(const p of preview.points){ctx.beginPath();ctx.arc(p.x*canvas.width,p.y*canvas.height,7,0,2*Math.PI);ctx.fill();}}

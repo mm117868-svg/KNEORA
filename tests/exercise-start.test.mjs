@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-import {SkeletonAverage} from '../live-overlay.mjs';
+import {JointFilter} from '../kneerec.js';
 import {AppVoice, completionNotice} from '../app-voice.mjs';
 import {finishRecording} from '../video-analysis/live.mjs';
 import {inspectExerciseLeg} from '../pose-gate.js';
@@ -19,10 +19,10 @@ function previewHarness() {
     return elements.get(id);
   };
   let now = 0, starts = 0, spoken = 0, stopped = 0, detects = 0, landmarks = pose();
-  const context = vm.createContext({setExerciseSidebar(){},$, stream: {}, running: false, current:{kind:'reps'}, skeletonAverage:new SkeletonAverage(), inspectExerciseLeg, highFiveState, HIGH_FIVE_SETTINGS, drawHands(){}, performance: {now: () => now},
+  const context = vm.createContext({setExerciseSidebar(){},$, stream: {}, running: false, current:{kind:'reps'}, JointFilter, clearOverlay(){}, legStyle(){return {};}, drawLeg(){}, inspectExerciseLeg, highFiveState, HIGH_FIVE_SETTINGS, drawHands(){}, performance: {now: () => now},
     appVoice: {play(){spoken++; return true;}, stop(){stopped++;}}, refreshHint(){},
     video: {readyState: 4, currentTime: 0, videoWidth: 1280}, canvas: {width: 1280, height: 720}, ctx: {drawImage(){}},
-    requestAnimationFrame(){return 1;}, cancelAnimationFrame(){}, pickSide(){return null;}, drawSkeleton(){},
+    requestAnimationFrame(){return 1;}, cancelAnimationFrame(){}, pickSide(){return null;},
     landmarker: {detectForVideo(){return {landmarks:[]};}},
     handRecognizer:{recognizeForVideo(){detects++;return landmarks;}},
     startSession(){starts++; context.running = true;}});

@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="progress-to-date.css?v=1">
 <link rel="stylesheet" href="exercise-summary.css?v=pubmed-1">
 <link rel="stylesheet" href="recovery-timeline.css?v=1">
-<link rel="stylesheet" href="recovery-summary.css?v=large-graph-1">
+<link rel="stylesheet" href="recovery-summary.css?v=native-video-1">
 <style>
 :root{
   --paper:#efeee9;--paper2:#e7e5dd;--bone:#fbfaf7;--line:#dad7ce;--ink:#1a1918;--muted:#55524c;
@@ -93,8 +93,9 @@ details.more summary{cursor:pointer;font-weight:600}
 #ex{position:fixed;inset:0;background:var(--dk);color:var(--dkink);z-index:20;display:none;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:100%}
 #ex.open{display:grid}
 .stage{position:relative;background:#050a14;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:0}
-.stage video{display:none}
-.stage canvas{max-width:100%;max-height:100%;display:block}
+/* The picture is the camera's own video, played by the browser. The canvas above it carries only the
+   outline of the operated leg and the hand, so slow processing can delay the outline but never the picture. */
+.stage video,.stage canvas{max-width:100%;max-height:100%;display:block}
 .stage .top{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 12px) 16px 28px;display:flex;align-items:flex-start;gap:12px;background:linear-gradient(180deg,rgba(5,10,20,.85),rgba(5,10,20,0));pointer-events:none}
 .stage .top>*{pointer-events:auto}
 .iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--dkline);background:rgba(255,255,255,.1);color:#fff;font-size:22px;cursor:pointer;display:grid;place-items:center;flex:0 0 auto;line-height:1}
@@ -522,7 +523,9 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 #ex.camera-expanded{grid-template-columns:minmax(0,1fr)}
 #ex.camera-expanded>.panel{display:none}
 .camera-view{position:relative;flex:none;max-width:100%;max-height:100%}
-.stage .camera-view canvas{display:block;width:100%;height:100%;max-width:none;max-height:none}
+.stage .camera-view video,.stage .camera-view canvas{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;max-height:none}
+.stage .camera-view video{object-fit:fill;background:#050a14}
+.stage .camera-view canvas{pointer-events:auto}
 .video-metrics{position:absolute;right:12px;top:72px;pointer-events:none;display:flex;flex-direction:column;gap:8px;max-width:calc(100% - 24px)}
 .video-metrics .two{gap:8px}.video-metrics .tile{padding:10px 12px;background:rgba(5,10,20,.8);border-color:rgba(255,255,255,.3);border-radius:8px;min-width:105px}
 .video-metrics .tile .lab{color:#e0e5eb;font-size:10px;letter-spacing:.06em}.video-metrics .tile .val{font-size:40px}.video-metrics .tile .val small{color:#e0e5eb}
@@ -580,7 +583,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       </fieldset>
       <fieldset class="setting-box"><legend>Live camera display</legend>
         <label class="setting-check"><input type="checkbox" id="showangle" checked><span>Show my live knee angle<small>Display the MediaPipe knee angle while positioning, during the countdown and throughout the session.</small></span></label>
-        <p class="small-note">The skeleton outline averages up to six recent frames for a steadier view. Visible joints are shown even when only the lower limb is in view.</p>
+        <p class="small-note">Only your operated leg is outlined: hip, knee and ankle. The other leg, your arms, trunk and face are never drawn. The outline is steadied for display; measurements use the original positions.</p>
         <p class="small-note">These displays need the pose model and a clear view of your leg. An unavailable angle is shown as a dash.</p>
       </fieldset>
       <fieldset class="setting-box"><legend>Video and session files</legend>
@@ -612,7 +615,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
   <div class="safety">
     <b>Listen to your knee.</b> Mild discomfort is normal; sharp pain is not. Stop and contact your surgeon if you notice fever, calf pain, spreading numbness or wound drainage. This programme supports your physiotherapist's plan; it does not replace it.
   </div>
-  <p class="foot">The skeleton shows visible joints and gives a whole-session knee angle. The experimental position model counts straight-leg raises, seated knee extensions and heel slides; it does not yet confirm which leg moved. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: pubmed-metrics-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
+  <p class="foot">The outline shows the hip, knee and ankle of your operated leg and gives a whole-session knee angle. The experimental position model counts straight-leg raises, seated knee extensions and heel slides; it does not yet confirm which leg moved. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: pubmed-metrics-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
   <footer class="app-footer" aria-label="Company and app information">
     <div class="footer-heading"><div><span class="eyebrow">Cambridge Kinematics<sup class="brand-trademark" aria-hidden="true">™</sup></span><h2>Supporting your recovery,<br>one day at a time.</h2></div><span class="footer-status">In development</span></div>
     <div class="footer-company"><strong>Cambridge Kinematics Limited</strong><p>A private limited company registered in England and Wales.</p><p>Cambridge, England</p></div>
@@ -629,8 +632,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 <!-- ===================== EXERCISE ===================== -->
 <section id="ex" aria-hidden="true">
   <div class="stage">
-    <video id="video" playsinline muted></video>
-    <div class="camera-view" id="cameraView"><canvas id="canvas" aria-label="Live exercise camera"></canvas><div class="video-metrics" aria-label="Live exercise measurements">
+    <div class="camera-view" id="cameraView"><video id="video" playsinline muted aria-label="Live exercise camera"></video><canvas id="canvas" aria-hidden="true"></canvas><div class="video-metrics" aria-label="Live exercise measurements">
     <div class="two">
       <div class="tile reps" id="repsTile"><div class="lab" id="repsLab">Repetitions</div><div class="val num"><span id="reps">0</span><small id="repsOf"></small></div><div class="sub" id="repsSub">&nbsp;</div></div>
       <div class="tile angle" id="angleTile"><div class="lab">Knee bend</div><div class="val num"><span id="angle">—</span><small>°</small></div><div class="bar"><div class="zone" id="zone"></div><div class="fill" id="fill"></div></div><div class="sub" id="angleSub">0° is straight</div></div>
@@ -690,7 +692,7 @@ const positionCanvas=document.createElement('canvas');positionCanvas.width=posit
 const positionCtx=positionCanvas.getContext('2d',{willReadFrequently:true});
 async function preparePositionModel(exercise){positionModel=null;if(!['straight_leg_raise','seated_extension','heel_slide'].includes(exercise))return;try{const r=await fetch(new URL('./tools/position-recogniser/models/'+exercise+'.json',import.meta.url));if(!r.ok)throw Error('Model unavailable');positionModel=await r.json();if(positionModel.exercise!==exercise)throw Error('Wrong model');}catch(e){positionModel=null;console.warn('Position model unavailable');}}
 
-import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, summarise, tracePreview, angleChartSvg, drawSkeleton, drawLeg, loadPose,
+import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, JointFilter, summarise, tracePreview, angleChartSvg, drawLeg, loadPose,
          FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=high-five-small-1";
 import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=full-breakdown-1";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js?v=wide-smooth-1";
@@ -700,14 +702,13 @@ import { AppVoice, completionNotice } from "./app-voice.mjs";
 import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=pubmed-1";
 import { mountExerciseContext } from "./exercise-context.mjs?v=pubmed-1";
 import { renderDetailedExerciseSummary } from "./exercise-details.mjs?v=pubmed-1";
-import { renderRecoverySummary } from "./recovery-summary.mjs?v=large-graph-1";
+import { renderRecoverySummary } from "./recovery-summary.mjs?v=native-video-1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
 import { renderProgressToDate } from "./progress-to-date.mjs?v=pubmed-1";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
 import { patientRecords, completedExercisesForDay, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=daily-ticks-1";
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-1";
-import {SkeletonAverage} from "./live-overlay.mjs";
-import {loadHighFive, highFiveState, drawHands, HIGH_FIVE_SETTINGS} from "./high-five.mjs";
+import {loadHighFive, highFiveState, drawHands, HIGH_FIVE_SETTINGS} from "./high-five.mjs?v=palm-anywhere-1";
 
 
 /* ---------------- Exercise library ----------------
@@ -989,8 +990,12 @@ let disposeAnalysis = () => {}, pendingAnswer = null;
 let current = null, stream = null, running = false, recorder = null, chunks = [], openGen = 0;
 let trace, monitor, t0, frameNo, lastVideoTime = -1, rafId = 0, startedAt, dragging = null, boxMode = false;
 let lastPoseAt = -Infinity;
-const skeletonAverage = new SkeletonAverage();
-let lastSkeleton = null;
+/* The drawing layer over the video. Only the operated leg is outlined: hip, knee and ankle, the three joints
+   the angle comes from. The other leg, the trunk, the arms and the face are found by the pose model but never
+   drawn. Display only: the outline uses the same One Euro filter as the angle trace, which follows a moving
+   leg closely and holds a still one steady; nothing drawn here feeds a measurement or a count. */
+const clearOverlay = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+const legStyle = () => ({ thigh: "#3ddc84", shank: "#3ddc84", radius: Math.max(5, canvas.width / 120), lineWidth: Math.max(4, canvas.width / 200), label: false });
 /* Display only. The measured angle is not changed by anything here: the trace, the statistics, the report
    and the counter all keep the per-frame value.
 
@@ -1239,28 +1244,29 @@ function cameraFailed(e) {
 }
 /* Live picture beside optional instructions while the patient gets into position; no session is recorded yet.
    Body overlays are display only. The independent hand model watches for an open palm. */
-let previewId = 0, previewLastVideoTime = -1, previewLastFrameAt = null, previewAll = null, previewSkeleton = null, previewPoseAt = -Infinity;
-function preview() { skeletonAverage.reset(); previewSkeleton = null; cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; previewStep(); }
+let previewId = 0, previewLastVideoTime = -1, previewLastFrameAt = null, previewAll = null, previewLeg = null, previewPoseAt = -Infinity, previewJoints = null;
+function preview() { previewJoints = null; previewLeg = null; cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; previewStep(); }
 
 function previewStep() {
   if (running || !stream) return;
   previewId = requestAnimationFrame(previewStep);
   const now = performance.now();
   if (previewLastFrameAt !== null && now - previewLastFrameAt > HAND_SAMPLE_MAX_GAP_MS) {
-    resetHand(); skeletonAverage.reset(); previewSkeleton = null; previewAll = null; showHand(0, false); $("handfill").style.width = "0";
+    resetHand(); previewJoints?.reset(); previewLeg = null; previewAll = null; showHand(0, false); $("handfill").style.width = "0";
     if (countdownStart !== null) cancelCountdown(true);
   }
   // A frozen image cannot complete a gesture or finish the countdown.
   if (video.readyState < 2 || video.currentTime === previewLastVideoTime) {
-    if (video.readyState >= 2 && now-previewPoseAt > 450) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (video.readyState >= 2 && now-previewPoseAt > 450) clearOverlay();   // an outline this old no longer belongs to the picture
     return;
   }
   previewLastVideoTime = video.currentTime; previewLastFrameAt = now;
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  clearOverlay();
 
   if (landmarker && ++previewN % 3 === 0 && video.videoWidth > 0) {
     let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
-    previewAll = res?.landmarks?.[0] || null; previewSkeleton = skeletonAverage.update(previewAll, now); previewPoseAt = now;
+    previewAll = res?.landmarks?.[0] || null; previewPoseAt = now;
+    previewLeg = (previewJoints ??= new JointFilter(canvas.height)).apply(previewAll ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null, now / 1000);
   }
   const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null;
   if (current.kind !== "hold") {
@@ -1268,7 +1274,7 @@ function previewStep() {
     $("track").textContent = view.message;
     $("track").className = "track " + (view.clear ? "ok" : "off");
   }
-  if (previewAll && now-previewPoseAt <= 450) drawSkeleton(ctx, previewSkeleton, canvas.width, canvas.height, {line:"rgba(61,220,132,.85)", lineWidth:Math.max(2,canvas.width/400), radius:Math.max(3,canvas.width/220)});
+  if (previewLeg && now-previewPoseAt <= 450) drawLeg(ctx, previewLeg, legStyle());
 
   if ($("showangle").checked) {
     $("angleTile").style.display = "block";
@@ -1276,8 +1282,6 @@ function previewStep() {
     const shown = angleDisplay.update(angle, now);
     $("angle").textContent = Number.isFinite(shown) ? shown.toFixed(0) : "–";
     $("fill").style.width = Number.isFinite(shown) ? pct(shown)+"%" : "0";
-    const displayLeg = pickSide(previewSkeleton, canvas.width, canvas.height, $("side").value, .2);
-    if (displayLeg) drawLeg(ctx, displayLeg, {thigh:"#3ddc84", shank:"#3ddc84", label:false});
   }
   if (countdownStart !== null) { if (tickCountdown(now)) startSession(); return; }
   const gesture = sampleHand(now);
@@ -1292,7 +1296,6 @@ function previewStep() {
 function startSession() {
   if (!stream || running) return;
   cancelAnimationFrame(previewId); cancelCountdown(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
-  skeletonAverage.reset(); lastSkeleton = null;
   const fps = stream.getVideoTracks()[0].getSettings().frameRate || 30;
   trace = new AngleTrace(1, canvas.height); monitor = new FlowMonitor(canvas.width, canvas.height, fps);
   angleDisplay.reset();
@@ -1324,11 +1327,11 @@ function step() {
   if (handLastSample !== null && now - handLastSample > HAND_SAMPLE_MAX_GAP_MS) { resetHand(); showHand(0, true); }
   if (video.currentTime === lastVideoTime) {
     legGate?.advance(t);
-    if (video.readyState >= 2 && now-lastPoseAt > 450) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (video.readyState >= 2 && now-lastPoseAt > 450) clearOverlay();
     return;
   }
   lastVideoTime = video.currentTime; frameNo++;
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  clearOverlay();
 
   // measurement layer: frame -> landmarks -> angle. Gets the frame and the clock only.
   let lm = null, angle = NaN;
@@ -1341,7 +1344,6 @@ function step() {
     lastPoseAt = now;
 
     lastAll = (res && res.landmarks && res.landmarks[0]) ? res.landmarks[0] : null;
-    lastSkeleton = skeletonAverage.update(lastAll, now);
     if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.2);
     angle = trace.add(frameNo, t, lm); lastLm = lm; lastAngle = angle;
   } else if (landmarker) { lm = lastLm; angle = lastAngle; }
@@ -1379,9 +1381,8 @@ function step() {
     if (!Number.isNaN(peak)) $("angleSub").innerHTML = (current.aim.kind === "bend" ? `bend towards <b>${current.aim.deg}°</b>` : `straight is <b>0°</b>`) + ` · best today <b>${peak.toFixed(0)}°</b>`;
   }
 
-  if (lastAll && now-lastPoseAt <= 450) drawSkeleton(ctx, lastSkeleton, canvas.width, canvas.height, { line: "rgba(61,220,132,.85)", lineWidth: Math.max(2, canvas.width / 400), radius: Math.max(3, canvas.width / 220) });
-  const displayLeg = lastSkeleton && now-lastPoseAt <= 450 ? pickSide(lastSkeleton, canvas.width, canvas.height, $("side").value, .2) : null;
-  if ($("showangle").checked && displayLeg) drawLeg(ctx, displayLeg, { thigh: "#3ddc84", shank: "#3ddc84", radius: Math.max(5, canvas.width / 120), lineWidth: Math.max(4, canvas.width / 200), label: false });
+  // trace.lastLm is the operated leg after the One Euro filter: the joints the angle itself comes from.
+  if (trace.lastLm && now-lastPoseAt <= 450) drawLeg(ctx, trace.lastLm, legStyle());
   if (now-lastHandAt <= 450) drawHands(ctx, lastHandResult, canvas.width, canvas.height);
   const [bx, by, bw, bh] = [canvas.width*10/32,canvas.height*.12,canvas.width*22/32,canvas.height*.78]; ctx.strokeStyle = "rgba(255,255,255,.65)"; ctx.lineWidth = 3; ctx.strokeRect(bx, by, bw, bh);
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
