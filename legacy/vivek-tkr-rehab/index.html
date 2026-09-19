@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0e1726">
+<title>Knee Recovery — TKR Rehab Guide</title>
+<style>
+  :root{
+    --ink:#0e1726;
+    --ink-2:#1b2940;
+    --paper:#f5f2ec;
+    --paper-2:#ece7dc;
+    --line:#d8d1c4;
+    --bone:#fbf9f4;
+    --pulse:#e8642f;       /* terracotta-clay accent */
+    --pulse-deep:#c44e1f;
+    --go:#2f7d5b;          /* in-range green */
+    --go-soft:#dcefe2;
+    --warn:#c0902a;
+    --muted:#6f6857;
+    --shadow:0 10px 30px -12px rgba(14,23,38,.4);
+    --r:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-feature-settings:"ss01","cv01";
+    overscroll-behavior:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* type scale */
+  .display{font-family:"Fraunces","Georgia",serif;font-weight:600;letter-spacing:-.02em;line-height:1.02}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--pulse-deep)}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+  /* App shell */
+  #app{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;position:relative}
+
+  /* ---------- HOME ---------- */
+  .home{padding:calc(env(safe-area-inset-top) + 26px) 20px 120px}
+  .brandbar{display:flex;align-items:center;gap:10px;margin-bottom:30px}
+  .mark{width:34px;height:34px;border-radius:9px;background:var(--ink);position:relative;flex:0 0 auto}
+  .mark::before{content:"";position:absolute;inset:9px 8px;border:2.5px solid var(--paper);border-radius:2px 2px 9px 9px;border-top:none}
+  .mark::after{content:"";position:absolute;top:7px;left:50%;width:2.5px;height:8px;background:var(--paper);transform:translateX(-50%);border-radius:2px}
+  .brandbar b{font-size:14px;font-weight:700;letter-spacing:-.01em}
+  .brandbar span{font-size:12px;color:var(--muted);display:block;margin-top:1px}
+
+  .hero{margin-bottom:8px}
+  .hero h1{font-size:clamp(34px,11vw,46px);margin:0 0 14px}
+  .hero h1 em{font-style:normal;color:var(--pulse-deep);position:relative}
+  .hero p{font-size:15.5px;line-height:1.5;color:var(--muted);margin:0;max-width:34ch}
+
+  .phasepick{margin:30px 0 8px}
+  .phasepick .eyebrow{margin-bottom:12px;display:block}
+  .seg{display:flex;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+  .seg button{flex:1;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);
+    padding:10px 4px;border-radius:10px;cursor:pointer;transition:.18s}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bone);box-shadow:var(--shadow)}
+
+  .list{margin-top:24px;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--bone);border:1px solid var(--line);border-radius:var(--r);padding:18px;cursor:pointer;
+    display:flex;align-items:center;gap:16px;transition:.16s;position:relative;overflow:hidden}
+  .card:active{transform:scale(.985)}
+  .card .ic{width:48px;height:48px;flex:0 0 auto;border-radius:12px;background:var(--paper-2);
+    display:grid;place-items:center}
+  .card .ic svg{width:26px;height:26px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .card h3{margin:0 0 3px;font-size:16px;font-weight:650;letter-spacing:-.01em}
+  .card p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.35}
+  .card .tag{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--pulse-deep);
+    background:#f7e5dc;padding:5px 8px;border-radius:7px;white-space:nowrap;align-self:flex-start}
+  .card.tracked::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--pulse)}
+
+  .safety{margin:28px 0 0;padding:16px;background:#fcf4e8;border:1px solid #ecdcbf;border-radius:14px;
+    font-size:12.5px;line-height:1.5;color:#7a6328}
+  .safety b{color:#5e4c1c}
+
+  /* ---------- EXERCISE ---------- */
+  .ex{position:fixed;inset:0;background:var(--ink);display:flex;flex-direction:column;z-index:20;
+    transform:translateY(100%);transition:transform .34s cubic-bezier(.4,0,.2,1)}
+  .ex.open{transform:none}
+  .ex .stage{position:relative;flex:1;overflow:hidden;background:#0a111d}
+  video,canvas.cv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+  canvas.cv{z-index:2}
+
+  .exhead{position:absolute;top:0;left:0;right:0;z-index:5;padding:calc(env(safe-area-inset-top) + 12px) 16px 30px;
+    display:flex;align-items:flex-start;gap:12px;
+    background:linear-gradient(180deg,rgba(10,17,29,.82),rgba(10,17,29,0))}
+  .exhead .back{width:38px;height:38px;border-radius:11px;border:none;background:rgba(255,255,255,.12);
+    backdrop-filter:blur(8px);color:#fff;font-size:20px;cursor:pointer;flex:0 0 auto;display:grid;place-items:center}
+  .exhead .t{color:#fff;padding-top:2px}
+  .exhead .t .eyebrow{color:#f0a07f}
+  .exhead .t h2{margin:2px 0 0;font-size:18px;font-weight:650;font-family:"Fraunces",serif;letter-spacing:-.01em}
+
+  /* big live angle gauge */
+  .gauge{position:absolute;z-index:5;left:16px;bottom:calc(env(safe-area-inset-bottom) + 150px);
+    background:rgba(10,17,29,.5);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);
+    border-radius:16px;padding:14px 16px;min-width:128px;color:#fff;transition:.2s}
+  .gauge.inrange{background:rgba(47,125,91,.42);border-color:rgba(120,230,170,.5)}
+  .gauge .lab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.72;font-weight:700}
+  .gauge .val{font-size:46px;font-weight:600;line-height:1;margin-top:4px;font-family:"Fraunces",serif}
+  .gauge .val sup{font-size:18px;vertical-align:super;opacity:.7;margin-left:1px}
+  .gauge .sub{font-size:11px;opacity:.8;margin-top:5px}
+  .gauge .peak{color:#ffd9c4}
+
+  /* rep counter pill */
+  .reps{position:absolute;z-index:5;right:16px;bottom:calc(env(safe-area-inset-bottom) + 150px);
+    background:rgba(10,17,29,.5);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);
+    border-radius:16px;padding:14px 16px;color:#fff;text-align:center;min-width:96px}
+  .reps .lab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.72;font-weight:700}
+  .reps .val{font-size:46px;font-weight:600;line-height:1;margin-top:4px;font-family:"Fraunces",serif}
+  .reps .val small{font-size:18px;opacity:.55}
+
+  /* coaching strip */
+  .coach{position:absolute;z-index:5;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom) + 18px);
+    background:rgba(255,255,255,.96);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);
+    display:flex;align-items:center;gap:12px;min-height:62px}
+  .coach .dot{width:10px;height:10px;border-radius:50%;background:var(--warn);flex:0 0 auto;
+    box-shadow:0 0 0 0 rgba(192,144,42,.4);animation:pulse 1.6s infinite}
+  .coach.ok .dot{background:var(--go);box-shadow:0 0 0 0 rgba(47,125,91,.4)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(192,144,42,.35)}70%{box-shadow:0 0 0 9px rgba(192,144,42,0)}100%{box-shadow:0 0 0 0 rgba(192,144,42,0)}}
+  .coach .msg{font-size:13.5px;line-height:1.35;font-weight:500;color:var(--ink)}
+  .coach .msg b{font-weight:700}
+
+  /* target band on the side */
+  .target{position:absolute;z-index:4;top:50%;right:14px;transform:translateY(-50%);
+    width:8px;height:200px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}
+  .target .band{position:absolute;left:0;right:0;background:rgba(47,125,91,.55);border-top:1px solid #7ee6aa;border-bottom:1px solid #7ee6aa}
+  .target .needle{position:absolute;left:-3px;right:-3px;height:3px;background:var(--pulse);border-radius:2px;transition:.12s}
+
+  /* loading / permission */
+  .veil{position:absolute;inset:0;z-index:8;background:var(--ink);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:30px;text-align:center;gap:8px}
+  .veil.hide{display:none}
+  .veil .spin{width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.18);
+    border-top-color:var(--pulse);animation:spin 1s linear infinite;margin-bottom:14px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .veil h3{color:#fff;font-family:"Fraunces",serif;font-size:20px;margin:0;font-weight:600}
+  .veil p{color:rgba(255,255,255,.7);font-size:13.5px;margin:4px 0 0;max-width:30ch;line-height:1.45}
+  .veil button{margin-top:18px;background:var(--pulse);color:#fff;border:none;font-family:inherit;
+    font-size:15px;font-weight:650;padding:14px 28px;border-radius:13px;cursor:pointer}
+  .veil .small{font-size:11.5px;opacity:.55;margin-top:14px}
+
+  /* instructions sheet (pre-roll) */
+  .brief{position:absolute;z-index:7;inset:auto 0 0 0;background:var(--bone);border-radius:22px 22px 0 0;
+    padding:22px 20px calc(env(safe-area-inset-bottom) + 20px);box-shadow:0 -10px 40px -10px rgba(0,0,0,.5);
+    transform:translateY(100%);transition:transform .3s ease}
+  .brief.up{transform:none}
+  .brief .grip{width:38px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 16px}
+  .brief h3{margin:0 0 4px;font-family:"Fraunces",serif;font-size:21px;font-weight:600}
+  .brief .meta{font-size:12.5px;color:var(--pulse-deep);font-weight:600;margin-bottom:14px}
+  .brief ol{margin:0 0 18px;padding-left:20px;color:var(--ink)}
+  .brief ol li{font-size:13.5px;line-height:1.55;margin-bottom:7px}
+  .brief .start{width:100%;background:var(--ink);color:var(--bone);border:none;font-family:inherit;
+    font-size:16px;font-weight:650;padding:16px;border-radius:14px;cursor:pointer}
+  .brief .start:active{transform:scale(.99)}
+
+  /* done toast */
+  .done{position:absolute;z-index:9;inset:0;background:rgba(14,23,38,.9);display:none;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:30px;gap:6px}
+  .done.show{display:flex}
+  .done .ring{width:88px;height:88px;border-radius:50%;border:4px solid var(--go);display:grid;place-items:center;margin-bottom:8px}
+  .done .ring svg{width:42px;height:42px;stroke:var(--go);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .done h2{color:#fff;font-family:"Fraunces",serif;font-size:26px;margin:0;font-weight:600}
+  .done p{color:rgba(255,255,255,.75);font-size:14px;margin:2px 0 0}
+  .done .stat{color:#fff;font-size:14px;margin-top:12px;opacity:.9}
+  .done .stat b{color:#f0a07f;font-size:18px}
+  .done button{margin-top:22px;background:var(--pulse);color:#fff;border:none;font-family:inherit;
+    font-size:15px;font-weight:650;padding:14px 30px;border-radius:13px;cursor:pointer}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===================== HOME ===================== -->
+  <main class="home" id="home">
+    <div class="brandbar">
+      <div class="mark"></div>
+      <div><b>Knee Recovery</b><span>Total knee replacement · guided rehab</span></div>
+    </div>
+
+    <section class="hero">
+      <h1 class="display">Move with<br><em>confidence.</em></h1>
+      <p>Your camera watches your form and counts every rep — so each session works your new knee exactly as your team intended.</p>
+    </section>
+
+    <section class="phasepick">
+      <span class="eyebrow">Where are you in recovery?</span>
+      <div class="seg" id="seg" role="group" aria-label="Recovery phase">
+        <button data-phase="1" aria-pressed="true">Week 0–1</button>
+        <button data-phase="2" aria-pressed="false">Week 1–4</button>
+        <button data-phase="3" aria-pressed="false">Week 4–8</button>
+        <button data-phase="4" aria-pressed="false">Week 8+</button>
+      </div>
+    </section>
+
+    <section class="list" id="list"><!-- exercises injected --></section>
+
+    <div class="safety">
+      <b>Listen to your knee.</b> Mild discomfort is normal; sharp pain is not. Stop and contact your surgeon if you notice fever, calf pain, spreading numbness, or wound drainage. This guide supports — it doesn't replace — your physiotherapist.
+    </div>
+  </main>
+
+  <!-- ===================== EXERCISE OVERLAY ===================== -->
+  <section class="ex" id="ex">
+    <div class="stage">
+      <video id="vid" playsinline muted></video>
+      <canvas class="cv" id="cv"></canvas>
+
+      <div class="exhead">
+        <button class="back" id="back" aria-label="Close exercise">‹</button>
+        <div class="t"><span class="eyebrow" id="exPhase">Phase I</span><h2 id="exTitle">Exercise</h2></div>
+      </div>
+
+      <div class="target" id="targetUI" style="display:none">
+        <div class="band" id="band"></div>
+        <div class="needle" id="needle" style="bottom:0"></div>
+      </div>
+
+      <div class="gauge" id="gauge" style="display:none">
+        <div class="lab" id="gaugeLab">Knee bend</div>
+        <div class="val"><span class="num" id="angleVal">—</span><sup>°</sup></div>
+        <div class="sub peak">Best <span class="num" id="peakVal">—</span>°</div>
+      </div>
+
+      <div class="reps" id="repsUI" style="display:none">
+        <div class="lab">Reps</div>
+        <div class="val"><span class="num" id="repVal">0</span><small>/<span class="num" id="repGoal">10</span></small></div>
+      </div>
+
+      <div class="coach" id="coach">
+        <div class="dot"></div>
+        <div class="msg" id="coachMsg">Getting the camera ready…</div>
+      </div>
+
+      <!-- loading / permission veil -->
+      <div class="veil" id="veil">
+        <div class="spin" id="spin"></div>
+        <h3 id="veilTitle">Starting camera</h3>
+        <p id="veilMsg">Loading the on-device movement model. Nothing leaves your phone.</p>
+        <button id="veilBtn" style="display:none">Allow camera</button>
+        <div class="small">All processing happens locally in your browser.</div>
+      </div>
+
+      <!-- pre-roll instructions -->
+      <div class="brief" id="brief">
+        <div class="grip"></div>
+        <h3 id="briefTitle">Exercise</h3>
+        <div class="meta" id="briefMeta"></div>
+        <ol id="briefSteps"></ol>
+        <button class="start" id="briefStart">I'm in position — start</button>
+      </div>
+
+      <!-- completion -->
+      <div class="done" id="done">
+        <div class="ring"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h2>Set complete</h2>
+        <p id="doneSub">Nice work.</p>
+        <div class="stat" id="doneStat"></div>
+        <button id="doneBtn">Done</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script type="module">
+import {FilesetResolver, PoseLandmarker}
+  from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs";
+
+/* ---------------- Exercise library ----------------
+   trackType:
+     'flexion'  -> measures knee bend angle, rep = bend past target then return
+     'extension'-> measures how straight (180=full), success = hold near target
+     'slr'      -> measures hip flexion (leg lift) with knee kept straight
+     'hold'     -> timed isometric / position hold, no rep counting
+   side auto-detected from whichever leg is more visible.
+--------------------------------------------------- */
+const LIB = {
+  1:[
+    {id:'quadset', icon:'flex', title:'Quad sets', tag:'Hold', trackType:'extension',
+      blurb:'Wake up the thigh muscle and press the knee flat.',
+      goal:160, holdSec:5, reps:10, gaugeLab:'Knee straightness',
+      steps:['Sit or lie with your operated leg out straight.','Tighten the thigh muscle to press the back of the knee down toward the bed.','Hold while the bar fills, then relax.','Aim for a strong, steady squeeze each time.']},
+    {id:'heelslide', icon:'slide', title:'Heel slides', tag:'ROM', trackType:'flexion',
+      blurb:'Gently rebuild your bend by sliding the heel toward you.',
+      goal:110, reps:10, gaugeLab:'Knee bend',
+      steps:['Lie on your back, operated leg straight.','Slide your heel toward your buttock, bending the knee as far as is comfortable.','Slide back out to straight to complete one rep.','Never push through sharp pain — the bar shows your best bend.']},
+    {id:'slr', icon:'lift', title:'Straight leg raise', tag:'Strength', trackType:'slr',
+      blurb:'Lift the whole leg with the knee locked straight.',
+      goal:35, reps:10, gaugeLab:'Leg lift',
+      steps:['Lie flat. Bend your good knee, foot on the bed.','Keep the operated knee fully straight and lift the leg ~30 cm.','Lower with control. Knee must stay locked — watch the coach.','If the knee bends, the rep won\'t count.']},
+  ],
+  2:[
+    {id:'heelslide2', icon:'slide', title:'Heel slides', tag:'ROM', trackType:'flexion',
+      blurb:'Progress your bend toward 90° and beyond.',
+      goal:120, reps:12, gaugeLab:'Knee bend',
+      steps:['Lie on your back, operated leg straight.','Slide the heel toward you, bending past 90° as tolerated.','Return to fully straight for one rep.','Breathe and ease into the stretch at end range.']},
+    {id:'sitext', icon:'flex', title:'Seated knee extension', tag:'Strength', trackType:'extension',
+      blurb:'Straighten the knee fully against gravity.',
+      goal:170, holdSec:3, reps:12, gaugeLab:'Knee straightness',
+      steps:['Sit tall on a firm chair, foot on the floor.','Straighten the operated knee until the leg is level.','Hold while the bar fills, then lower slowly.','Squeeze the thigh hard at the top.']},
+    {id:'slr2', icon:'lift', title:'Straight leg raise', tag:'Strength', trackType:'slr',
+      blurb:'Build quad strength — knee stays straight throughout.',
+      goal:40, reps:12, gaugeLab:'Leg lift',
+      steps:['Lie flat, good knee bent.','Lift the straight operated leg, pause at the top.','Lower slowly. Keep the knee locked the whole way.','Aim for smooth, controlled lifts.']},
+  ],
+  3:[
+    {id:'deepbend', icon:'slide', title:'Heel slide — deep bend', tag:'ROM', trackType:'flexion',
+      blurb:'Chase ≥110° while keeping full straightening.',
+      goal:115, reps:12, gaugeLab:'Knee bend',
+      steps:['Lie down, operated leg straight.','Pull the heel in firmly to maximise the bend.','Hold the deep bend a moment, then straighten fully.','The best-angle marker tracks your progress over weeks.']},
+    {id:'minisquat', icon:'squat', title:'Mini squat', tag:'Strength', trackType:'flexion',
+      blurb:'Controlled standing bend — hold a counter for support.',
+      goal:60, reps:12, gaugeLab:'Knee bend',
+      steps:['Stand sideways to the camera, holding a counter.','Bend both knees to a shallow squat (~60°).','Keep the knee tracking over the toes, not inward.','Stand tall to finish each rep.']},
+    {id:'stepup', icon:'lift', title:'Forward step-up', tag:'Function', trackType:'flexion',
+      blurb:'Step up onto a low step, driving through the operated leg.',
+      goal:70, reps:10, gaugeLab:'Knee bend',
+      steps:['Stand sideways to the camera at a low step.','Step up leading with the operated leg.','Control the movement — no wobble or knee collapse inward.','Step down slowly to reset.']},
+  ],
+  4:[
+    {id:'fullbend', icon:'slide', title:'Functional bend', tag:'ROM', trackType:'flexion',
+      blurb:'Maintain ≥120° for daily tasks.',
+      goal:120, reps:12, gaugeLab:'Knee bend',
+      steps:['Seated or lying, bend the knee as deeply as comfortable.','Aim for ≥120° — enough for stairs and sitting low.','Return to full straight each rep.','Stop short of sharp pain.']},
+    {id:'squat', icon:'squat', title:'Squat', tag:'Strength', trackType:'flexion',
+      blurb:'Deeper, controlled squats with even weight.',
+      goal:90, reps:12, gaugeLab:'Knee bend',
+      steps:['Stand sideways to the camera, feet hip-width.','Squat to around 90°, weight even on both legs.','Keep knees tracking over the toes.','Drive up through the heels to stand.']},
+    {id:'sls', icon:'lift', title:'Single-leg stance', tag:'Balance', trackType:'extension',
+      blurb:'Hold balance on the operated leg, knee soft and stable.',
+      goal:165, holdSec:10, reps:5, gaugeLab:'Stance hold',
+      steps:['Stand facing the camera near a counter for safety.','Lift the good foot and balance on the operated leg.','Keep the standing knee straight but not locked hard.','Hold steady while the bar fills.']},
+  ]
+};
+
+const ICONS={
+  flex:'<path d="M5 19V5M5 12h9a4 4 0 0 0 4-4"/>',
+  slide:'<path d="M4 17h7l5-9M4 17l3-3"/><circle cx="17" cy="6" r="2"/>',
+  lift:'<path d="M5 20V8M5 8l5 3 9-5"/><circle cx="5" cy="5" r="2"/>',
+  squat:'<path d="M8 4v6l-3 9M16 4v6l3 9M8 10h8"/>'
+};
+const PHASE_NAME={1:'Phase I · Week 0–1',2:'Phase II · Week 1–4',3:'Phase III · Week 4–8',4:'Phase IV · Week 8+'};
+
+/* ---------------- State ---------------- */
+let phase=1, current=null, landmarker=null, running=false, rafId=null;
+let lastVideoTime=-1;
+let peak=0, reps=0, repPhase='ready', holdStart=0, inRangeStart=0, completed=false;
+let smoothAngle=null;
+
+const $=id=>document.getElementById(id);
+
+/* ---------------- Home rendering ---------------- */
+function renderList(){
+  const list=$('list'); list.innerHTML='';
+  LIB[phase].forEach(ex=>{
+    const el=document.createElement('div');
+    el.className='card tracked';
+    el.innerHTML=`
+      <div class="ic"><svg viewBox="0 0 24 24">${ICONS[ex.icon]}</svg></div>
+      <div class="tx"><h3>${ex.title}</h3><p>${ex.blurb}</p></div>
+      <div class="tag">${ex.tag}</div>`;
+    el.onclick=()=>openExercise(ex);
+    list.appendChild(el);
+  });
+}
+$('seg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  [...$('seg').children].forEach(x=>x.setAttribute('aria-pressed','false'));
+  b.setAttribute('aria-pressed','true');
+  phase=+b.dataset.phase; renderList();
+});
+
+/* ---------------- Model load (once) ---------------- */
+async function ensureModel(){
+  if(landmarker)return;
+  const fileset=await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
+  landmarker=await PoseLandmarker.createFromOptions(fileset,{
+    baseOptions:{
+      modelAssetPath:"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task",
+      delegate:"GPU"
+    },
+    runningMode:"VIDEO",
+    numPoses:1,
+    minPoseDetectionConfidence:0.5,
+    minTrackingConfidence:0.5
+  });
+}
+
+/* ---------------- Open / brief ---------------- */
+function openExercise(ex){
+  current=ex; completed=false;
+  $('exTitle').textContent=ex.title;
+  $('exPhase').textContent=PHASE_NAME[phase].split('·')[0].trim();
+  $('briefTitle').textContent=ex.title;
+  $('briefMeta').textContent=`${PHASE_NAME[phase]} · ${ex.reps?ex.reps+' reps':'hold'}`;
+  $('briefSteps').innerHTML=ex.steps.map(s=>`<li>${s}</li>`).join('');
+  $('ex').classList.add('open');
+  $('done').classList.remove('show');
+  $('brief').classList.remove('up');
+  $('veil').classList.remove('hide');
+  $('veilBtn').style.display='none';
+  $('spin').style.display='block';
+  $('veilTitle').textContent='Starting camera';
+  $('veilMsg').textContent='Loading the on-device movement model. Nothing leaves your phone.';
+  startCamera();
+}
+
+$('back').onclick=closeExercise;
+function closeExercise(){
+  running=false; if(rafId)cancelAnimationFrame(rafId);
+  const v=$('vid'); if(v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}
+  $('ex').classList.remove('open');
+}
+
+/* ---------------- Camera + model ---------------- */
+async function startCamera(){
+  try{
+    await ensureModel();
+    let stream;
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
+    }catch{
+      stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    }
+    const v=$('vid'); v.srcObject=stream; await v.play();
+    $('veil').classList.add('hide');
+    $('brief').classList.add('up');   // show instructions over the live feed
+  }catch(err){
+    $('spin').style.display='none';
+    $('veilTitle').textContent='Camera needed';
+    $('veilMsg').textContent='This exercise uses your camera to track movement. Please allow access in your browser settings, then try again.';
+    $('veilBtn').style.display='inline-block';
+    $('veilBtn').onclick=()=>{$('veil').classList.remove('hide');startCamera();};
+  }
+}
+
+/* ---------------- Begin tracking ---------------- */
+$('briefStart').onclick=()=>{
+  $('brief').classList.remove('up');
+  resetSession();
+  $('gauge').style.display='block';
+  $('targetUI').style.display='block';
+  if(current.reps && current.trackType!=='hold') $('repsUI').style.display='block';
+  $('gaugeLab').textContent=current.gaugeLab;
+  $('repGoal').textContent=current.reps||'';
+  setupTargetBand();
+  running=true; loop();
+};
+
+function resetSession(){
+  peak=0;reps=0;repPhase='ready';holdStart=0;inRangeStart=0;completed=false;smoothAngle=null;
+  $('repVal').textContent='0'; $('peakVal').textContent='—'; $('angleVal').textContent='—';
+}
+
+/* target band geometry: map angle range to the vertical strip */
+let bandLo,bandHi,mapLo,mapHi;
+function setupTargetBand(){
+  const t=current.trackType;
+  if(t==='flexion'){ mapLo=0;mapHi=150; bandLo=current.goal; bandHi=150; }     // want to reach high bend
+  else if(t==='extension'){ mapLo=120;mapHi=180; bandLo=current.goal; bandHi=180; }
+  else if(t==='slr'){ mapLo=0;mapHi=70; bandLo=current.goal; bandHi=70; }
+  const band=$('band');
+  const top=100-((bandHi-mapLo)/(mapHi-mapLo))*100;
+  const bot=100-((bandLo-mapLo)/(mapHi-mapLo))*100;
+  band.style.top=top+'%'; band.style.bottom=(100-bot)+'%';
+}
+function updateNeedle(val){
+  let p=((val-mapLo)/(mapHi-mapLo)); p=Math.max(0,Math.min(1,p));
+  $('needle').style.bottom=(p*100)+'%';
+}
+
+/* ---------------- Geometry ---------------- */
+function angle(a,b,c){ // angle at b in degrees
+  const ab={x:a.x-b.x,y:a.y-b.y}, cb={x:c.x-b.x,y:c.y-b.y};
+  const dot=ab.x*cb.x+ab.y*cb.y;
+  const m=Math.hypot(ab.x,ab.y)*Math.hypot(cb.x,cb.y)||1e-6;
+  return Math.acos(Math.max(-1,Math.min(1,dot/m)))*180/Math.PI;
+}
+function vis(lm,i){return lm[i] && (lm[i].visibility===undefined||lm[i].visibility>0.4);}
+// Landmark indices: 23/24 hip, 25/26 knee, 27/28 ankle, 11/12 shoulder
+function pickSide(lm){
+  const r=(lm[24]?.visibility||0)+(lm[26]?.visibility||0)+(lm[28]?.visibility||0);
+  const l=(lm[23]?.visibility||0)+(lm[25]?.visibility||0)+(lm[27]?.visibility||0);
+  return r>=l?{hip:24,knee:26,ankle:28,sho:12}:{hip:23,knee:25,ankle:27,sho:11};
+}
+
+/* ---------------- Main loop ---------------- */
+const cv=$('cv'), ctx=cv.getContext('2d');
+function loop(){
+  if(!running)return;
+  const v=$('vid');
+  if(v.readyState>=2){
+    if(cv.width!==v.videoWidth){cv.width=v.videoWidth;cv.height=v.videoHeight;}
+    const now=performance.now();
+    if(v.currentTime!==lastVideoTime){
+      lastVideoTime=v.currentTime;
+      const res=landmarker.detectForVideo(v,now);
+      ctx.clearRect(0,0,cv.width,cv.height);
+      if(res.landmarks&&res.landmarks.length){
+        process(res.landmarks[0]);
+      }else{
+        coach(false,'Step back so your whole leg is in frame.');
+      }
+    }
+  }
+  rafId=requestAnimationFrame(loop);
+}
+
+function process(lm){
+  const s=pickSide(lm);
+  const okJoints=vis(lm,s.hip)&&vis(lm,s.knee)&&vis(lm,s.ankle);
+  drawSkeleton(lm,s,okJoints);
+  if(!okJoints){coach(false,'Make sure your hip, knee and ankle are all visible.');return;}
+
+  const kneeAngle=angle(lm[s.hip],lm[s.knee],lm[s.ankle]); // 180 = straight
+  const t=current.trackType;
+
+  if(t==='flexion'){
+    const bend=180-kneeAngle;                    // 0 straight … higher = more bend
+    handleMetric(bend,'bend');
+  }else if(t==='extension'){
+    handleMetric(kneeAngle,'straight');          // closer to 180 = straighter
+  }else if(t==='slr'){
+    // hip flexion = angle at hip between shoulder line and knee; approximate via thigh vs torso
+    const hipAngle=angle(lm[s.sho],lm[s.hip],lm[s.knee]); // 180 = leg in line with torso (flat)
+    const lift=180-hipAngle;                     // how far leg raised off the bed
+    const kneeStraight=kneeAngle>155;
+    handleSLR(lift,kneeStraight);
+  }
+}
+
+/* smoothing */
+function smooth(v){ smoothAngle = smoothAngle==null? v : smoothAngle*0.6+v*0.4; return smoothAngle; }
+
+function handleMetric(raw,kind){
+  const val=Math.round(smooth(raw));
+  $('angleVal').textContent=val;
+  if(val>peak){peak=val;$('peakVal').textContent=peak;}
+  updateNeedle(kind==='bend'?val: (kind==='straight'?val:val));
+  const inRange = val>=current.goal;
+
+  if(current.holdSec){ // hold-based (extension/quad set/stance)
+    if(inRange){
+      if(!holdStart)holdStart=performance.now();
+      const held=(performance.now()-holdStart)/1000;
+      coach(true,`Hold steady — <b>${held.toFixed(1)}s</b> / ${current.holdSec}s`);
+      if(held>=current.holdSec){ countRep(); holdStart=0; }
+    }else{
+      holdStart=0;
+      coach(false, kind==='straight'
+        ? 'Push the knee straighter to reach the green zone.'
+        : 'A little more — get into the green band.');
+    }
+  }else{ // rep-based flexion
+    if(inRange && repPhase==='ready'){
+      coach(true,`Great depth — now return to ${kind==='bend'?'straight':'start'}.`);
+      repPhase='returning';
+    }else if(repPhase==='returning' && val < current.goal*0.35){
+      countRep(); repPhase='ready';
+    }else if(repPhase==='ready'){
+      coach(false, kind==='bend'?'Slide the heel in to reach the green zone.':'Move into the green zone.');
+    }
+  }
+}
+
+function handleSLR(lift,kneeStraight){
+  const val=Math.round(smooth(lift));
+  $('angleVal').textContent=val;
+  if(val>peak){peak=val;$('peakVal').textContent=peak;}
+  updateNeedle(val);
+  if(!kneeStraight){ coach(false,'Keep the knee <b>locked straight</b> as you lift.'); return; }
+  const inRange=val>=current.goal;
+  if(inRange && repPhase==='ready'){ coach(true,'Good height — lower slowly.'); repPhase='returning'; }
+  else if(repPhase==='returning' && val<8){ countRep(); repPhase='ready'; }
+  else if(repPhase==='ready'){ coach(true,'Knee locked — lift the leg into the green zone.'); }
+}
+
+function countRep(){
+  reps++; $('repVal').textContent=reps;
+  navigator.vibrate&&navigator.vibrate(30);
+  if(current.reps && reps>=current.reps && !completed){ finish(); }
+}
+
+/* ---------------- Coaching strip ---------------- */
+function coach(ok,msg){
+  $('coachMsg').innerHTML=msg;
+  $('coach').classList.toggle('ok',!!ok);
+  $('gauge').classList.toggle('inrange',!!ok);
+}
+
+/* ---------------- Skeleton overlay ---------------- */
+const BONES=[[11,12],[11,23],[12,24],[23,24],[23,25],[25,27],[27,31],[24,26],[26,28],[28,32]];
+function drawSkeleton(lm,s,ok){
+  const W=cv.width,H=cv.height;
+  ctx.lineWidth=Math.max(3,W*0.006);
+  ctx.strokeStyle=ok?'rgba(232,100,47,.55)':'rgba(255,255,255,.32)';
+  BONES.forEach(([a,b])=>{
+    if(!lm[a]||!lm[b])return;
+    ctx.beginPath();ctx.moveTo(lm[a].x*W,lm[a].y*H);ctx.lineTo(lm[b].x*W,lm[b].y*H);ctx.stroke();
+  });
+  // highlight active joint
+  [s.hip,s.knee,s.ankle].forEach((i,idx)=>{
+    if(!lm[i])return;
+    ctx.beginPath();
+    ctx.arc(lm[i].x*W,lm[i].y*H, idx===1?W*0.018:W*0.012,0,7);
+    ctx.fillStyle= idx===1 ? (ok?'#e8642f':'#fff') : 'rgba(255,255,255,.85)';
+    ctx.fill();
+  });
+}
+
+/* ---------------- Finish ---------------- */
+function finish(){
+  completed=true; running=false; if(rafId)cancelAnimationFrame(rafId);
+  navigator.vibrate&&navigator.vibrate([40,60,40]);
+  $('doneSub').textContent=`${current.title} — ${reps} reps logged.`;
+  const unit=current.trackType==='flexion'?'bend':(current.trackType==='slr'?'lift':'straightness');
+  $('doneStat').innerHTML=`Best ${unit} this set <b>${peak}°</b>`;
+  $('done').classList.add('show');
+}
+$('doneBtn').onclick=()=>{ const v=$('vid'); if(v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;} $('ex').classList.remove('open'); };
+
+/* init */
+renderList();
+</script>
+</body>
+</html>
