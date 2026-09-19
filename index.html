@@ -749,6 +749,10 @@ const LIB = {
     { id: "mini_squat", icon: "squat", title: "Mini squat", tag: "Strength", kind: "reps", count: 12, aim: { kind: "bend", deg: 60 }, target: 60,
       blurb: "A shallow standing bend, holding a counter.",
       steps: ["Stand side-on to the camera, holding a counter or chair.", "Bend both knees to a shallow squat.", "Stand tall. That is one repetition."] },
+    // From Vivek's original page (legacy/vivek-tkr-rehab). Pending, with his aim carried over unreviewed. guide: false means no demonstration video exists yet.
+    { id: "forward_step_up", icon: "stand", title: "Forward step-up", tag: "Function", kind: "reps", count: 10, aim: { kind: "bend", deg: 70 }, target: 70, guide: false,
+      blurb: "Step up onto a low step, leading with the operated leg.",
+      steps: ["Stand side-on to the camera, facing a low step, with a rail or counter in reach.", "Step up, leading with the operated leg.", "Step back down slowly. That is one repetition."] },
   ],
   4: [
     { id: "sit_to_stand", icon: "stand", title: "Sit to stand", tag: "Function", kind: "reps", count: 10, aim: { kind: "bend", deg: 90 }, target: 90,
@@ -760,6 +764,10 @@ const LIB = {
     { id: "single_leg_stance", icon: "lift", title: "Single-leg balance", tag: "Hold", kind: "hold", hold: 10, rest: 5, count: 5, aim: { kind: "straight", deg: 15 }, target: 90,
       blurb: "Balance on the operated leg near a counter.",
       steps: ["Stand near a counter for safety, side-on to the camera.", "Lift the other foot and balance on the operated leg.", "Hold while the timer counts, then rest."] },
+    // From Vivek's original page (legacy/vivek-tkr-rehab). Pending, with his aim carried over unreviewed.
+    { id: "functional_bend", icon: "slide", title: "Functional bend", tag: "Bend", kind: "reps", count: 12, aim: { kind: "bend", deg: 120 }, target: 120, guide: false,
+      blurb: "Keep a deep bend for stairs and low chairs.",
+      steps: ["Sit or lie side-on to the camera with the operated leg straight.", "Bend the knee as far as is comfortable.", "Return to straight. That is one repetition.", "Stop short of sharp pain."] },
   ],
 };
 // Keep future exercises visible while restricting entry to the current exercise set.
@@ -849,7 +857,7 @@ let phase = 1;   // the week section the open exercise came from; written into t
 let renderedDay = todayKey();
 function currentPhase() { const d = daysPostOp($("opdate").value, new Date()); return d === null || d < 0 ? null : phaseForDay(d); }
 function exerciseDemoLink(ex) {
-  if (isExerciseAvailable(ex)) return "";
+  if (isExerciseAvailable(ex) || ex.guide === false) return "";
   return `<a class="exercise-demo" href="./exercise-guides/magnific/#${encodeURIComponent(ex.id)}" target="_blank" rel="noopener" aria-label="Watch demonstration: ${esc(ex.title)} (opens in a new tab)">Watch demonstration ↗</a>`;
 }
 

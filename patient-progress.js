@@ -25,7 +25,7 @@ export function comparableRecords(records, record, metric = 'bend') {
 }
 const bend = r => number(r.measurement?.p95_flexion_deg);
 const date = r => new Date(r.started_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-const name = r => ({heel_slide:'Heel slides',straight_leg_raise:'Straight leg raise',seated_extension:'Seated knee extension',standing_flexion:'Standing knee bend',quad_set:'Quad sets',mini_squat:'Mini squat',sit_to_stand:'Sit to stand',squat:'Squat',single_leg_stance:'Single-leg balance'}[r.exercise] || String(r.exercise || 'Exercise').replace(/_/g,' '));
+const name = r => ({heel_slide:'Heel slides',straight_leg_raise:'Straight leg raise',seated_extension:'Seated knee extension',standing_flexion:'Standing knee bend',quad_set:'Quad sets',mini_squat:'Mini squat',sit_to_stand:'Sit to stand',squat:'Squat',single_leg_stance:'Single-leg balance',forward_step_up:'Forward step-up',functional_bend:'Functional bend'}[r.exercise] || String(r.exercise || 'Exercise').replace(/_/g,' '));
 const sourceLabel = r => ({position_recognition:'Position recognition prototype',pose_gated_optical:'Camera count confirmed in the selected leg',patient_voice:'Your spoken count',knee_tracker:'Camera knee tracker',monitoring:'Camera movement counter',timer:'Timed holds'}[r.count_source || 'monitoring'] || 'Count unavailable');
 const duration = r => {const s=number(r.duration_s);return s === null ? 'Not recorded' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;};
 const display = n => n === null ? 'Not recorded' : Math.round(n).toLocaleString('en-GB');
