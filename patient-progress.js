@@ -16,7 +16,8 @@ export function recordedCount(record) {
   return count;
 }
 export function patientRecords(records, patient, operationDate) {
-  return records.filter(r => r && r.patient_id === patient && (r.operation_date || '') === (operationDate || '') && Number.isFinite(Date.parse(r.started_at)))
+  // A session the patient rejected stays in storage, marked, and is left out of every count, log and graph.
+  return records.filter(r => r && r.rejected !== true && r.patient_id === patient && (r.operation_date || '') === (operationDate || '') && Number.isFinite(Date.parse(r.started_at)))
     .sort((a,b) => Date.parse(a.started_at) - Date.parse(b.started_at));
 }
 export function comparableRecords(records, record, metric = 'bend') {

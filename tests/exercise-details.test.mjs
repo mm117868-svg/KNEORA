@@ -45,7 +45,7 @@ test('legacy target-zone hold is not passed off as a peak-position hold',()=>{
 });
 test('unavailable live results, visible zero degrees and spoken counts stay distinct',()=>{
  const r={exercise:'seated_extension',duration_s:0,count_source:'patient_voice',patient_count:{repetitions:3},measurement:{min_extension_deg:0}};
- const s=detailedExerciseSummary(r);assert.equal(s.liveCount,3);assert.equal(s.timings.sessionRate,null);const html=renderDetailedExerciseSummary(r);assert.match(html,/0°/);assert.match(html,/Not measured/);assert.ok(!html.includes('Infinity'));
+ const s=detailedExerciseSummary(r);assert.equal(s.liveCount,3);assert.equal(s.timings.sessionRate,null);const html=renderDetailedExerciseSummary(r);assert.match(html,/<strong>0°<\/strong>/,'a real zero is a result and is shown large');assert.doesNotMatch(html,/Not measured|Not recorded/,'what was not measured is left out, not listed');assert.ok(!html.includes('Infinity'));
 });
 
 function samples(exercise){return Array.from({length:80},(_,i)=>{const t=i/10,v=t<1?0:t<3?(t-1)/2:t<4?1:t<6?(6-t)/2:0;return {t,bend:exercise==='straight_leg_raise'?4+2*v:exercise==='seated_extension'?90-80*v:5+100*v,hipFlexion:exercise==='straight_leg_raise'?30*v:null,hipAngle:exercise==='straight_leg_raise'?180-30*v:null,valid:exercise==='straight_leg_raise',frameStatus:exercise==='straight_leg_raise'?'accepted':'partial'};});}
@@ -57,7 +57,7 @@ for(const exercise of ['straight_leg_raise','seated_extension','heel_slide'])tes
  const saved=JSON.parse(JSON.stringify(compactReport(result)));assert.deepEqual(saved.reps,result.reps);assert.ok(!('trace' in saved));
  const r={exercise,exercise_analysis:saved,duration_s:8};const html=renderBasicExerciseSummary(r);
  assert.match(html,/Full exercise breakdown/);assert.match(html,/Fastest repetition/);assert.match(html,/Timing for each repetition/);assert.match(html,/Maximum observed knee extension: bend remaining/);
- assert.ok(!html.includes('<details'));assert.ok(!html.includes('NaN'));assert.ok(!html.includes('undefined'));
+ assert.match(html,/<details class="exercise-more"><summary>All the numbers, for your physiotherapist<\/summary>/,'the long detail is folded away, the headline cards are not');assert.ok(html.indexOf('exercise-hero')<html.indexOf('<details'));assert.ok(!html.includes('NaN'));assert.ok(!html.includes('undefined'));
 });
 test('SLR peak hold stays measured even when the optional target is unreachable',()=>{
  const r=analyseExercise(samples('straight_leg_raise'),{exercise:'straight_leg_raise',start:0,duration:8,bendTolerance:10,targetLift:60});

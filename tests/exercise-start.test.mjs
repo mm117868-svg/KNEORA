@@ -15,8 +15,8 @@ const source = html.slice(html.indexOf('const HAND_HOLD_START_S'), html.indexOf(
    visible the model says the wrist is. */
 const pose = (raised=true,seen=.95) => { const lm=Array.from({length:33},()=>({x:.5,y:.5,visibility:.9}));
   lm[11]={x:.6,y:.3,visibility:.95}; lm[12]={x:.62,y:.3,visibility:.4}; lm[23]={x:.6,y:.6,visibility:.95}; lm[24]={x:.62,y:.6,visibility:.4};
-  lm[15]={x:.7,y:raised?.08:.62,visibility:seen}; lm[16]={x:.64,y:.62,visibility:.3}; return lm; };
-function previewHarness() {
+  lm[15]={x:.7,y:raised?.02:.62,visibility:seen}; lm[13]={x:.66,y:raised?.16:.46,visibility:.9}; lm[0]={x:.6,y:.2,visibility:.9}; lm[16]={x:.64,y:.62,visibility:.3}; return lm; };
+function previewHarness({armed = true} = {}) {
   const elements = new Map();
   const $ = id => {
     if (!elements.has(id)) elements.set(id, {hidden: true, style: {}, innerHTML: '', textContent: '', classList: {add(){}, remove(){}}, listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; }});
@@ -30,6 +30,7 @@ function previewHarness() {
     landmarker: {detectForVideo(){detects++;return {landmarks:landmarks?[landmarks]:[]};}},
     startSession(){starts++; context.running = true;}});
   vm.runInContext(source, context);
+  if (armed) vm.runInContext('startArmed = true', context);   // as after a second with the hand seen down
   return {$, context, get starts(){return starts;}, get spoken(){return spoken;}, get stopped(){return stopped;}, get detects(){return detects;},
     frame(t, {fresh = true, sample = landmarks} = {}) { now = t; landmarks = sample; if (fresh) context.video.currentTime += .04; context.previewStep(); },
     run(from, to, options) {for (let t = from; t <= to; t += 40) this.frame(t, options);},
@@ -38,6 +39,10 @@ function previewHarness() {
 test('a raised hand starts the five-second countdown',()=>{
  const h=previewHarness();h.run(0,1960);assert.equal(h.counting,false);h.run(2000,2280);assert.equal(h.counting,true);assert.equal(h.spoken,1);
  const begin=vm.runInContext('countdownStart',h.context);h.run(2320,begin+4960,{sample:pose(false)});assert.equal(h.starts,0);h.frame(begin+5000,{sample:pose(false)});assert.equal(h.starts,1);
+});
+test('an arm already up when the patient comes into view starts nothing until it has been seen down for a second', () => {
+ const h=previewHarness({armed:false});h.run(0,6000);assert.equal(h.counting,false,'six seconds of raised arm, never seen lowered');
+ h.run(6040,7400,{sample:pose(false)});h.run(7440,9800,{sample:pose(true)});assert.equal(h.counting,true);
 });
 test('a lowered hand, nobody in view and a wrist the model is unsure of cannot start',()=>{
  for(const sample of [pose(false),null,pose(true,.2)]){const h=previewHarness();h.run(0,8000,{sample});assert.equal(h.starts,0);assert.equal(h.counting,false);}
@@ -63,10 +68,11 @@ test('with no pose model a raised hand cannot start, and the Start button and sp
 test('what counts as a raised hand: above its own shoulder by half the trunk, sitting or lying, either hand',()=>{
  assert.equal(raisedWrist(pose(true),1280,720),15);assert.equal(raisedWrist(pose(false),1280,720),null);
  const level=pose(true);level[15].y=.2;assert.equal(raisedWrist(level,1280,720),null,'a hand just above the shoulder is not raised');
- const right=pose(false);right[12].visibility=.95;right[24].visibility=.95;right[16]={x:.5,y:.05,visibility:.9};assert.equal(raisedWrist(right,1280,720),16);
+ const face=pose(true);face[15].y=.19;face[13].y=.4;assert.equal(raisedWrist(face,1280,720),null,'a hand at the face with the elbow down is not a signal');
+ const right=pose(false);right[12].visibility=.95;right[24].visibility=.95;right[16]={x:.5,y:.02,visibility:.9};right[14]={x:.55,y:.15,visibility:.9};assert.equal(raisedWrist(right,1280,720),16);
  // lying on the back: trunk along the picture, arm pointing at the ceiling; then the arm resting beside the body
- const lying=pose(false);lying[11]={x:.3,y:.7,visibility:.9};lying[12]={x:.31,y:.68,visibility:.4};lying[23]={x:.55,y:.72,visibility:.9};lying[15]={x:.3,y:.35,visibility:.9};assert.equal(raisedWrist(lying,1280,720),15);
- lying[15]={x:.5,y:.74,visibility:.9};assert.equal(raisedWrist(lying,1280,720),null);
+ const lying=pose(false);lying[11]={x:.3,y:.7,visibility:.9};lying[12]={x:.31,y:.68,visibility:.4};lying[23]={x:.55,y:.72,visibility:.9};lying[15]={x:.3,y:.3,visibility:.9};lying[13]={x:.3,y:.5,visibility:.9};lying[0]={x:.2,y:.68,visibility:.9};assert.equal(raisedWrist(lying,1280,720),15);
+ lying[15]={x:.5,y:.74,visibility:.9};lying[13]={x:.4,y:.73,visibility:.9};assert.equal(raisedWrist(lying,1280,720),null);
  assert.equal(raisedHandState(null,1280,720),'absent');assert.equal(raisedHandState(undefined,1280,720),'unknown');assert.equal(raisedHandState(pose(false),1280,720),'other');assert.equal(raisedHandState(pose(true),1280,720),'open');
 });
 test('holding the starting palm cannot finish until it has been released, then held again',()=>{

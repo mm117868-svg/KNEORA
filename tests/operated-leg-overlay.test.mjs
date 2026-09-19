@@ -24,21 +24,21 @@ Object.assign(body[23], {x: .30, y: .50}); Object.assign(body[25], {x: .45, y: .
 Object.assign(body[24], {x: .32, y: .60}); Object.assign(body[26], {x: .47, y: .70}); Object.assign(body[28], {x: .62, y: .80});   // right hip, knee, ankle
 const px = i => [body[i].x * W, body[i].y * H];
 /* The same body with the left hand held well above the left shoulder. */
-const raised = body.map(p => ({...p})); Object.assign(raised[11], {x: .5, y: .3}); Object.assign(raised[23], {x: .3, y: .5}); Object.assign(raised[15], {x: .55, y: .05});
+const raised = body.map(p => ({...p})); Object.assign(raised[11], {x: .5, y: .4}); Object.assign(raised[23], {x: .3, y: .5}); Object.assign(raised[15], {x: .55, y: .02}); Object.assign(raised[13], {x: .53, y: .15}); Object.assign(raised[0], {x: .5, y: .3});
 
 function run(side, {found = true, palm = false, frames = 6} = {}) {
   const marks = [], elements = new Map();
   const ctx = {clearRect() { marks.length = 0; }, beginPath() {}, stroke() {}, fill() {}, save() {}, restore() {}, closePath() {}, setLineDash() {}, strokeText() {},
     fillText(text, x, y) { marks.push([x, y]); }, moveTo(x, y) { marks.push([x, y]); }, lineTo(x, y) { marks.push([x, y]); }, arc(x, y) { marks.push([x, y]); }};
   const $ = id => { if (!elements.has(id)) elements.set(id, {hidden: true, style: {}, textContent: '', innerHTML: '', className: '', value: id === 'side' ? side : '', checked: id === 'showangle', classList: {add() {}, remove() {}, toggle() {}}, addEventListener() {}}); return elements.get(id); };
-  let now = 1000;
+  let now = 1000, handUp = false;
   const context = vm.createContext({$, ctx, canvas: {width: W, height: H}, video: {readyState: 4, currentTime: 0, videoWidth: W}, stream: {}, running: false, current: {kind: 'reps'},
     pickSide, JointFilter, FluidOutline, PictureClock, drawOutline, trendCI95, kneeFlexionDeg, inspectExerciseLeg, raisedHandState, RAISED_HAND, drawRaisedHand() {}, pct: d => d, performance: {now: () => now},
     angleDisplay: {shown: NaN, sample: [], sampleTimes: [], update(a) { this.shown = a; this.sample = [a - 1, a + 1, a - 1, a + 1]; this.sampleTimes = [0, 33, 66, 100]; return a; }}, appVoice: {play() { return true; }, stop() {}}, refreshHint() {}, setExerciseSidebar() {}, startSession() {},
-    requestAnimationFrame() { return 1; }, cancelAnimationFrame() {}, landmarker: {detectForVideo: () => ({landmarks: found ? [palm ? raised : body] : []})},
+    requestAnimationFrame() { return 1; }, cancelAnimationFrame() {}, landmarker: {detectForVideo: () => ({landmarks: found ? [handUp ? raised : body] : []})},
     requestAnimationFrameUnused: null});
   vm.runInContext(source, context);
-  for (let i = 0; i < frames; i++) { now += 40; context.video.currentTime += .04; context.previewStep(); }   // the pose runs on every third frame
+  for (let i = 0; i < frames + (palm ? 30 : 0); i++) { now += 40; context.video.currentTime += .04; handUp = palm && i >= 30; context.previewStep(); }   // with a signal: a second with the hand down, then the hand up   // the pose runs on every third frame
   return {marks, angle: elements.get('angle')?.textContent, counting: vm.runInContext('countdownStart !== null', context)};
 }
 

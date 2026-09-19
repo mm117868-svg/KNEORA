@@ -31,6 +31,18 @@ test('it is shown for the straight leg raise only, and the other-knee advice onl
 });
 test('repetitions come from the joint angle: the knee, or the hip for a straight leg raise', () => {
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  assert.match(html, /repCounter\.update\(current\.id === "straight_leg_raise" \? \(slrView\(lastAll/); assert.match(html, /"angle_hysteresis"/);
+  assert.match(html, /repCounter\.update\(repSignal\.read\(lastAll, canvas\.width, canvas\.height\), t\)/); assert.match(html, /"angle_hysteresis"/);
   assert.doesNotMatch(html, /positionCounter\.update|readPositionFrame\(video|monitor\.update\(video/);
+});
+
+import {RepSignal} from '../rep-signal.mjs';
+import {EXERCISE_PROFILES, exerciseProfile} from '../exercise-profiles.mjs';
+test('every live exercise has its own profile, and the straight leg raise is watched by how far the leg is lifted', () => {
+  for (const id of ['heel_slide', 'seated_extension', 'straight_leg_raise']) assert.ok(EXERCISE_PROFILES[id].tracks && EXERCISE_PROFILES[id].holdAt);
+  assert.equal(new Set(['heel_slide', 'seated_extension', 'straight_leg_raise'].map(id => JSON.stringify([EXERCISE_PROFILES[id].signal, EXERCISE_PROFILES[id].direction]))).size, 3, 'no two of the three are counted the same way');
+  assert.equal(exerciseProfile('something_new').direction, 'either');
+  for (const raise of [0, 20, 45]) { const lift = new RepSignal('straight_leg_raise', 'left').read(lying(raise, 80), W, H); assert.ok(Math.abs(lift - raise) < 1e-6, `lifted ${raise}: read ${lift}`); }
+  const mirrored = lying(30, 80).map(p => ({...p, x: 1 - p.x})); assert.ok(Math.abs(new RepSignal('straight_leg_raise', 'left').read(mirrored, W, H) - 30) < 1e-6, 'the same whichever way the patient faces');
+  const unsure = lying(30, 80); unsure[27].visibility = .3; assert.ok(Number.isNaN(new RepSignal('straight_leg_raise', 'left').read(unsure, W, H)), 'never read from a joint the model is unsure of');
+  assert.ok(Math.abs(new RepSignal('seated_extension', 'left').read(lying(0, 80), W, H)) < 1e-6);
 });

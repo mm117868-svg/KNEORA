@@ -36,6 +36,17 @@ export function exercisePerformanceMetrics(record){
  };
 }
 const degrees=n=>numeric(n)===null?'Not measured':`About ${Math.round(n*10)/10}°`;
+/* The one figure that matters most for each exercise, from the focused PubMed review (EXERCISE_EVIDENCE.md), read from
+   what the live session measured so it is there as soon as the session ends. value is null when it was not measured. */
+export function keyOutcome(record){
+ const live=record.measurement||{},n=v=>validAngle(v),lift=numeric(record.angle_count?.median_excursion_deg);
+ const pick={
+  straight_leg_raise:{label:'Knee kept straight',value:n(live.median_flexion_deg),sub:'typical knee bend while lifting; lower is straighter'+(lift!==null?` · typical hip lift about ${Math.round(lift)}°`:''),source:'qab'},
+  seated_extension:{label:'Straightest knee',value:n(live.p05_extension_deg)??n(live.min_extension_deg),sub:'bend remaining at your straightest; 0° is straight',source:'guideline'},
+  heel_slide:{label:'Furthest bend',value:n(live.p95_flexion_deg)??n(live.peak_flexion_deg),sub:'typical furthest knee bend in this session',source:'flexion'}
+ }[record.exercise]||{label:'Knee bend',value:n(live.p95_flexion_deg),sub:'typical furthest knee bend',source:null};
+ return {...pick,link:pick.source?{name:EXERCISE_SOURCES[pick.source].name,url:EXERCISE_SOURCES[pick.source].url}:null};
+}
 export function renderExerciseEvidenceSummary(record){
  const info=EXERCISE_EVIDENCE[record.exercise];if(!info)return '';
  const p=exercisePerformanceMetrics(record),a=record.exercise_analysis?.exercise===record.exercise?record.exercise_analysis:null;

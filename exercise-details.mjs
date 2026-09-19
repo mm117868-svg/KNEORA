@@ -1,4 +1,4 @@
-import {renderExerciseEvidenceSummary} from './exercise-evidence.mjs?v=cards-1';
+import {renderExerciseEvidenceSummary,keyOutcome} from './exercise-evidence.mjs?v=cards-1';
 import {exerciseContextFacts} from './exercise-context.mjs?v=pubmed-1';
 import {distribution} from './video-analysis/statistics.mjs';
 import {recordedCount} from './patient-progress.js?v=cards-1';
@@ -86,11 +86,15 @@ function table(label,headers,rows) {
   return `<div class="exercise-table-scroll" tabindex="0" role="region" aria-label="${esc(label)}, scroll horizontally for all columns"><table><caption>${esc(label)}</caption><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((value,i)=>i===0?`<th scope="row">${esc(value)}</th>`:`<td>${esc(value)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 /* The three numbers a patient looks for first, large, at the top. */
-const hero=(record,s)=>{const live=record.measurement||{},done=s.count!==null&&s.prescribed?Math.min(1,s.count/s.prescribed):null,best=finite(live.p95_flexion_deg)?live.p95_flexion_deg:live.peak_flexion_deg;
- const card=(label,value,sub,extra='')=>`<div class="exercise-hero-card${value===null?' is-empty':''}"><span>${esc(label)}</span><strong>${value===null?'–':esc(value)}</strong><small>${esc(sub)}</small>${extra}</div>`;
- return `<div class="exercise-hero">${card('Repetitions',s.count===null?null:String(s.count),s.prescribed?`of ${s.prescribed} prescribed`:'counted',done===null?'':`<i class="exercise-hero-bar" aria-hidden="true"><b style="width:${Math.round(done*100)}%"></b></i>`)}${card('Time',finite(s.total)?`${Math.floor(s.total/60)}:${String(Math.round(s.total%60)).padStart(2,'0')}`:null,'minutes and seconds')}${card('Knee bend',finite(best)?`${Math.round(best)}°`:null,'typical furthest bend, camera estimate')}</div>`;};
+const hero=(record,s)=>{const done=s.count!==null&&s.prescribed?Math.min(1,s.count/s.prescribed):null,key=keyOutcome(record);
+ const card=(label,value,sub,extra='')=>`<div class="exercise-hero-card${value===null?' is-empty':''}${label===key.label?' is-key':''}"><span>${esc(label)}</span><strong>${value===null?'–':esc(value)}</strong><small>${esc(sub)}</small>${extra}</div>`;
+ return `<div class="exercise-hero">${card('Repetitions',s.count===null?null:String(s.count),s.prescribed?`of ${s.prescribed} prescribed`:'counted',done===null?'':`<i class="exercise-hero-bar" aria-hidden="true"><b style="width:${Math.round(done*100)}%"></b></i>`)}${card('Time',finite(s.total)?`${Math.floor(s.total/60)}:${String(Math.round(s.total%60)).padStart(2,'0')}`:null,'minutes and seconds')}${card(key.label,key.value===null?null:`${Math.round(key.value)}°`,`${key.sub}. Camera estimate.`,key.link?`<a class="exercise-hero-source" href="${esc(key.link.url)}" target="_blank" rel="noopener">Why this matters: ${esc(key.link.name)} (PubMed)</a>`:'')}</div>`;};
 const EMPTY=/^(Not measured|Not recorded|Not available|Not analysed)/;
-const facts=rows=>`<dl class="exercise-detail-facts">${rows.map(([label,value])=>`<div${EMPTY.test(String(value))?' class="is-empty"':''}><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`;
+/* Only what was measured is shown. A row with nothing in it is left out, and a heading with no rows under it is left
+   out with its note, so the page is never a wall of "Not measured". */
+const measured=rows=>rows.filter(([,value])=>!EMPTY.test(String(value)));
+const facts=rows=>{const kept=measured(rows);return kept.length?`<dl class="exercise-detail-facts">${kept.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`:'';};
+const block=(title,rows,note='')=>{const body=facts(rows);return body?`<h4>${esc(title)}</h4>${body}${note?`<p>${note}</p>`:''}`:'';};
 const extremeWords=value=>!value?'Not measured':`${seconds(value.value)} · ${value.repetitions.length===1?'repetition':'repetitions'} ${value.repetitions.join(', ')}`;
 
 export function renderDetailedExerciseSummary(record) {
@@ -98,49 +102,49 @@ export function renderDetailedExerciseSummary(record) {
   const sessionRows=[['Time spent on this exercise',seconds(s.total)],['Prescribed repetitions',number(s.prescribed)],
     ['Live recorded count',number(s.liveCount)],['Complete repetitions seen in the video',number(s.observedCount)],
     ['Repetitions compared with the prescribed count',s.count!==null&&s.prescribed?`${s.count} of ${s.prescribed}`:'Not measured']];
-  if(s.report)sessionRows.push(['Video duration',seconds(s.config.duration)],['Part of the video analysed',seconds(s.analysed)],
-    ['Analysis starts at',seconds(s.config.start)],['Interrupted or incomplete movements excluded',number(s.incomplete)],
-    ['Time in complete repetitions',seconds(t.cycleTime)],['Total measured hold time',seconds(t.holdTime)],
+  const technicalRows=s.report?[['Video duration',seconds(s.config.duration)],['Part of the video analysed',seconds(s.analysed)],['Analysis starts at',seconds(s.config.start)],['Interrupted or incomplete movements excluded',number(s.incomplete)]]:[];
+  if(s.report)sessionRows.push(['Time in complete repetitions',seconds(t.cycleTime)],['Total measured hold time',seconds(t.holdTime)],
     [`Total ${v?.outward.toLowerCase()||'outward movement'} time`,seconds(t.outwardTime)],[`Total ${v?.returning.toLowerCase()||'return movement'} time`,seconds(t.returnTime)],
     ['Time outside complete repetitions',seconds(t.otherTime)],['Time between complete repetitions',seconds(t.gapTime)],
     ['Cadence during complete repetitions',number(t.cadence,' reps/min')]);
   // A partial video count must not be divided by the whole session duration.
   if(!s.report || (finite(s.analysed)&&finite(s.total)&&Math.abs(s.analysed-s.total)<=1&&(s.config.start??0)===0))sessionRows.push(['Repetitions per minute over the whole session',number(t.sessionRate,' reps/min')]);
-  let html=`<section class="exercise-details" aria-label="Full exercise breakdown"><h3>Full exercise breakdown</h3><p>All available measurements for this session. “Not measured” means the recording did not provide that information.</p>${hero(record,s)}${renderExerciseEvidenceSummary(record)}<h4>Repetitions and time</h4>${facts(sessionRows)}`;
+  let html=`<section class="exercise-details" aria-label="Full exercise breakdown"><h3>Your session</h3>${hero(record,s)}${renderExerciseEvidenceSummary(record)}${block('Repetitions and time',sessionRows)}`;
   if(s.config.smallMovement||record.pose_validation?.small_movement)html+='<p>Small movement mode: repetitions are observed movement attempts. The angles are shown separately and do not establish a full-range exercise or clinical test result.</p>';
-  html+=`<h4>Help, resistance and symptoms during the exercise</h4>${facts(exerciseContextFacts(record))}<p>These details are reported by the patient, not detected by the camera. Compare sessions using the same help, load and setup. Band type and tension are not quantified here.</p>`;
+  html+=block('Help, resistance and symptoms during the exercise',exerciseContextFacts(record),'Reported by you, not detected by the camera. Compare sessions using the same help, load and setup.');
   const symptoms=[];
   if(finite(record.patient?.pain_0_10)&&record.patient.pain_0_10>=0&&record.patient.pain_0_10<=10)symptoms.push(['Pain after exercise',`${record.patient.pain_0_10}/10`]);
   if(finite(record.patient?.difficulty_1_5)&&record.patient.difficulty_1_5>=1&&record.patient.difficulty_1_5<=5)symptoms.push(['Reported effort',`${record.patient.difficulty_1_5}/5`]);
-  if(symptoms.length)html+=`<h4>How the exercise felt</h4>${facts(symptoms)}`;
+  html+=block('How the exercise felt',symptoms);
   if(record.patient?.note)html+=`<p>Your note: ${esc(record.patient.note)}</p>`;
   if(!s.report){
     const live=record.measurement||{};
-    html+=`<h4>Live knee measurements</h4>${facts([
+    html+=block('Live knee measurements',[
       ['Greatest knee bend (maximum flexion)',number(live.peak_flexion_deg,'°')],['Straightest knee (bend remaining)',number(live.min_extension_deg,'°')],
       ['Average knee bend',number(live.mean_flexion_deg,'°')],['Median knee bend',number(live.median_flexion_deg,'°')],
       ['Typical upper bend (95th percentile)',number(live.p95_flexion_deg,'°')],['Typical lower bend (5th percentile)',number(live.p05_extension_deg,'°')],
-      ['Frames with a usable knee angle',number(live.frames_with_angle)],['Live frames sampled',number(live.frames_total)]
-    ])}<p>These are live camera observations. The automatic video analysis adds individual repetitions, hip angles, hold times and fastest and slowest timings when available.</p>`;
+      ['Pictures with a usable knee angle',finite(live.frames_with_angle)&&finite(live.frames_total)?`${live.frames_with_angle} of ${live.frames_total}`:'Not measured']
+    ],'Live camera estimates.');
     if(record.hold)html+=`<p>The hold count comes from the exercise timer. A timer does not confirm that a muscle contraction was held.</p>`;
     return html+'</section>';
   }
-  html+=`<p>Time outside complete repetitions can include pauses, incomplete movements and tracking gaps. It is not a measurement of rest. Whole-session rate includes this time; cadence describes the completed movement cycles. An opening movement without a visible starting position may be missed.</p>`;
+  /* Everything below is detail for a physiotherapist. It stays folded away until it is asked for. */
+  html+=`<details class="exercise-more"><summary>All the numbers, for your physiotherapist</summary>${block('About the recording',technicalRows,'Time outside complete repetitions can include pauses, incomplete movements and tracking gaps. It is not a measurement of rest.')}`;
   if(v){
-    html+=`<h4>Fastest, slowest and holds</h4>${facts([
+    html+=block('Fastest, slowest and holds',[
       ['Fastest repetition',extremeWords(t.fastest)],['Slowest repetition',extremeWords(t.slowest)],
       ['Shortest hold near the furthest position',extremeWords(t.shortestHold)],['Longest hold near the furthest position',extremeWords(t.longestHold)],
       ['Variation in repetition time (relative to the average)',number(t.cycleVariation,'%')]
-    ])}<p>Faster or longer is not automatically better. Use the pace and hold duration in your exercise plan. A zero-second hold means no sustained hold was detected in the sampled frames.</p>`;
+    ],'Faster or longer is not automatically better. Use the pace and hold duration in your exercise plan.');
     html+=statTable('Tempo and cadence',s.timing,'Average is the mean; median is the middle value. Variation (SD) describes how spread out the repetitions were and needs at least two measurements. Each repetition runs from its detected starting position to its return.');
     html+=`<p>The hold is the continuous time near the observed peak${s.rows.some(row=>finite(row.hold))?`, within about ${number(s.report.reps.find(rep=>rep.phaseTiming)?.phaseTiming?.bandDegrees??s.config.cycleSensitivity?.band??3,'°')}`:''}. It is an estimate from sampled images, not proof that the leg was completely still. Cadence during complete repetitions is 60 divided by the average cycle time; the table describes each repetition’s individual rate.</p>`;
   }
-  html+=`<h4>Joint angles throughout the analysed video</h4><p>Knee flexion means knee bend. Maximum observed extension is shown as the least bend remaining, with 0° meaning straight. These are observed exercise angles, not a separate test of maximum capacity. Averages include the visible time spent moving and pausing.</p>${facts([
+  html+=block('Joint angles throughout the analysed video',[
     ['Maximum knee flexion: greatest bend',number(m.maximumObservedBend??m.kneeBend?.maximum,'°')],
     ['Maximum observed knee extension: bend remaining',number(m.bestObservedStraightening??m.kneeBend?.minimum,'°')],
     ['Knee movement range across the video',number(m.kneeBend?.range,'°')],
     ['Starting reference: knee bend',number(s.report.baseline?.kneeBend,'°')]
-  ])}`;
+  ],'Knee flexion means knee bend; 0° means straight. Observed exercise angles, not a test of maximum capacity.');
   html+=table('Whole-video angle statistics',['Angle','Minimum','Maximum','Average','Median','Range','Variation (SD)','Typical lower (5%)','Typical upper (95%)','Minimum at','Maximum at','Usable samples'],s.videoAngles.map(({label,stats})=>[
     label,...['minimum','maximum','mean','median','range','standardDeviation','p05','p95'].map(key=>number(stats?.[key],'°')),seconds(stats?.minimumTime),seconds(stats?.peakTime),stats?`${number(stats.frames)} (${percent(stats.coverage)})`:'Not measured'
   ]));
@@ -161,13 +165,13 @@ export function renderDetailedExerciseSummary(record) {
       ]));
     }else html+='<p>No complete repetitions were measurable. Any available angles above are still shown; a missed movement is not scored as zero ability.</p>';
   }
-  html+=`<h4>How much the camera could measure</h4>${facts([
+  html+=block('How much the camera could measure',[
     ['Samples usable for this exercise',percent(s.coverage)],['Video images sampled',number(m.sampledFrames)],['Images with full knee and hip tracking',number(m.fullyTrackedFrames)],
     ['Partly usable images',number(m.partialFrames)],['Rejected images',number(m.rejectedFrames)],
     ['Average landmark visibility (not accuracy)',percent(m.visibility?.mean)],['Sampling rate',number(finite(m.sampledFrames)&&positive(s.analysed)?m.sampledFrames/s.analysed:null,' images/s')]
-  ])}`;
+  ]);
   const rejections=Object.entries(m.rejectionCounts||{}).filter(([,n])=>positive(n)!==null);
   if(rejections.length)html+=`<p>Reasons for missing measurements. One image can have more than one reason.</p>${facts(rejections.map(([reason,n])=>[reason.replaceAll('_',' ').replaceAll(':',': '),String(n)]))}`;
-  html+=`<p>Camera estimates cannot measure muscle force, pain, swelling, passive range or clinical extension lag. Pain and effort are included only when you report them. Angle estimates cannot distinguish hyperextension from knee bend. Tracking coverage is not a measure of clinical accuracy.</p></section>`;
+  html+=`<p>Camera estimates cannot measure muscle force, pain, swelling, passive range or clinical extension lag. Pain and effort are included only when you report them. Angle estimates cannot distinguish hyperextension from knee bend. Tracking coverage is not a measure of clinical accuracy.</p></details></section>`;
   return html;
 }

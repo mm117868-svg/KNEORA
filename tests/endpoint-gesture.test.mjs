@@ -35,7 +35,7 @@ function setup(t,{missingKnee=false,handFailure=false}={}){
  for(const [id,x,y] of [[23,.2,.5],[25,.5,.5],[27,.5,.8],[24,.2,.4],[26,.4,.4],[28,.6,.4]])landmarks[id]={x,y,visibility:.99,presence:.99};
  // The right arm: shoulder, hip and a wrist that is either held high or resting by the hip.
  landmarks[12]={x:.25,y:.2,visibility:.95};landmarks[11]={x:.26,y:.2,visibility:.4};
- const body=()=>{const lm=landmarks.map(p=>({...p}));lm[16]={x:.3,y:hand==='open'?.02:.42,visibility:hand==='absent'?0:.95};if(missingKnee)lm[25].visibility=lm[26].visibility=0;return lm;};
+ const body=()=>{const lm=landmarks.map(p=>({...p}));lm[16]={x:.3,y:hand==='open'?.0:.42,visibility:hand==='absent'?0:.95};lm[14]={x:.28,y:hand==='open'?.1:.32,visibility:.9};if(missingKnee)lm[25].visibility=lm[26].visibility=0;return lm;};
  const camera=createEndpointCamera({video,canvas:{getContext:()=>ctx},onStatus:s=>status.push(s),onReady:r=>ready.push(r),onCaptureStart:s=>starts.push(s),onResult:r=>results.push(r),
   getStream:async()=>({getTracks:()=>[{stop:()=>stopped++}]}),
   modelLoader:async options=>{assert.equal(options.variant,'heavy');assert.equal(options.runningMode,'IMAGE');return {model:'TEST pose',landmarker:{setOptions:async()=>{},detect:()=>({landmarks:[body()]}),detectForVideo:()=>assert.fail('Endpoint pictures must use IMAGE detection'),close:()=>closed++}};},

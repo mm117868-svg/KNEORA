@@ -40,7 +40,7 @@
 .exercise-evidence-metrics dd p{font-weight:400}
 
 /* ---- Full breakdown: cards, large numbers first, gaps played down ---- */
-.exercise-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0 26px}
+.exercise-hero{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:14px;margin:18px 0 26px}
 .exercise-hero-card{background:var(--ink);color:#fff;border-radius:18px;padding:20px 22px;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:0 10px 30px rgba(26,25,24,.16)}
 .exercise-hero-card:first-child{background:linear-gradient(135deg,var(--brand),#d9661f)}
 .exercise-hero-card span{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
@@ -57,3 +57,8 @@
 .exercise-detail-facts>div.is-empty{background:transparent;border-style:dashed}
 .exercise-detail-facts>div.is-empty dd{font-size:13px;font-weight:600;color:var(--muted)}
 @media (max-width:640px){.exercise-hero{grid-template-columns:1fr}.exercise-detail-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.exercise-hero-card.is-key{background:linear-gradient(135deg,#1a1918,#3a2418);outline:2px solid var(--brand)}
+.exercise-hero-source{color:#f5c9a8;font-size:12px;margin-top:8px;text-decoration:underline}
+.exercise-more{margin-top:30px;border:1px solid var(--line);border-radius:14px;background:var(--bone);padding:4px 20px}
+.exercise-more>summary{cursor:pointer;font-weight:700;font-size:15px;padding:14px 0;list-style-position:inside}
+.exercise-more[open]>summary{border-bottom:1px solid var(--line);margin-bottom:6px}

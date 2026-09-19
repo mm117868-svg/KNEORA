@@ -3,23 +3,29 @@
    The app used to run a second set of models (a palm detector, a hand landmark model and a gesture classifier)
    ten times a second just to see an open palm. That cost more than the leg tracking it sat beside. The pose
    model already reports both wrists and shoulders on every result, so a raised hand costs nothing extra: a
-   wrist held clearly above its own shoulder, by at least half the length of the trunk. That is true sitting,
+   wrist held well above its own shoulder, by at least four fifths of the length of the trunk, with the elbow up too. That is true sitting,
    standing or lying down with the arm pointing at the ceiling, and false with the arms resting, folded or on
    the thighs. It needs no open palm, and the hand can be anywhere across the picture.
 
    This only starts and stops a recording. It takes no part in measuring or counting. */
-export const RAISED_HAND = Object.freeze({visibility: .5, aboveShoulder: .5, sampleMs: 100, releaseMs: 500});
-const SIDES = [[15, 11, 23, 12], [16, 12, 24, 11]];   // wrist, its shoulder, its hip, the other shoulder
+export const RAISED_HAND = Object.freeze({visibility: .6, aboveShoulder: .8, sampleMs: 100, releaseMs: 500});
+const SIDES = [[15, 11, 23, 12, 13], [16, 12, 24, 11, 14]];   // wrist, its shoulder, its hip, the other shoulder, its elbow
 const seen = (p, least) => p && Number.isFinite(p.x) && Number.isFinite(p.y) && (p.visibility ?? 1) >= least;
 
 /* Which wrist, if any, is raised: the landmark index, or null. body: the 33 pose landmarks, 0 to 1 across the picture. */
 export function raisedWrist(body, width, height) {
   if (!Array.isArray(body) || !(width > 0 && height > 0)) return null;
-  for (const [wrist, shoulder, hip, other] of SIDES) {
+  for (const [wrist, shoulder, hip, other, elbow] of SIDES) {
     const w = body[wrist], s = body[shoulder];
     if (!seen(w, RAISED_HAND.visibility) || !seen(s, RAISED_HAND.visibility)) continue;
     const span = (a, b) => Math.hypot((a.x - b.x) * width, (a.y - b.y) * height);
     const trunk = Math.max(seen(body[hip], .3) ? span(s, body[hip]) : 0, seen(body[other], .3) ? 1.2 * span(s, body[other]) : 0);
+    // A deliberate signal: the arm properly up. The wrist well above the shoulder (four fifths of the trunk), the elbow
+    // above the shoulder too when it can be seen, and the wrist above the nose when that can be seen. Touching the
+    // face, scratching the head or resting a hand on the chest is none of these.
+    const e = body[elbow], nose = body[0];
+    if (seen(e, RAISED_HAND.visibility) && e.y >= s.y) continue;
+    if (seen(nose, RAISED_HAND.visibility) && w.y >= nose.y) continue;
     if (trunk > 0 && (s.y - w.y) * height >= RAISED_HAND.aboveShoulder * trunk) return wrist;
   }
   return null;

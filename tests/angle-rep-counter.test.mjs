@@ -36,3 +36,31 @@ test('the record says what was counted and how big the movements were', () => {
   assert.equal(s.repetitions, 6); assert.equal(s.version, 'angle-hysteresis-1'); assert.ok(Math.abs(s.median_excursion_deg - 30) < 3); assert.ok(Math.abs(s.resting_angle_deg - 85) < 2);
   assert.equal(new AngleRepCounter().summary(1).repetitions, null);
 });
+
+test('fail-safes: a noisy view needs a bigger movement, and settling somewhere new is a change of position, not a repetition', () => {
+  assert.equal(run({reps: 8, size: 8, noise: 3, seed: 2}).reps <= 2, true, 'with 3 degrees of jitter an 8 degree movement is not trusted');
+  assert.equal(run({reps: 8, size: 40, noise: 3, seed: 2}).reps, 8, 'a clear movement still counts through the same jitter');
+  const counter = new AngleRepCounter(); let t = 0; const feed = (angle, seconds) => { for (let k = 0; k < seconds * 15; k++) counter.update(angle, t += 1 / 15); };
+  feed(85, 2); feed(40, 12); feed(40, 3);
+  assert.equal(counter.reps, 0); assert.ok(counter.events.some(e => e.reason === 'position_changed'));
+  for (let i = 0; i < 3; i++) { feed(10, 2); feed(40, 2); }
+  assert.equal(counter.reps, 3, 'and counting carries on from the new position');
+});
+
+test('each exercise counts only its own direction: a knee extension lowers the bend, and tucking the foot under is not a repetition', () => {
+  const feedInto = counter => { let t = 0; return (angle, seconds) => { for (let k = 0; k < seconds * 15; k++) counter.update(angle(k / 15 / seconds), t += 1 / 15); }; };
+  const down = new AngleRepCounter(undefined, 'down'), feed = feedInto(down);
+  feed(() => 85, 2); for (let i = 0; i < 3; i++) { feed(x => 85 + 25 * stroke(x), 1); feed(x => 110 - 25 * stroke(x), 1); feed(() => 85, 1); }   // bending further: the wrong way
+  assert.equal(down.reps, 0);
+  for (let i = 0; i < 4; i++) { feed(x => 85 - 60 * stroke(x), 1.2); feed(x => 25 + 60 * stroke(x), 1.2); feed(() => 85, 1); }
+  assert.equal(down.reps, 4);
+});
+
+test('the resting value is only learned in the starting position, so starting mid-movement cannot turn the count inside out', () => {
+  const counter = new AngleRepCounter(undefined, 'down', [45, 130]); let t = 0; const feed = (angle, seconds) => { for (let k = 0; k < seconds * 15; k++) counter.update(angle(k / 15 / seconds), t += 1 / 15); };
+  feed(() => 10, 3);                                   // recording starts with the knee already held straight
+  assert.equal(counter.ready, false); assert.match(counter.message(), /Go to the starting position/);
+  feed(x => 10 + 75 * stroke(x), 1.2); feed(() => 85, 1.5); assert.equal(counter.ready, true);
+  for (let i = 0; i < 3; i++) { feed(x => 85 - 75 * stroke(x), 1.2); feed(() => 10, 1); feed(x => 10 + 75 * stroke(x), 1.2); feed(() => 85, 1); }
+  assert.equal(counter.reps, 3);
+});

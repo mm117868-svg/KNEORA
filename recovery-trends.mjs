@@ -56,8 +56,11 @@ export function publishedContext(x, y, minDay, maxDay) {
   return band || line ? `<g data-graph-reference="published">${band}${line}</g>` : '';
 }
 
-export function combinedMovementChart(trends, elapsed) {
-  const all = [...trends.bend, ...trends.straighten];
+/* sessions: what the exercise sessions say, one value a day ({bend, straighten} of {day, date, value}). Drawn hollow and
+   smaller, so a dedicated recovery check is never mistaken for an exercise estimate or the other way round. */
+export function combinedMovementChart(trends, elapsed, sessions = {bend: [], straighten: []}) {
+  const fromSessions = [...(sessions.bend || []), ...(sessions.straighten || [])];
+  const all = [...trends.bend, ...trends.straighten, ...fromSessions];
   const minDay = Math.min(0, ...all.map(p => p.day)), maxDay = Math.max(14, elapsed || 0, ...all.map(p => p.day));
   const high = Math.max(150, Math.ceil(Math.max(0, ...all.map(p => p.value)) / 30) * 30);
   const x = day => 58 + (day - minDay) / (maxDay - minDay) * 416, y = value => 268 - value / high * 216;
@@ -85,6 +88,7 @@ export function combinedMovementChart(trends, elapsed) {
     ${ticks.map(day => `<text x="${x(day)}" y="290" text-anchor="middle">${day}</text>`).join('')}
     <g data-graph-series="straighten">${trends.straighten.map(p => `${whisker(p, '#23734f')}<path d="M${x(p.day)} ${y(p.value)-7}l7 7-7 7-7-7Z" fill="none" stroke="#23734f" stroke-width="2.5"><title>${title(p,'straighten')}</title></path>`).join('')}</g>
     <g data-graph-series="bend">${trends.bend.map(p => `${whisker(p, 'var(--brand)')}<circle cx="${x(p.day)}" cy="${y(p.value)}" r="4.5" fill="var(--brand)"><title>${title(p,'bend')}</title></circle>`).join('')}</g>
+    <g data-graph-series="sessions">${(sessions.bend || []).map(p => `<circle cx="${x(p.day)}" cy="${y(p.value)}" r="3.5" fill="var(--bone)" stroke="var(--brand)" stroke-width="1.8"><title>From your heel slides · Day ${p.day} · ${esc(shortDate(p.date))}: about ${Math.round(p.value)}° (exercise estimate)</title></circle>`).join('')}${(sessions.straighten || []).map(p => `<path d="M${x(p.day)} ${y(p.value)-5}l5 5-5 5-5-5Z" fill="var(--bone)" stroke="#23734f" stroke-width="1.6"><title>From your seated knee extensions · Day ${p.day} · ${esc(shortDate(p.date))}: about ${Math.round(p.value)}° bend remaining (exercise estimate)</title></path>`).join('')}</g>
     ${all.length?'':'<text x="266" y="162" text-anchor="middle">No measurements yet</text>'}
     <text x="266" y="319" text-anchor="middle" class="chart-axis-title">X · Days after surgery · surgery = day 0</text>
   </svg>`;

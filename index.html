@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="progress-to-date.css?v=1">
 <link rel="stylesheet" href="exercise-summary.css?v=cards-1">
 <link rel="stylesheet" href="recovery-timeline.css?v=1">
-<link rel="stylesheet" href="recovery-summary.css?v=native-video-1">
+<link rel="stylesheet" href="recovery-summary.css?v=log-1">
 <style>
 :root{
   --paper:#efeee9;--paper2:#e7e5dd;--bone:#fbfaf7;--line:#dad7ce;--ink:#1a1918;--muted:#55524c;
@@ -160,6 +160,7 @@ details.more summary{cursor:pointer;font-weight:600}
 .brief .hands .bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden}
 .brief .hands .fill{height:100%;width:0;background:var(--brand);transition:width .1s linear}
 #hipTile[hidden]{display:none}
+.keep-row{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.keep-row button{min-height:48px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--bone);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}.keep-row .keep-next{background:var(--ink);border-color:var(--ink);color:#fff}.keep-row .keep-main{background:var(--brand);border-color:var(--brand);color:#fff}
 .brief .start-now{display:block;width:100%;margin-top:14px;min-height:52px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer}.brief .start-now:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .brief .gesture-retry{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:var(--bone);color:var(--ink);padding:10px 14px;cursor:pointer}
 .countdown{position:absolute;inset:0;z-index:8;display:grid;place-items:center;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:clamp(120px,30vh,260px);color:#fff;text-shadow:0 6px 40px rgba(0,0,0,.7);cursor:pointer;text-align:center}
@@ -584,6 +585,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
         <p class="small-note">Choose the leg that was operated on before opening an exercise.</p>
       </fieldset>
       <fieldset class="setting-box"><legend>Live camera display</legend>
+        <label class="f">Hold at the far end of each movement<select id="holdtarget"><option value="0">No hold timer</option><option value="3">3 seconds</option><option value="5" selected>5 seconds</option><option value="10">10 seconds</option></select><small class="small-note">A timer on the picture counts your hold and then says when to return. Use the hold your physiotherapist gave you. 5 seconds is common in hospital exercise sheets; the research reviewed for this app sets no single correct hold.</small></label>
         <label class="setting-check"><input type="checkbox" id="showangle" checked><span>Show my live knee angle<small>Display the MediaPipe knee angle while positioning, during the countdown and throughout the session. The ± beside it and the shaded band at the knee show how steady the reading is (a 95% interval of the last third of a second), not how accurate it is.</small></span></label>
         <p class="small-note">Only your operated leg is outlined: hip, knee and ankle. The other leg, your arms, trunk and face are never drawn. The outline is steadied for display; measurements use the original positions.</p>
         <p class="small-note">These displays need the pose model and a clear view of your leg. An unavailable angle is shown as a dash.</p>
@@ -677,6 +679,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
     <div class="brief" id="brief">
       <h3>Ready to begin?</h3>
       <div class="hands" id="hands"><span id="handtext" role="status"></span><div class="bar" aria-hidden="true"><div class="fill" id="handfill"></div></div></div>
+      <button type="button" class="gesture-retry" id="watchGuide">Watch the demonstration again</button>
       <button type="button" class="gesture-retry" id="poseRetry" hidden>Retry leg tracking</button>
       <button type="button" class="start-now" id="startNow">Start · 5 second countdown</button>
       <details class="sound-help"><summary>Check the countdown sound</summary><button type="button" class="gesture-retry" id="voiceTest">Test Marin voice</button><p id="voiceStatus" class="small-note" role="status"></p></details>
@@ -690,7 +693,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 <script type="module">
 import {showExerciseGuide} from './exercise-guides/guide-player.js?v=magnific-1';
 import {LivePositionCounter,readPositionFrame} from './tools/position-recogniser/live.mjs';
-let positionModel=null,positionCounter=null,repCounter=null;
+let positionModel=null,positionCounter=null,repCounter=null,repSignal=null;
 const positionCanvas=document.createElement('canvas');positionCanvas.width=positionCanvas.height=128;
 const positionCtx=positionCanvas.getContext('2d',{willReadFrequently:true});
 async function preparePositionModel(exercise){positionModel=null;if(!['straight_leg_raise','seated_extension','heel_slide'].includes(exercise))return;try{const r=await fetch(new URL('./tools/position-recogniser/models/'+exercise+'.json',import.meta.url));if(!r.ok)throw Error('Model unavailable');positionModel=await r.json();if(positionModel.exercise!==exercise)throw Error('Wrong model');}catch(e){positionModel=null;console.warn('Position model unavailable');}}
@@ -705,7 +708,7 @@ import { AppVoice, completionNotice } from "./app-voice.mjs";
 import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=cards-1";
 import { mountExerciseContext } from "./exercise-context.mjs?v=pubmed-1";
 import { renderDetailedExerciseSummary } from "./exercise-details.mjs?v=cards-1";
-import { renderRecoverySummary } from "./recovery-summary.mjs?v=fluid-1";
+import { renderRecoverySummary } from "./recovery-summary.mjs?v=log-1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
 import { renderProgressToDate } from "./progress-to-date.mjs?v=pubmed-1";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
@@ -716,6 +719,8 @@ import {FluidOutline, PictureClock, drawOutline} from "./fluid-outline.mjs?v=flu
 import {trendCI95} from "./confidence.mjs?v=1";
 import {slrView} from "./slr-view.mjs?v=1";
 import {AngleRepCounter} from "./angle-rep-counter.mjs?v=1";
+import {RepSignal} from "./rep-signal.mjs?v=1";
+import {exerciseProfile} from "./exercise-profiles.mjs?v=1";
 
 
 /* ---------------- Exercise library ----------------
@@ -815,7 +820,7 @@ if (PROGRESS_VIEW) document.title = `${PAGE_VIEW === "recovery-summary" ? "Recov
 const NOPOSE = PROGRESS_VIEW || new URLSearchParams(location.search).has("nopose");
 
 /* ---------------- settings ---------------- */
-const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam" };
+const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", holdtarget: "kr_app_hold" };
 const flags = { showangle: "kr_app_angle", savevideo: "kr_app_video", savefiles: "kr_app_files" };
 
 for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); if(k==="patient")restorePatientProfile(); renderHome(); }); }
@@ -876,7 +881,7 @@ function renderWeeks() {
     <div class="head"><h2>${esc(PHASES[p])}</h2><span class="days">${esc(PHASE_DAYS[p])}</span>${+p === now ? '<span class="badge">you are here</span>' : ""}</div>
     <div class="list">${LIB[p].map((ex, i) => `<div class="exercise-row"><button class="ex-card" data-p="${p}" data-i="${i}"${isExerciseAvailable(ex) ? "" : ' disabled aria-disabled="true"'}>
       <div class="ic"><svg viewBox="0 0 24 24">${ICONS[ex.icon]}</svg></div>
-      <div><div class="ex-heading"><h3>${esc(ex.title)}</h3>${isExerciseAvailable(ex)?'<span class="exercise-completion" hidden><span class="completion-tick" aria-hidden="true">✓</span>Done today</span>':''}</div><p>${esc(ex.blurb)}</p><p class="meta">${isExerciseAvailable(ex) ? `${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}` : "To be introduced in due course"}</p></div>
+      <div><div class="ex-heading"><h3>${esc(ex.title)}</h3>${isExerciseAvailable(ex)?'<span class="exercise-completion" hidden><span class="completion-tick" aria-hidden="true">✓</span>Done today</span>':''}</div><p>${esc(ex.blurb)}</p><p class="meta">${isExerciseAvailable(ex) ? `${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}` : "To be introduced in due course"}</p>${isExerciseAvailable(ex) && ex.kind !== "hold" ? `<p class="meta tracks">${esc(exerciseProfile(ex.id).tracks)}</p>` : ""}</div>
       <div class="tag">${isExerciseAvailable(ex) ? esc(ex.tag) : "Pending"}</div></button>${exerciseDemoLink(ex)}</div>`).join("")}</div></section>`).join("");
   $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; openExercise(LIB[phase][+b.dataset.i]); });
 }
@@ -961,6 +966,7 @@ $("poseRetry").onclick = () => { loadExercisePose(); refreshHint(); };
 /* No hand model. A raised hand is read from the pose result the page already has (raised-hand.mjs), and the Start
    button and the space bar start the same countdown with no model at all. */
 $("startNow").onclick = () => beginCountdown();
+$("watchGuide").onclick = () => { if (current && !running && countdownStart === null) showExerciseGuide(current); };
 addEventListener("keydown", e => { if (e.code === "Space" && stream && !running && countdownStart === null && !/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(document.activeElement?.tagName || "")) { e.preventDefault(); beginCountdown(); } });
 
 async function listCams() {
@@ -1090,7 +1096,10 @@ $("voiceTest").onclick = async () => {
 async function openExercise(ex) {
   if (!isExerciseAvailable(ex)) return;
   if (!["left", "right"].includes($("side").value)) { location.href="./#side"; return; }
-  if (!await showExerciseGuide(ex)) return;
+  /* The demonstration plays the first time an exercise is opened on this device. After that it is a link beside the
+     camera, so nobody has to skip the same video every day. */
+  const seenKey = "kr_guide_seen_" + ex.id; let seen = false; try { seen = localStorage.getItem(seenKey) === "1"; } catch (e) { }
+  if (!seen && ex.guide !== false) { if (!await showExerciseGuide(ex)) return; try { localStorage.setItem(seenKey, "1"); } catch (e) { } }
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; resetHand(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   $("voiceStatus").textContent = "";
   appVoice.prepare();
@@ -1172,7 +1181,7 @@ function refreshHint() {
   $("poseRetry").hidden = poseState !== "failed" && poseState !== "off";
   let text;
   if (landmarker) {
-    text = "When ready, raise one hand above your shoulder for 2 seconds, or press Start (or the space bar). Lower your hand during the countdown, then begin your exercise.";
+    text = "When ready, put one arm straight up, well above your head, and keep it there for 2 seconds, or press Start (or the space bar). Lower your hand during the countdown, then begin your exercise.";
     $("status").textContent = "Raise a hand for 2 seconds, or press Start, to begin recording.";
   } else {
     text = "Press Start (or the space bar) when you are ready. You will have a countdown to get into position.";
@@ -1187,6 +1196,7 @@ function refreshHint() {
    A hand raised above its shoulder, anywhere across the picture, read from the pose result (raised-hand.mjs). */
 const HAND_HOLD_START_S = 2, HAND_HOLD_FINISH_S = 3, COUNTDOWN_S = 5;
 const HAND_SAMPLE_MAX_GAP_MS = 500;
+let startLowSince = null, startArmed = false;   // a raise only counts after the hand has been seen down for a second
 let handSince = null, handLastSample = null, countdownStart = null, previewN = 0, handArmed = false, statusBefore = null;
 let lastHandAt = -Infinity, lastHandResult = null, handReleasedAt = null, handReleaseSample = null;
 /* body: the whole-body pose result made from this very frame (null when nobody was found); undefined when the pose
@@ -1270,7 +1280,7 @@ function cameraFailed(e) {
 /* Live picture beside optional instructions while the patient gets into position; no session is recorded yet.
    Body overlays are display only. A raised hand is read from the same pose result. */
 let previewId = 0, previewLastVideoTime = -1, previewLastFrameAt = null, previewAll = null, previewLeg = null, previewPoseAt = -Infinity, previewJoints = null, previewPoseMs = 0, previewPoseSkip = 1;
-function preview() { previewJoints = null; previewLeg = null; previewPoseMs = 0; previewPoseSkip = 2; outline = newOutline(); cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; previewStep(); }
+function preview() { startLowSince = null; startArmed = false; previewJoints = null; previewLeg = null; previewPoseMs = 0; previewPoseSkip = 2; outline = newOutline(); cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; previewStep(); }
 
 function previewStep() {
   if (running || !stream) return;
@@ -1313,7 +1323,10 @@ function previewStep() {
   if (!newFrame) return;
   if (countdownStart !== null) { if (tickCountdown(now)) startSession(); return; }
   if (gesture !== null) {
-    const f = handHold(gesture === "open", HAND_HOLD_START_S, now);
+    /* A deliberate signal only: the hand has to be seen down for a second before a raise can start anything, so walking
+       into the picture with an arm up, or reaching to adjust the screen, starts nothing. */
+    if (gesture === "other") { startLowSince ??= now; if (now - startLowSince >= 1000) startArmed = true; } else if (gesture !== "open") startLowSince = null;
+    const f = handHold(startArmed && gesture === "open", HAND_HOLD_START_S, now);
     $("handfill").style.width = (f * 100) + "%"; showHand(f, false);
     if (f >= 1) beginCountdown();
   }
@@ -1334,7 +1347,7 @@ function startSession() {
   if (current.kind === "hold") hold = { phase: "hold", until: t0 + current.hold * 1000, cycles: 0 };
   tracker = null;
   if (trackWanted() && jsfeatLib) { tracker = new KneeTracker(canvas.width, canvas.height, fps, {smallMovement:smallMovement()}); tracker.attach(jsfeatLib); }
-  legGate = null; tracker = null; repCounter = new AngleRepCounter();
+  legGate = null; tracker = null; repCounter = new AngleRepCounter(undefined, exerciseProfile(current.id).direction, exerciseProfile(current.id).restBand); repSignal = new RepSignal(current.id, $("side").value);
   gateBoxReference = null; manualCountingBox = false; monitor.locked = true;
   monitor.box = [0, 0, canvas.width, canvas.height];   // the whole picture
   running = true; setExerciseSidebar(false); $("brief").classList.remove("up"); $("finish").disabled = false; $("reset").disabled = current.kind === "hold"; $("boxbtn").disabled = true; $("boxbtn").hidden = true;
@@ -1375,9 +1388,9 @@ function step() {
   } else if (landmarker) { lm = lastLm; angle = lastAngle; }
   peak = trace.quantile(0.95);   // "best today" is the 95th percentile of the trusted frames so far, not the single highest frame
 
-  /* Repetitions: the joint angle leaves the resting position and comes back (angle-rep-counter.mjs). The knee angle,
-     or for a straight leg raise the hip angle, since there the knee stays straight. */
-  if (current.kind !== "hold" && bodyNow !== undefined) repCounter.update(current.id === "straight_leg_raise" ? (slrView(lastAll, $("side").value, canvas.width, canvas.height).hip ?? NaN) : angle, t);
+  /* Repetitions: the watched angle leaves its resting value and comes back (angle-rep-counter.mjs). The knee bend, or
+     for a straight leg raise the direction of the whole leg, since there the knee stays straight (rep-signal.mjs). */
+  if (current.kind !== "hold" && bodyNow !== undefined) repCounter.update(repSignal.read(lastAll, canvas.width, canvas.height), t);
   const count = current.kind === "hold" ? hold.cycles : repCounter.reps;
 
   if (count >= current.count && !prescribedDone) { prescribedDone = true; $("status").textContent = `That's your ${current.count}. Finish when you're ready, or carry on.`; $("status").className = "status ok"; }
@@ -1417,7 +1430,14 @@ function paintSession(now) {
     ctx.save(); ctx.fillStyle = "rgba(5,10,20,.72)"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 18 * k) : ctx.rect(x, y, w, h); ctx.fill();
     ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillStyle = done ? "#3ddc84" : "#fff"; ctx.font = `800 ${Math.round(92 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(String(repCounter.reps), x + w * .36, y + h * .72);
     ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = `600 ${Math.round(34 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(`/ ${current.count}`, x + w * .74, y + h * .7);
-    ctx.font = `600 ${Math.round(17 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(done ? "DONE · FINISH WHEN READY" : "REPETITIONS", x + w / 2, y + h * .92); ctx.restore();
+    ctx.font = `600 ${Math.round(17 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(done ? "DONE · FINISH WHEN READY" : "REPETITIONS", x + w / 2, y + h * .92);
+    /* The hold timer: how long to stay at the far end of the movement, then when to come back. A pacing cue only. */
+    const want = +$("holdtarget").value || 0, heldS = want ? repCounter.holdS((now - t0) / 1000) : 0;
+    if (want && heldS > 0.25) { const reached = heldS >= want, hy = y + h + 12 * k, hh = 74 * k;
+      ctx.fillStyle = reached ? "rgba(20,120,70,.9)" : "rgba(5,10,20,.72)"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, hy, w, hh, 18 * k) : ctx.rect(x, hy, w, hh); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.font = `800 ${Math.round(30 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(reached ? "NOW RETURN SLOWLY" : `HOLD  ${Math.min(want, Math.floor(heldS) + 1)} / ${want}`, x + w / 2, hy + hh * .5);
+      ctx.fillStyle = "rgba(255,255,255,.3)"; ctx.fillRect(x + 18 * k, hy + hh * .72, w - 36 * k, 8 * k); ctx.fillStyle = "#fff"; ctx.fillRect(x + 18 * k, hy + hh * .72, (w - 36 * k) * Math.min(1, heldS / want), 8 * k); }
+    ctx.restore();
   }
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
 }
@@ -1510,8 +1530,15 @@ async function finish(abandon = false) {
     if (videoBlob && $("savevideo").checked) { download(`${base}_${rec.video_file}`, videoBlob); n++; }
     where = `Saved on this device, and ${["", "one", "two", "three", "four", "five", "six", "seven"][n] || n} files named ${base}_… went to your Downloads folder for your physiotherapist.`;
   }
-  $("q").innerHTML = `<h3>Saved</h3><p>${esc(where)}</p><div class="row"><a href="#" id="doneBack">Back to exercises</a><a href="?view=progress-to-date" id="doneProgress">Progress to date</a></div>`;
-  $("doneBack").onclick = e => { e.preventDefault(); closeExercise(); };
+  /* Keep, repeat or reject. A repeat is a second session: the day's log averages the sessions kept that day. A rejected
+     session stays on the device, marked, and is left out of every count, log and graph; it can be put back at once. */
+  const again = current, todays = LIB[phase] || [], nextUp = todays.slice(todays.indexOf(current) + 1).find(ex => isExerciseAvailable(ex)) || null;   // straight on to the next exercise of the day
+  const saved = () => { $("q").innerHTML = `<h3>${rec.rejected ? "Rejected" : "Saved"}</h3><p>${rec.rejected ? "This session will not be counted or logged. It was not deleted." : esc(where) + " If you do this exercise again today, today's log shows the average of the sessions you keep."}</p><div class="keep-row"><button type="button" class="keep-main" id="doneBack">${rec.rejected ? "Back to exercises" : "Keep it · back to exercises"}</button>${nextUp ? `<button type="button" class="keep-next" id="doneNext">Next: ${esc(nextUp.title)} →</button>` : ""}<button type="button" id="doneRepeat">Do it again</button><button type="button" id="doneReject">${rec.rejected ? "Undo: keep this session" : "Reject this session"}</button></div><div class="row"><a href="?view=recovery-summary" id="doneProgress">See today's log</a></div>`;
+    $("doneBack").onclick = () => closeExercise();
+    $("doneRepeat").onclick = () => { closeExercise(); openExercise(again); };
+    if (nextUp) $("doneNext").onclick = () => { closeExercise(); openExercise(nextUp); };
+    $("doneReject").onclick = () => { rec.rejected = !rec.rejected; rec.rejected_at = rec.rejected ? new Date().toISOString() : null; updateRecord(slot, rec); refreshExerciseCompletion(); renderHome(); saved(); }; };
+  saved();
   renderHome();
 }
 function ask(title, prompt, values) {

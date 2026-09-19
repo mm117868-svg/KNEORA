@@ -37,7 +37,7 @@ const MODELS = `${SHARED}
   const busy = ms => { const end = performance.now() + ms; while (performance.now() < end); };
   function body(ms) { const leg = legAt(ms), lm = Array.from({ length: 33 }, (_, i) => ({ x: .55 + (i % 7) * .03, y: .1 + (i % 5) * .05, z: 0, visibility: .9, presence: .9 }));
     const put = (i, p, v = .97) => { lm[i] = { x: (p[0] + scatter()) / W, y: (p[1] + scatter()) / H, z: 0, visibility: v, presence: v }; };
-    put(11, [850, 170]); put(12, [860, 175], .4); put(15, window.__raise ? [930, 20] : [800, 430]); put(23, leg.hip); put(25, leg.knee); put(27, leg.ankle); put(29, [leg.ankle[0] + 12, leg.ankle[1] + 28]); put(31, [leg.ankle[0] - 50, leg.ankle[1] + 34]);
+    put(0, [860, 150]); put(11, [850, 200]); put(12, [860, 205], .4); put(13, window.__raise ? [870, 100] : [830, 320]); put(15, window.__raise ? [880, 5] : [800, 430]); put(23, leg.hip); put(25, leg.knee); put(27, leg.ankle); put(29, [leg.ankle[0] + 12, leg.ankle[1] + 28]); put(31, [leg.ankle[0] - 50, leg.ankle[1] + 34]);
     put(24, [leg.hip[0] + 12, leg.hip[1] + 8], .35); put(26, [572, 470], .35); put(28, [585, 655], .35); put(30, [600, 690], .3); put(32, [535, 695], .3); return lm; }
   export const FilesetResolver = { forVisionTasks: async () => ({}) };
   export const PoseLandmarker = { createFromOptions: async () => ({ setOptions: async () => {}, close() {},
