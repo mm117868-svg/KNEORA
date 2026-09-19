@@ -172,6 +172,11 @@ details.more summary{cursor:pointer;font-weight:600}
 .handring.finish .hfill{background:var(--amber)}
 .done{position:fixed;inset:0;z-index:30;background:rgba(11,18,32,.97);display:none;overflow:auto;padding:26px 20px}
 .done.show{display:block}
+.physio-report{margin:22px 0 6px;padding:20px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:left}.physio-report .eyebrow{margin-bottom:10px}
+.pr-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}.pr-col{border-radius:12px;padding:14px 16px}.pr-col.well{background:rgba(42,157,106,.1);border:1px solid rgba(42,157,106,.35)}.pr-col.improve{background:rgba(224,150,40,.1);border:1px solid rgba(224,150,40,.4)}
+.pr-col h3{margin:0 0 8px;font:800 17px "Archivo",Arial,sans-serif;color:var(--ink)}.pr-col ul{margin:0;padding-left:20px}.pr-col li{font-size:15px;line-height:1.5;color:var(--ink);margin-bottom:8px}.pr-col li:last-child{margin-bottom:0}
+.done .physio-report p.pr-note{margin:12px 0 0;font-size:12px;color:var(--muted)}@media(max-width:640px){.pr-cols{grid-template-columns:1fr}}
+.done-bar{position:fixed;left:0;right:0;bottom:0;z-index:31;display:flex;gap:10px;justify-content:center;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px)}.done-bar button{flex:1 1 0;max-width:370px;min-height:56px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--bone);color:var(--ink);font:inherit;font-size:16px;font-weight:800;cursor:pointer}.done-bar button.primary{background:var(--ink);border-color:var(--ink);color:var(--bone)}.done-bar button[hidden]{display:none}.done .inner{padding-bottom:96px}
 .done .inner{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
 .done h2{font-family:"Archivo",Arial,sans-serif;font-size:30px;margin:0;font-weight:600}
 .done p{color:var(--dkmuted);font-size:15px;margin:0;max-width:40ch}
@@ -723,6 +728,7 @@ import {FluidOutline, PictureClock, drawOutline} from "./fluid-outline.mjs?v=flu
 import {trendCI95} from "./confidence.mjs?v=1";
 import {slrView} from "./slr-view.mjs?v=1";
 import {AngleRepCounter} from "./angle-rep-counter.mjs?v=forgiving-1";
+import {renderPhysioReport} from "./physio-report.mjs?v=1";
 import {RepSignal} from "./rep-signal.mjs?v=1";
 import {exerciseProfile} from "./exercise-profiles.mjs?v=1";
 
@@ -1490,7 +1496,7 @@ async function finish(abandon = false) {
     measurement: summarise(trace, duration, target), monitoring: mon, patient_count: null, tracking: tr, pose_validation: pv, count_source: source, position_recognition: positionResult, angle_count: angleCount, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
     recording: { captured: !!videoBlob?.size, bytes: videoBlob?.size || 0, mime_type: videoBlob?.type || null },
 
-    software_version: SOFTWARE, app: { page: "index.html", build: "pubmed-metrics-1", phase, aim: current.aim } };
+    software_version: SOFTWARE, app: { page: "index.html", build: "pubmed-metrics-1", phase, aim: current.aim, hold_target_s: current.kind === "hold" ? null : (+$("holdtarget").value || 0) } };
   if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles };
   rec.measurement.trace_preview = tracePreview(trace.rows);
   const slot = storeRecord(rec) - 1;   // stored now, before the questions, so walking away from the laptop loses nothing
@@ -1499,10 +1505,15 @@ async function finish(abandon = false) {
   const done = $("done");
   setExerciseSidebar(false);
   done.classList.add("show");
-  done.innerHTML = `<div class="inner"><p role="status" class="recording-stopped">${esc(confirmation.text)}${confirmationSpoken ? "" : '<small style="display:block">Marin audio is unavailable. The recording has stopped.</small>'}</p><div id="simpleExerciseSummary"></div><div id="exerciseAnalysis"></div><div class="q" id="q"></div><div id="exerciseContext"></div><div id="fullExerciseSummary"></div></div>`;
+  done.innerHTML = `<div class="inner"><p role="status" class="recording-stopped">${esc(confirmation.text)}${confirmationSpoken ? "" : '<small style="display:block">Marin audio is unavailable. The recording has stopped.</small>'}</p><div id="simpleExerciseSummary"></div><div id="physioReport"></div><div id="exerciseAnalysis"></div><div class="q" id="q"></div><div id="exerciseContext"></div><div id="fullExerciseSummary"></div></div><nav class="done-bar" aria-label="What next"><button type="button" id="barMenu">← Back to menu</button><button type="button" class="primary" id="barNext" hidden></button></nav>`;
+  /* What next, always in reach: fixed to the bottom of the results from the moment the session ends, never below the scroll. */
+  const todays = (LIB[phase] || []).filter(ex => isExerciseAvailable(ex)), at = todays.indexOf(current), nextUp = todays.length > 1 && at >= 0 ? todays[(at + 1) % todays.length] : todays.find(ex => ex !== current) || null;   // after the last exercise of the day, round to the first
+  $("barMenu").onclick = () => closeExercise();
+  if (nextUp) { $("barNext").hidden = false; $("barNext").textContent = `Next: ${nextUp.title} →`; $("barNext").onclick = () => { closeExercise(); openExercise(nextUp); }; }
   const updateExerciseSummary = () => {
     const history = patientRecords(loadRecords(), rec.patient_id, rec.operation_date);
     $("simpleExerciseSummary").innerHTML = renderBasicExerciseSummary(rec, history, {details:false});
+    $("physioReport").innerHTML = renderPhysioReport(rec, history);   // done well, and what to work on next time
     $("fullExerciseSummary").innerHTML = renderDetailedExerciseSummary(rec);
   };
   updateExerciseSummary();
@@ -1533,8 +1544,8 @@ async function finish(abandon = false) {
   }
   /* Keep, repeat or reject. A repeat is a second session: the day's log averages the sessions kept that day. A rejected
      session stays on the device, marked, and is left out of every count, log and graph; it can be put back at once. */
-  const again = current, todays = LIB[phase] || [], nextUp = todays.slice(todays.indexOf(current) + 1).find(ex => isExerciseAvailable(ex)) || null;   // straight on to the next exercise of the day
-  const saved = () => { $("q").innerHTML = `<h3>${rec.rejected ? "Rejected" : "Saved"}</h3><p>${rec.rejected ? "This session will not be counted or logged. It was not deleted." : esc(where) + " If you do this exercise again today, today's log shows the average of the sessions you keep."}</p><div class="keep-row"><button type="button" class="keep-main" id="doneBack">${rec.rejected ? "Back to exercises" : "Keep it · back to exercises"}</button>${nextUp ? `<button type="button" class="keep-next" id="doneNext">Next: ${esc(nextUp.title)} →</button>` : ""}<button type="button" id="doneRepeat">Do it again</button><button type="button" id="doneReject">${rec.rejected ? "Undo: keep this session" : "Reject this session"}</button></div><div class="row"><a href="?view=recovery-summary" id="doneProgress">See today's log</a></div>`;
+  const again = current;
+  const saved = () => { $("q").innerHTML = `<h3>${rec.rejected ? "Rejected" : "Saved"}</h3><p>${rec.rejected ? "This session will not be counted or logged. It was not deleted." : esc(where) + " If you do this exercise again today, today's log shows the average of the sessions you keep."}</p><div class="keep-row"><button type="button" class="keep-main" id="doneBack">${rec.rejected ? "Back to menu" : "Keep it · back to menu"}</button>${nextUp ? `<button type="button" class="keep-next" id="doneNext">Next: ${esc(nextUp.title)} →</button>` : ""}<button type="button" id="doneRepeat">Do it again</button><button type="button" id="doneReject">${rec.rejected ? "Undo: keep this session" : "Reject this session"}</button></div><div class="row"><a href="?view=recovery-summary" id="doneProgress">See today's log</a></div>`;
     $("doneBack").onclick = () => closeExercise();
     $("doneRepeat").onclick = () => { closeExercise(); openExercise(again); };
     if (nextUp) $("doneNext").onclick = () => { closeExercise(); openExercise(nextUp); };

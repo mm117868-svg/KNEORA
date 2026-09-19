@@ -108,6 +108,13 @@ const CAMERA_AND_JUDGE = `(() => {${SHARED}
   const session = await judge(10); report('session', session); await picture('session.jpg'); await page.screenshot({path: path.join(out, 'page-session.png')});   // the whole page, to see the readout over the picture
   await page.waitForTimeout(12000);   // four more movements, for the counter
   const counted = await page.evaluate(() => ({ reps: document.getElementById('reps').textContent, track: document.getElementById('track').textContent })); console.log('counter     ', JSON.stringify(counted));
+  // the end of the session: the physio report, and what next always in reach
+  await page.click('#finish'); await page.waitForSelector('.done-bar #barMenu', { timeout: 20000 }); await page.waitForSelector('.physio-report li');
+  const ending = await page.evaluate(() => ({ next: document.getElementById('barNext').textContent, nextHidden: document.getElementById('barNext').hidden, well: document.querySelectorAll('.pr-col.well li').length, improve: document.querySelectorAll('.pr-col.improve li').length,
+    barInView: document.querySelector('.done-bar').getBoundingClientRect().bottom <= innerHeight + 1 })); console.log('ending      ', JSON.stringify(ending));
+  await page.waitForTimeout(800); await page.screenshot({path: path.join(out, 'page-ending.png')});
+  assert.ok(ending.well >= 1 && ending.improve >= 1 && ending.barInView && !ending.nextHidden && /^Next: /.test(ending.next), 'the session ends with a physio report and a next exercise button in view');
+  await page.click('#barMenu'); await page.waitForFunction(() => !document.getElementById('done').classList.contains('show'));
   await browser.close();
 
   hold('positioning', positioning, 50); hold('session', session, 35);

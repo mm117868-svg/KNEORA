@@ -169,7 +169,7 @@ for (const exercise of ['straight_leg_raise', 'seated_extension', 'heel_slide'])
     $('patient').value = 'SOFTWARE-TEST'; $('side').value = 'left'; $('opdate').value = '2026-09-01';
     Object.assign(h.context, {$, current: {id: exercise, kind: 'reps', count: 10, aim: {}},
       chunks: [new Blob(['software fixture'], {type: 'video/webm'})], startedAt: new Date('2026-09-13T10:00:00Z'),
-      frameNo: 250, SOFTWARE: 'test', phase: 1, trace: {rows: []},
+      frameNo: 250, SOFTWARE: 'test', phase: 1, trace: {rows: []}, LIB: {1: []}, isExerciseAvailable: () => true, renderPhysioReport: () => 'Physio report', closeExercise(){}, openExercise(){},
       daysPostOp: () => 12, localIso: date => date.toISOString(), summarise: () => ({}), tracePreview: () => [],
       storeRecord: record => records.push(record), updateRecord: (slot, record) => updates.push({slot, record}),
       refreshExerciseCompletion(){assert.equal(records.length,1);h.events.push('completion updated');},
