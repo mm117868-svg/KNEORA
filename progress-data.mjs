@@ -1,6 +1,6 @@
-import {exercisePerformanceMetrics} from './exercise-evidence.mjs?v=pubmed-1';
+import {exercisePerformanceMetrics} from './exercise-evidence.mjs?v=cards-1';
 import {normaliseExerciseContext,exerciseContextKey,exerciseContextFacts} from './exercise-context.mjs?v=pubmed-1';
-import {recordedCount} from './patient-progress.js?v=high-five-small-1';
+import {recordedCount} from './patient-progress.js?v=cards-1';
 export const EXERCISE_NAMES = {straight_leg_raise:'Straight leg raise',seated_extension:'Seated knee extension',heel_slide:'Heel slides'};
 export const finite = n => typeof n === 'number' && Number.isFinite(n) ? n : null;
 const values = xs => xs.map(finite).filter(n=>n!==null);

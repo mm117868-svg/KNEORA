@@ -6,6 +6,7 @@ const number = value => typeof value === 'number' && Number.isFinite(value) && v
 export function recordedCount(record) {
   if (record.hold) return number(record.hold.cycles_completed);
   const source = record.count_source || 'monitoring';
+  if(source === 'angle_hysteresis') return record.angle_count?.count_status === 'unavailable' ? null : number(record.angle_count?.repetitions);
   if(source === 'position_recognition') return record.position_recognition?.count_status === 'unavailable' ? null : number(record.position_recognition?.repetitions);
   const count = number((source === 'patient_voice' ? record.patient_count : source === 'knee_tracker' ? record.tracking : source === 'monitoring' ? record.monitoring : source === 'pose_gated_optical' ? record.pose_validation : null)?.repetitions);
   if (count === 0 && source !== 'patient_voice') {
@@ -26,7 +27,7 @@ export function comparableRecords(records, record, metric = 'bend') {
 const bend = r => number(r.measurement?.p95_flexion_deg);
 const date = r => new Date(r.started_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 const name = r => ({heel_slide:'Heel slides',straight_leg_raise:'Straight leg raise',seated_extension:'Seated knee extension',standing_flexion:'Standing knee bend',quad_set:'Quad sets',mini_squat:'Mini squat',sit_to_stand:'Sit to stand',squat:'Squat',single_leg_stance:'Single-leg balance',forward_step_up:'Forward step-up',functional_bend:'Functional bend'}[r.exercise] || String(r.exercise || 'Exercise').replace(/_/g,' '));
-const sourceLabel = r => ({position_recognition:'Position recognition prototype',pose_gated_optical:'Camera count confirmed in the selected leg',patient_voice:'Your spoken count',knee_tracker:'Camera knee tracker',monitoring:'Camera movement counter',timer:'Timed holds'}[r.count_source || 'monitoring'] || 'Count unavailable');
+const sourceLabel = r => ({angle_hysteresis:'Counted from your joint angle',position_recognition:'Position recognition prototype',pose_gated_optical:'Camera count confirmed in the selected leg',patient_voice:'Your spoken count',knee_tracker:'Camera knee tracker',monitoring:'Camera movement counter',timer:'Timed holds'}[r.count_source || 'monitoring'] || 'Count unavailable');
 const duration = r => {const s=number(r.duration_s);return s === null ? 'Not recorded' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;};
 const display = n => n === null ? 'Not recorded' : Math.round(n).toLocaleString('en-GB');
 function tile(label,value,note='') { return `<div class="patient-metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></div>`; }

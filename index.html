@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="progress-to-date.css?v=1">
-<link rel="stylesheet" href="exercise-summary.css?v=pubmed-1">
+<link rel="stylesheet" href="exercise-summary.css?v=cards-1">
 <link rel="stylesheet" href="recovery-timeline.css?v=1">
 <link rel="stylesheet" href="recovery-summary.css?v=native-video-1">
 <style>
@@ -702,14 +702,14 @@ import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js?v=wide-s
 import { ageYears, loadProfile, saveProfile } from "./patient-profile.mjs";
 import { bindShortDate } from "./short-date.mjs";
 import { AppVoice, completionNotice } from "./app-voice.mjs";
-import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=pubmed-1";
+import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=cards-1";
 import { mountExerciseContext } from "./exercise-context.mjs?v=pubmed-1";
-import { renderDetailedExerciseSummary } from "./exercise-details.mjs?v=pubmed-1";
+import { renderDetailedExerciseSummary } from "./exercise-details.mjs?v=cards-1";
 import { renderRecoverySummary } from "./recovery-summary.mjs?v=fluid-1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
 import { renderProgressToDate } from "./progress-to-date.mjs?v=pubmed-1";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
-import { patientRecords, completedExercisesForDay, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=daily-ticks-1";
+import { patientRecords, completedExercisesForDay, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=cards-1";
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-1";
 import {raisedHandState, drawRaisedHand, RAISED_HAND} from "./raised-hand.mjs?v=1";
 import {FluidOutline, PictureClock, drawOutline} from "./fluid-outline.mjs?v=fluid-1";

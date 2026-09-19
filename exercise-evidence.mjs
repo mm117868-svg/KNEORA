@@ -52,6 +52,8 @@ export function renderExerciseEvidenceSummary(record){
   ['Bend remaining after returning',p.returnBend?.median,'Typical return endpoint. Less remaining bend describes a straighter return.'],
   ['Variation in deepest bend between slides',p.peakBend?.standardDeviation,'Smaller spread means more similar peaks. It does not establish a sufficient range.']
  ];
+ // A box of three "Not measured" tells the patient nothing: it is shown only once at least one figure exists.
+ if(!rows.some(row=>typeof row[1]==='number'&&Number.isFinite(row[1])))return '';
  return `<section class="exercise-evidence" aria-label="Physiotherapy priorities for this exercise"><div class="eyebrow">What matters for this exercise</div><h4>${esc(info.aim)}</h4><p>These are the measurements to discuss with your physiotherapist. “Typical” is the median across completed repetitions; variation is the standard deviation and needs at least two.</p><dl class="exercise-evidence-metrics">${rows.map(([label,value,note])=>`<div><dt>${esc(label)}</dt><dd>${esc(degrees(value))}<p>${esc(note)}</p></dd></div>`).join('')}</dl>${!a?'<p>The figures will fill in after automatic analysis if the recording contains usable movements.</p>':''}<p>${esc(info.clinical)}</p><p class="exercise-simple-note">Camera observations, not a validated exercise grade. Hold time, cadence and speed have no universal pass mark established in the studies reviewed. The intended pace and range come from your physiotherapist.</p><p class="exercise-evidence-links">${info.sources.map(link).join(' · ')}</p></section>`;
 }
 export function renderExerciseEvidenceGuide(){

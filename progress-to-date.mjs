@@ -1,5 +1,5 @@
 import {exerciseContextFacts} from './exercise-context.mjs?v=pubmed-1';
-import {renderExerciseEvidenceGuide} from './exercise-evidence.mjs?v=pubmed-1';
+import {renderExerciseEvidenceGuide} from './exercise-evidence.mjs?v=cards-1';
 import {EXERCISE_NAMES,METRICS,finite,seriesFor,dailyRows,metricSummary,formatValue,localDate,dayNumber,dayAt,postOpDay} from './progress-data.mjs?v=pubmed-1';
 import {esc,tile,dayLabel,shortDate,chart,csvDownload,download} from './progress-shared.mjs';
 import {RECOVERY_SOURCES,REFERENCES} from './recovery-references.mjs';

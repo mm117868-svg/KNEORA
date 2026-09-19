@@ -1,7 +1,7 @@
-import {renderExerciseEvidenceSummary} from './exercise-evidence.mjs?v=pubmed-1';
+import {renderExerciseEvidenceSummary} from './exercise-evidence.mjs?v=cards-1';
 import {exerciseContextFacts} from './exercise-context.mjs?v=pubmed-1';
 import {distribution} from './video-analysis/statistics.mjs';
-import {recordedCount} from './patient-progress.js?v=high-five-small-1';
+import {recordedCount} from './patient-progress.js?v=cards-1';
 import {trackingCoverage,videoRepetitionCount} from './measurement-quality.mjs?v=high-five-small-1';
 import {esc} from './progress-shared.mjs';
 
@@ -85,7 +85,12 @@ function statTable(title,rows,note) {
 function table(label,headers,rows) {
   return `<div class="exercise-table-scroll" tabindex="0" role="region" aria-label="${esc(label)}, scroll horizontally for all columns"><table><caption>${esc(label)}</caption><thead><tr>${headers.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map((value,i)=>i===0?`<th scope="row">${esc(value)}</th>`:`<td>${esc(value)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
-const facts=rows=>`<dl class="exercise-detail-facts">${rows.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`;
+/* The three numbers a patient looks for first, large, at the top. */
+const hero=(record,s)=>{const live=record.measurement||{},done=s.count!==null&&s.prescribed?Math.min(1,s.count/s.prescribed):null,best=finite(live.p95_flexion_deg)?live.p95_flexion_deg:live.peak_flexion_deg;
+ const card=(label,value,sub,extra='')=>`<div class="exercise-hero-card${value===null?' is-empty':''}"><span>${esc(label)}</span><strong>${value===null?'–':esc(value)}</strong><small>${esc(sub)}</small>${extra}</div>`;
+ return `<div class="exercise-hero">${card('Repetitions',s.count===null?null:String(s.count),s.prescribed?`of ${s.prescribed} prescribed`:'counted',done===null?'':`<i class="exercise-hero-bar" aria-hidden="true"><b style="width:${Math.round(done*100)}%"></b></i>`)}${card('Time',finite(s.total)?`${Math.floor(s.total/60)}:${String(Math.round(s.total%60)).padStart(2,'0')}`:null,'minutes and seconds')}${card('Knee bend',finite(best)?`${Math.round(best)}°`:null,'typical furthest bend, camera estimate')}</div>`;};
+const EMPTY=/^(Not measured|Not recorded|Not available|Not analysed)/;
+const facts=rows=>`<dl class="exercise-detail-facts">${rows.map(([label,value])=>`<div${EMPTY.test(String(value))?' class="is-empty"':''}><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`;
 const extremeWords=value=>!value?'Not measured':`${seconds(value.value)} · ${value.repetitions.length===1?'repetition':'repetitions'} ${value.repetitions.join(', ')}`;
 
 export function renderDetailedExerciseSummary(record) {
@@ -101,7 +106,7 @@ export function renderDetailedExerciseSummary(record) {
     ['Cadence during complete repetitions',number(t.cadence,' reps/min')]);
   // A partial video count must not be divided by the whole session duration.
   if(!s.report || (finite(s.analysed)&&finite(s.total)&&Math.abs(s.analysed-s.total)<=1&&(s.config.start??0)===0))sessionRows.push(['Repetitions per minute over the whole session',number(t.sessionRate,' reps/min')]);
-  let html=`<section class="exercise-details" aria-label="Full exercise breakdown"><h3>Full exercise breakdown</h3><p>All available measurements for this session. “Not measured” means the recording did not provide that information.</p>${renderExerciseEvidenceSummary(record)}<h4>Repetitions and time</h4>${facts(sessionRows)}`;
+  let html=`<section class="exercise-details" aria-label="Full exercise breakdown"><h3>Full exercise breakdown</h3><p>All available measurements for this session. “Not measured” means the recording did not provide that information.</p>${hero(record,s)}${renderExerciseEvidenceSummary(record)}<h4>Repetitions and time</h4>${facts(sessionRows)}`;
   if(s.config.smallMovement||record.pose_validation?.small_movement)html+='<p>Small movement mode: repetitions are observed movement attempts. The angles are shown separately and do not establish a full-range exercise or clinical test result.</p>';
   html+=`<h4>Help, resistance and symptoms during the exercise</h4>${facts(exerciseContextFacts(record))}<p>These details are reported by the patient, not detected by the camera. Compare sessions using the same help, load and setup. Band type and tension are not quantified here.</p>`;
   const symptoms=[];

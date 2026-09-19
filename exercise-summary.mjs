@@ -1,14 +1,15 @@
-import {recordedCount} from './patient-progress.js?v=position-1';
+import {recordedCount} from './patient-progress.js?v=cards-1';
 import {EXERCISE_NAMES,METRICS,finite,postOpDay,measurementSeries} from './progress-data.mjs?v=pubmed-1';
 import {esc,shortDate,dayLabel} from './progress-shared.mjs';
 import {MIN_COUNT_COVERAGE,trackingCoverage,videoRepetitionCount,trackingFeedback} from './measurement-quality.mjs?v=high-five-small-1';
-import {renderDetailedExerciseSummary} from './exercise-details.mjs?v=pubmed-1';
+import {renderDetailedExerciseSummary} from './exercise-details.mjs?v=cards-1';
 const positive=n=>finite(n)!==null&&n>0?n:null;
 const nonnegative=n=>finite(n)!==null&&n>=0?n:null;
 const round=n=>Math.round(n*10)/10;
 const angle=n=>finite(n)===null?'Not measured':`About ${Math.round(n)}°`;
 const average=xs=>{const a=xs.filter(n=>finite(n)!==null);return a.length?a.reduce((sum,n)=>sum+n,0)/a.length:null;};
 function liveRepetitionTempo(record) {
+ if(record.count_source==='angle_hysteresis'){const times=(record.angle_count?.events||[]).filter(e=>e.status==='accepted'&&finite(e.t)!==null).map(e=>e.t);return average(times.slice(1).map((t,i)=>positive(t-times[i])));}
  if(record.count_source==='pose_gated_optical'){
   const times=[...new Set((record.pose_validation?.events||[]).filter(e=>e.status==='accepted'&&finite(e.confirmedAt)!==null).map(e=>e.confirmedAt))].sort((a,b)=>a-b);
   return average(times.slice(1).map((t,i)=>positive(t-times[i])));
@@ -27,7 +28,7 @@ const facts={
  seated_extension:{title:'Seated knee extension',focus:'The useful things to follow are how far you can straighten your knee and how steadily you bend it back. Keep to the range and pace in your exercise plan.',key:'leastBend',direction:'bend at your straightest position',source:'https://doi.org/10.1093/ptj/pzag058'},
  heel_slide:{title:'Heel slides',focus:'The useful things to follow are how far your knee bends and how well you straighten it again. Build range within your exercise plan, alongside how your knee feels.',key:'greatestBend',direction:'bend at your furthest point',source:'https://doi.org/10.1186/s12891-020-03493-x'}
 };
-const counterLabel=r=>({position_recognition:'Position recognition prototype',pose_gated_optical:'Camera count confirmed in the selected leg',patient_voice:'Your spoken count',knee_tracker:'Live knee tracker count',monitoring:'Live camera count',timer:'Completed holds'}[r.count_source||'monitoring']||'Recorded count');
+const counterLabel=r=>({angle_hysteresis:'Counted from your joint angle',position_recognition:'Position recognition prototype',pose_gated_optical:'Camera count confirmed in the selected leg',patient_voice:'Your spoken count',knee_tracker:'Live knee tracker count',monitoring:'Live camera count',timer:'Completed holds'}[r.count_source||'monitoring']||'Recorded count');
 function previousMeasurement(record,history,metric) {
  const current=finite(metric.get(record));if(current===null)return null;
  const earlier=history.filter(r=>Date.parse(r.started_at)<Date.parse(record.started_at)&&measurementSeries(r,metric)===measurementSeries(record,metric)&&finite(metric.get(r))!==null).sort((a,b)=>Date.parse(a.started_at)-Date.parse(b.started_at)).at(-1);
