@@ -1,8 +1,8 @@
 # Repetition-count video exemplar
 
-[![Watch the seated knee-extension repetition-count exemplar](poster.jpg)](https://mm117868-svg.github.io/knee-recovery/examples/rep-count/)
+[![Watch the seated knee-extension repetition-count exemplar](poster.jpg)](https://mm117868-svg.github.io/KNEORA/examples/rep-count/)
 
-[Watch the video](https://mm117868-svg.github.io/knee-recovery/examples/rep-count/) · [Download the MP4](seated-extension-rep-count.mp4) · [Replay events](replay-events.json)
+[Watch the video](https://mm117868-svg.github.io/KNEORA/examples/rep-count/) · [Download the MP4](seated-extension-rep-count.mp4) · [Replay events](replay-events.json)
 
 This 41-second exemplar shows five seated knee extensions with holds. The counter advances from zero to five at the event times measured by the experimental return-to-start counter in browser playback. The image-comparison method does not use a pose model.
 

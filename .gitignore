@@ -1,2 +1,4 @@
 tools/.countdown-cache/
 tools/__pycache__/
+__pycache__/
+.DS_Store
