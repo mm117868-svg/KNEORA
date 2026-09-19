@@ -2,3 +2,5 @@ tools/.countdown-cache/
 tools/__pycache__/
 __pycache__/
 .DS_Store
+depth-bench/.venv/
+depth-bench/captures/

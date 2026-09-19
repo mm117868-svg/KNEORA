@@ -1,0 +1,8 @@
+# The pose model is the 0.10 series: the 1.0 wheels crash on macOS at start-up,
+# and 0.10 has wheels for Python 3.9 to 3.12 only.
+mediapipe==0.10.14
+numpy>=1.26,<2.2
+# pyrealsense2 is not on PyPI for macOS. Install one of these instead, in order:
+#   pip install realsense-applesilicon
+#   pip install pyrealsense2-macosx
+#   build librealsense from source
