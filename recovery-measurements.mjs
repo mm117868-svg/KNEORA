@@ -1,5 +1,6 @@
 import {dayNumber,localDate,postOpDay,finite} from './progress-data.mjs';
 import {assessPose} from './video-analysis/analysis.mjs';
+import {meanCI95} from './confidence.mjs?v=1';
 
 export const RECOVERY_KEY='kr_recovery_measurements_v1';
 export const MEASUREMENT_VERSION='endpoint-3-flexible';
@@ -31,7 +32,11 @@ export function summariseEndpoint(frames,{rules=CAPTURE_RULES}={}){
  const warnings=[];
  if(rules.noticeSpread!==undefined&&maximum-minimum>rules.noticeSpread)warnings.push('Your knee angle varied during capture. You can save this approximate average; it may not represent your furthest bend or straightest position.');
  if(coverage<.5||angles.length<5)warnings.push('This result uses only a few clear pictures. You can save it, or repeat for a clearer comparison.');
- return {mean:average,minimum,maximum,sd:Math.sqrt(mean(angles.map(a=>(a-average)**2))),accepted:valid.length,sampled:frames.length,coverage,
+ /* The 95% confidence interval of the average, by Student's t from the accepted pictures (confidence.mjs). It says how
+    steady the pictures were, not how accurate the camera is, and it never decides whether a result is accepted. The
+    saved value is still the plain average; records saved before this was added simply have no interval. */
+ const interval=meanCI95(angles);
+ return {mean:average,minimum,maximum,sd:Math.sqrt(mean(angles.map(a=>(a-average)**2))),ci95:interval?{low:interval.low,high:interval.high,half_width:interval.halfWidth}:null,accepted:valid.length,sampled:frames.length,coverage,
   warnings,frames:frames.map(f=>({time_ms:finite(f.time_ms),angle:validAngle(f.angle)?f.angle:null,reason:String(f.reason||'').slice(0,150)})),rules:{...rules}};
 }
 export function kneeAngle3D(hip,knee,ankle){

@@ -51,8 +51,14 @@ test('the recovery check shows the video element with the canvas laid over it', 
 test('changed modules carry new version tags, so a cached copy is not mixed with a new page', () => {
   const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const tag = (text, file) => text.match(new RegExp(file.replace('.', '\\.') + '\\?v=([\\w-]+)'))?.[1];
-  assert.equal(tag(index, 'high-five.mjs'), tag(fs.readFileSync(new URL('../recovery-camera.mjs', import.meta.url), 'utf8'), 'high-five.mjs'),
-    'both pages must load the same copy of the hand module');
-  assert.equal(tag(index, 'recovery-summary.mjs'), 'native-video-1');
+  assert.equal(tag(index, 'recovery-summary.mjs'), 'fluid-1');
   assert.equal(tag(index, 'recovery-summary.css'), 'native-video-1');
+  /* A module asked for under two different tags is loaded twice. Every page and module that uses one of these must
+     ask for the same copy. */
+  const sources = ['index.html', 'recovery-summary.mjs', 'recovery-camera.mjs', 'recovery-trends.mjs', 'recovery-measurements.mjs'].map(name => [name, fs.readFileSync(new URL(`../${name}`, import.meta.url), 'utf8')]);
+  for (const [file, expected] of [['fluid-outline.mjs', 'fluid-1'], ['confidence.mjs', '1'], ['recovery-measurements.mjs', 'interval-1'], ['recovery-trends.mjs', 'interval-1'], ['recovery-camera.mjs', 'fluid-1']]) {
+    const found = sources.flatMap(([name, text]) => [...text.matchAll(new RegExp(`["']\\./${file.replace('.', '\\.')}(\\?v=([\\w-]+))?["']`, 'g'))].map(m => `${name}: ${m[2] || 'no tag'}`));
+    assert.ok(found.length > 0, `${file} is used`);
+    for (const use of found) assert.ok(use.endsWith(`: ${expected}`), `${file} should be loaded as ?v=${expected} everywhere (${use})`);
+  }
 });

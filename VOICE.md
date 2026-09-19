@@ -10,7 +10,7 @@ Use generated audio through `app-voice.mjs`. Do not fall back to an operating-sy
 
 ## Countdown
 
-Selecting an exercise opens the camera and prepares audio playback. It does not start recording. Holding an open palm towards the camera anywhere in the picture for two seconds starts a five-second countdown. Marin says five, four, three, two, one at one-second intervals; recording begins after the full five seconds. The audio stops if the countdown is cancelled or the camera stops supplying frames. Showing another open palm for three seconds can finish the exercise after the starting palm has been lowered or closed. The Finish button remains available.
+Selecting an exercise opens the camera and prepares audio playback. It does not start recording. Raising a hand above the shoulder, or pressing Start (or the space bar), anywhere in the picture for two seconds starts a five-second countdown. Marin says five, four, three, two, one at one-second intervals; recording begins after the full five seconds. The audio stops if the countdown is cancelled or the camera stops supplying frames. Showing another open palm for three seconds can finish the exercise after the starting palm has been lowered or closed. The Finish button remains available.
 
 The live gesture uses the separately bundled MediaPipe Gesture Recognizer and its Open_Palm classification. It does not require body, face or shoulder landmarks. Frozen frames, missing landmarks and interrupted holds do not count as a completed gesture. Camera and hand-model access are required for starting. The body-pose model is used separately for exercise tracking. Historical voice-counted records remain readable, but new sessions use camera-based repetition counting.
 

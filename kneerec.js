@@ -58,6 +58,9 @@ export class OneEuro {
 export class JointFilter {
   constructor(frameH = 720) { this.h = frameH || 720; this.f = Array.from({ length: 6 }, () => new OneEuro()); this.side = null; }
   reset() { for (const f of this.f) f.reset(); this.side = null; }
+  /* How far behind a steadily moving joint this filter leaves it, in seconds, at a speed in frame heights a second:
+     a first-order low-pass trails a ramp by its time constant, 1 / (2 pi cutoff). For display only (fluid-outline.mjs). */
+  lagS(speed) { const f = this.f[0]; return 1 / (2 * Math.PI * (f.minCutoff + f.beta * Math.abs(speed))); }
   apply(lm, t) {
     if (!lm) { this.reset(); return null; }
     if (lm.side !== this.side) { this.reset(); this.side = lm.side; }

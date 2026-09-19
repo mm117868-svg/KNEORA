@@ -1,15 +1,13 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Endpoint model software check</title></head>
-<body><h1>Endpoint model software check</h1><p>No camera or patient data is used. This checks the bundled models on a blank generated image, not measurement accuracy.</p><button id="check">Check Heavy and hand models</button><pre id="result" role="status">Ready</pre><canvas id="frame" width="640" height="360"></canvas>
+<body><h1>Endpoint model software check</h1><p>No camera or patient data is used. This checks the bundled models on a blank generated image, not measurement accuracy.</p><button id="check">Check the Heavy model</button><pre id="result" role="status">Ready</pre><canvas id="frame" width="640" height="360"></canvas>
 <script type="module">
 import {loadPose} from '../kneerec.js?v=endpoint-heavy-images-1';
-import {loadHighFive} from '../high-five.mjs';
 const button=document.querySelector('#check'),status=document.querySelector('#result'),canvas=document.querySelector('#frame');
-button.onclick=async()=>{button.disabled=true;status.textContent='Loading bundled models…';let pose,hands;
+button.onclick=async()=>{button.disabled=true;status.textContent='Loading bundled models…';let pose;
  try{const loaded=await loadPose({variant:'heavy',runningMode:'IMAGE',modelDirs:[new URL('../models',import.meta.url).href],wasmLocal:new URL('../vendor/wasm',import.meta.url).href});pose=loaded.landmarker;await pose.setOptions({numPoses:2});
  canvas.getContext('2d').fillRect(0,0,640,360);const counts=[];for(let i=0;i<6;i++)counts.push(pose.detect(canvas).landmarks.length);
- hands=await loadHighFive();const handCount=hands.recognizeForVideo(canvas,performance.now()).landmarks.length;
- if(counts.some(n=>n!==0)||handCount!==0)throw Error('Unexpected detection on blank image');
- status.textContent=`PASS: ${loaded.model}; ${loaded.library}; IMAGE mode; six independent pictures; no false pose on blank input. Hand model loaded and processed a frame. No patient measurement was created.`;
- }catch(error){status.textContent=`FAIL: ${error.message}`;}finally{pose?.close();hands?.close();button.disabled=false;}
+ if(counts.some(n=>n!==0))throw Error('Unexpected detection on blank image');
+ status.textContent=`PASS: ${loaded.model}; ${loaded.library}; IMAGE mode; six independent pictures; no false pose on blank input. No patient measurement was created.`;
+ }catch(error){status.textContent=`FAIL: ${error.message}`;}finally{pose?.close();button.disabled=false;}
 };
 </script></body></html>

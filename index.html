@@ -159,6 +159,7 @@ details.more summary{cursor:pointer;font-weight:600}
 .brief .hands{margin-top:12px;padding:14px;border-radius:14px;background:var(--paper2);font-size:16px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;align-items:stretch;gap:10px}
 .brief .hands .bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden}
 .brief .hands .fill{height:100%;width:0;background:var(--brand);transition:width .1s linear}
+.brief .start-now{display:block;width:100%;margin-top:14px;min-height:52px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer}.brief .start-now:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .brief .gesture-retry{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:var(--bone);color:var(--ink);padding:10px 14px;cursor:pointer}
 .countdown{position:absolute;inset:0;z-index:8;display:grid;place-items:center;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:clamp(120px,30vh,260px);color:#fff;text-shadow:0 6px 40px rgba(0,0,0,.7);cursor:pointer;text-align:center}
 .countdown small{display:block;font-family:"Inter",sans-serif;font-size:16px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-align:center;color:var(--dkmuted)}
@@ -582,7 +583,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
         <p class="small-note">Choose the leg that was operated on before opening an exercise.</p>
       </fieldset>
       <fieldset class="setting-box"><legend>Live camera display</legend>
-        <label class="setting-check"><input type="checkbox" id="showangle" checked><span>Show my live knee angle<small>Display the MediaPipe knee angle while positioning, during the countdown and throughout the session.</small></span></label>
+        <label class="setting-check"><input type="checkbox" id="showangle" checked><span>Show my live knee angle<small>Display the MediaPipe knee angle while positioning, during the countdown and throughout the session. The ± beside it and the shaded band at the knee show how steady the reading is (a 95% interval of the last third of a second), not how accurate it is.</small></span></label>
         <p class="small-note">Only your operated leg is outlined: hip, knee and ankle. The other leg, your arms, trunk and face are never drawn. The outline is steadied for display; measurements use the original positions.</p>
         <p class="small-note">These displays need the pose model and a clear view of your leg. An unavailable angle is shown as a dash.</p>
       </fieldset>
@@ -591,8 +592,8 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
         <label class="setting-check"><input type="checkbox" id="savefiles" checked><span>Save session files to Downloads<small>Download the session files when you finish. Your browser controls where downloads are saved.</small></span></label>
       </fieldset>
       <fieldset class="setting-box session-settings"><legend>Start and finish sessions</legend>
-        <p class="small-note"><b>Start from your exercise position.</b> Show an open palm towards the camera anywhere in the picture and hold it for two seconds. A five-second Marin countdown gives you time to lower your hand before recording starts. Your head does not need to be visible.</p>
-        <p class="small-note">To finish, show an open palm for three seconds or select Finish. The app confirms when recording has stopped and you can move from your exercise position.</p>
+        <p class="small-note"><b>Start from your exercise position.</b> Raise one hand above your shoulder and keep it up for two seconds, or press Start (or the space bar). A five-second Marin countdown gives you time to lower your hand and settle before recording starts. Your shoulder and hand need to be in the picture for the raised hand to be seen; the Start button works without.</p>
+        <p class="small-note">To finish, raise a hand for three seconds or select Finish. The app confirms when recording has stopped and you can move from your exercise position.</p>
         <p class="small-note">Spoken guidance uses Marin, an AI-generated voice with a soft, warm British female delivery. The countdown stays visible if audio is unavailable.</p>
         <p class="small-note">MediaPipe detects the hand gesture on this device. Camera access is needed; the microphone is not used.</p>
       </fieldset>
@@ -675,7 +676,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       <h3>Ready to begin?</h3>
       <div class="hands" id="hands"><span id="handtext" role="status"></span><div class="bar" aria-hidden="true"><div class="fill" id="handfill"></div></div></div>
       <button type="button" class="gesture-retry" id="poseRetry" hidden>Retry leg tracking</button>
-      <button type="button" class="gesture-retry" id="handRetry" hidden>Retry hand recognition</button>
+      <button type="button" class="start-now" id="startNow">Start · 5 second countdown</button>
       <details class="sound-help"><summary>Check the countdown sound</summary><button type="button" class="gesture-retry" id="voiceTest">Test Marin voice</button><p id="voiceStatus" class="small-note" role="status"></p></details>
     </div>
     <details class="tile instr" id="exerciseInstructions"><summary>Exercise instructions</summary><ol id="instr"></ol><p id="briefSetup"></p></details>
@@ -692,8 +693,8 @@ const positionCanvas=document.createElement('canvas');positionCanvas.width=posit
 const positionCtx=positionCanvas.getContext('2d',{willReadFrequently:true});
 async function preparePositionModel(exercise){positionModel=null;if(!['straight_leg_raise','seated_extension','heel_slide'].includes(exercise))return;try{const r=await fetch(new URL('./tools/position-recogniser/models/'+exercise+'.json',import.meta.url));if(!r.ok)throw Error('Model unavailable');positionModel=await r.json();if(positionModel.exercise!==exercise)throw Error('Wrong model');}catch(e){positionModel=null;console.warn('Position model unavailable');}}
 
-import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, JointFilter, summarise, tracePreview, angleChartSvg, drawLeg, loadPose,
-         FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=high-five-small-1";
+import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, JointFilter, summarise, tracePreview, angleChartSvg, loadPose,
+         FlowMonitor, localIso, stampOf, download, daysPostOp, loadRecords, storeRecord, updateRecord, pickRecorderMime } from "./kneerec.js?v=fluid-1";
 import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=full-breakdown-1";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js?v=wide-smooth-1";
 import { ageYears, loadProfile, saveProfile } from "./patient-profile.mjs";
@@ -702,13 +703,15 @@ import { AppVoice, completionNotice } from "./app-voice.mjs";
 import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=pubmed-1";
 import { mountExerciseContext } from "./exercise-context.mjs?v=pubmed-1";
 import { renderDetailedExerciseSummary } from "./exercise-details.mjs?v=pubmed-1";
-import { renderRecoverySummary } from "./recovery-summary.mjs?v=native-video-1";
+import { renderRecoverySummary } from "./recovery-summary.mjs?v=fluid-1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
 import { renderProgressToDate } from "./progress-to-date.mjs?v=pubmed-1";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
 import { patientRecords, completedExercisesForDay, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=daily-ticks-1";
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-1";
-import {loadHighFive, highFiveState, drawHands, HIGH_FIVE_SETTINGS} from "./high-five.mjs?v=palm-anywhere-1";
+import {raisedHandState, drawRaisedHand, RAISED_HAND} from "./raised-hand.mjs?v=1";
+import {FluidOutline, PictureClock, drawOutline} from "./fluid-outline.mjs?v=fluid-1";
+import {trendCI95} from "./confidence.mjs?v=1";
 
 
 /* ---------------- Exercise library ----------------
@@ -784,7 +787,7 @@ const ICONS = {
 const PHASES = { 1: "Week 0–1", 2: "Week 1–4", 3: "Week 4–8", 4: "Week 8+" };
 const PHASE_DAYS = { 1: "days 0 to 6 after the operation", 2: "days 7 to 27", 3: "days 28 to 55", 4: "day 56 onwards" };
 const phaseForDay = d => d === null ? null : d < 7 ? 1 : d < 28 ? 2 : d < 56 ? 3 : 4;
-const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. To start, show an open palm anywhere in the picture for two seconds. Your head can stay outside the picture. Shorts or bare legs help. Hold briefly at the starting position while the counting box is placed around your selected leg. Include the complete leg movement in the picture.";
+const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. To start, raise one hand above your shoulder for two seconds, or press Start. Shorts or bare legs help. Hold briefly at the starting position while the counting box is placed around your selected leg. Include the complete leg movement in the picture.";
 
 
 const $ = id => document.getElementById(id);
@@ -951,15 +954,10 @@ else loadExercisePose();
 $("poseRetry").onclick = () => { loadExercisePose(); refreshHint(); };
 
 
-let handRecognizer = null, handModelState = "idle", handModelLoading = false;
-async function loadHandModel() {
-  if (handModelLoading || handRecognizer) return;
-  handModelLoading = true; handModelState = "loading"; refreshHint();
-  try { handRecognizer = await loadHighFive(); handModelState = "ready"; }
-  catch(e) { handModelState = "failed"; console.warn("Hand model: " + e.message); }
-  finally { handModelLoading = false; refreshHint(); }
-}
-$("handRetry").onclick = () => loadHandModel();
+/* No hand model. A raised hand is read from the pose result the page already has (raised-hand.mjs), and the Start
+   button and the space bar start the same countdown with no model at all. */
+$("startNow").onclick = () => beginCountdown();
+addEventListener("keydown", e => { if (e.code === "Space" && stream && !running && countdownStart === null && !/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(document.activeElement?.tagName || "")) { e.preventDefault(); beginCountdown(); } });
 
 async function listCams() {
   try { const devs = await navigator.mediaDevices.enumerateDevices(); const cams = devs.filter(d => d.kind === "videoinput");
@@ -992,10 +990,31 @@ let trace, monitor, t0, frameNo, lastVideoTime = -1, rafId = 0, startedAt, dragg
 let lastPoseAt = -Infinity;
 /* The drawing layer over the video. Only the operated leg is outlined: hip, knee and ankle, the three joints
    the angle comes from. The other leg, the trunk, the arms and the face are found by the pose model but never
-   drawn. Display only: the outline uses the same One Euro filter as the angle trace, which follows a moving
-   leg closely and holds a still one steady; nothing drawn here feeds a measurement or a count. */
+   drawn. Display only: nothing drawn here feeds a measurement or a count.
+
+   The layer is repainted on every screen refresh, not only when a pose result arrives. fluid-outline.mjs carries
+   the outline between results so it moves with the leg and not in steps, fades it in and out, and draws it
+   fainter when the pose model is less sure. With the angle shown, an arc marks the bend at the knee and a wedge
+   either side of the shin shows how steady the displayed reading is: the 95% interval of the last third of a
+   second's readings about their own trend, so a knee that is moving smoothly is not mistaken for an unsteady
+   reading (confidence.mjs). */
 const clearOverlay = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
-const legStyle = () => ({ thigh: "#3ddc84", shank: "#3ddc84", radius: Math.max(5, canvas.width / 120), lineWidth: Math.max(4, canvas.width / 200), label: false });
+/* The joints handed to the outline have been through the One Euro filter, which leaves them a little behind a moving
+   leg. The outline is told by how much, so it is drawn on the leg and not on the filter's trail. */
+const jointLag = new JointFilter(), newOutline = () => new FluidOutline(canvas.height, undefined, speed => jointLag.lagS(speed));
+let outline = newOutline();
+/* The outline keeps the video's own clock, so it sits on the leg in the picture that is showing even when the camera
+   slows or stalls. A result is timed by the picture it was made from; the drawing, by the picture now on screen. */
+const pictureClock = new PictureClock();
+const aimOutline = (leg, pictureS) => leg ? outline.target([leg.hip, leg.knee, leg.ankle], pictureS, leg.visibility) : outline.lose(pictureS);
+function paintOverlay(now) {
+  clearOverlay();
+  const pictureNow = pictureClock.read(video.currentTime, now / 1000);
+  const showAngle = $("showangle").checked && Number.isFinite(angleDisplay.shown), steadiness = showAngle ? trendCI95(angleDisplay.sampleTimes, angleDisplay.sample) : null;
+  for (const part of outline.at(pictureNow)) drawOutline(ctx, part.points, { alpha: part.alpha, scale: canvas.width / 1100,
+    angle: showAngle && !part.fading ? angleDisplay.shown : null, halfWidth: steadiness ? steadiness.halfWidth : null });
+  if (now - lastHandAt <= 450) drawRaisedHand(ctx, lastHandResult, canvas.width, canvas.height);
+}
 /* Display only. The measured angle is not changed by anything here: the trace, the statistics, the report
    and the counter all keep the per-frame value.
 
@@ -1011,11 +1030,12 @@ const ANGLE_MOVING_DEG_S = 15;   // above this the knee counts as moving and the
 const ANGLE_STEADY_DEG = 0.75;   // while still, the reading only moves once it has drifted this far
 class AngleDisplay {
   constructor(windowMs = ANGLE_WINDOW_MS, holdMs = ANGLE_HOLD_MS) { this.windowMs = windowMs; this.holdMs = holdMs; this.reset(); }
-  reset() { this.win = []; this.nextAt = 0; this.shown = NaN; }
+  reset() { this.win = []; this.nextAt = 0; this.shown = NaN; this.sample = []; this.sampleTimes = []; }
   update(angle, now) {
     if (Number.isFinite(angle)) this.win.push([now, angle]);
     while (this.win.length && now - this.win[0][0] > this.windowMs) this.win.shift();
-    const vals = this.win.map(v => v[1]).sort((a, b) => a - b);
+    this.sample = this.win.map(v => v[1]); this.sampleTimes = this.win.map(v => v[0]);   // every reading in the window and its time, for the steadiness band: leaving out the extremes would make it too narrow
+    const vals = [...this.sample].sort((a, b) => a - b);
     if (vals.length >= 5) { vals.shift(); vals.pop(); }
     const mean = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : NaN;
     /* how fast the knee is going, from the start and end thirds of the window rather than from single
@@ -1062,7 +1082,6 @@ async function openExercise(ex) {
   await preparePositionModel(ex.id);
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; resetHand(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   $("voiceStatus").textContent = "";
-  loadHandModel();
   appVoice.prepare();
   appVoice.prepare("repetitions_complete"); appVoice.prepare("session_ended");
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
@@ -1075,7 +1094,7 @@ async function openExercise(ex) {
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
   else { z.style.left = "0"; z.style.right = (100 - pct(ex.aim.deg)) + "%"; z.style.borderLeft = "none"; z.style.borderRight = "2px solid var(--green)"; $("angleSub").innerHTML = `straight is <b>0°</b>`; }
   $("angleTile").style.display = $("showangle").checked && poseState !== "off" && poseState !== "failed" ? "block" : "none";
-  $("status").textContent = "Get into position, then show an open palm to start."; $("status").className = "status";
+  $("status").textContent = "Get into position, then raise a hand or press Start."; $("status").className = "status";
   $("finish").disabled = true; $("reset").disabled = true; $("boxbtn").disabled = true; $("clock").textContent = "00:00";
   $("track").textContent = "camera starting"; $("track").className = "track off";
   $("done").className = "done"; $("done").innerHTML = ""; $("handring").hidden = true; $("countdown").hidden = true; $("countdown").innerHTML = "";
@@ -1137,39 +1156,34 @@ function showCounts() {
 
 }
 
-/* The hand model is independent of body-pose tracking. */
 function refreshHint() {
   if (!stream || running) return;
   $("poseRetry").hidden = poseState !== "failed" && poseState !== "off";
-  $("handRetry").hidden = handModelState !== "failed";
   let text;
-  if (handRecognizer) {
-    text = "When ready, hold up a high five for 2 seconds. Lower your hand during the countdown, then begin your exercise.";
-    $("status").textContent = "Show an open palm for 2 seconds to start recording.";
-  } else if (handModelState === "failed") {
-    text = "Hand recognition could not load. Select Retry hand recognition to continue.";
-    $("status").textContent = "Hand recognition is unavailable. Recording has not started.";
+  if (landmarker) {
+    text = "When ready, raise one hand above your shoulder for 2 seconds, or press Start (or the space bar). Lower your hand during the countdown, then begin your exercise.";
+    $("status").textContent = "Raise a hand for 2 seconds, or press Start, to begin recording.";
   } else {
-    text = "Preparing hand recognition. You will be able to start with an open palm anywhere in the picture.";
-    $("status").textContent = "Loading hand recognition. Recording has not started.";
+    text = "Press Start (or the space bar) when you are ready. You will have a countdown to get into position.";
+    $("status").textContent = "Press Start to begin recording.";
   }
   text += " After the countdown, keep your leg resting and still for 3 seconds for position recognition.";
   if(appVoice.state !== "ready") text += " Watch the countdown on screen if audio is unavailable.";
   $("handtext").textContent = text;
 }
 
-/* ---------------- open-palm start and finish ----------------
-   A separate hand model recognises Open_Palm anywhere in the frame. */
+/* ---------------- raised-hand start and finish ----------------
+   A hand raised above its shoulder, anywhere across the picture, read from the pose result (raised-hand.mjs). */
 const HAND_HOLD_START_S = 2, HAND_HOLD_FINISH_S = 3, COUNTDOWN_S = 5;
 const HAND_SAMPLE_MAX_GAP_MS = 500;
 let handSince = null, handLastSample = null, countdownStart = null, previewN = 0, handArmed = false, statusBefore = null;
 let lastHandAt = -Infinity, lastHandResult = null, handReleasedAt = null, handReleaseSample = null;
-function sampleHand(now) {
-  if (!handRecognizer || now-lastHandAt < HIGH_FIVE_SETTINGS.sampleMs) return null;
-  lastHandAt = now;
-  try { lastHandResult = handRecognizer.recognizeForVideo(video, Math.round(now)); }
-  catch { lastHandResult = null; }
-  return highFiveState(lastHandResult);
+/* body: the whole-body pose result made from this very frame (null when nobody was found); undefined when the pose
+   did not run on this frame, and then there is nothing new to look at. */
+function sampleHand(now, body) {
+  if (body === undefined || now-lastHandAt < RAISED_HAND.sampleMs) return null;
+  lastHandAt = now; lastHandResult = body;
+  return raisedHandState(body, canvas.width, canvas.height);
 }
 function finishHand(state, now) {
   if (handReleaseSample !== null && (now-handReleaseSample > HAND_SAMPLE_MAX_GAP_MS || now < handReleaseSample)) handReleasedAt = null;
@@ -1177,7 +1191,7 @@ function finishHand(state, now) {
   if (!handArmed) {
     if (state === "absent" || state === "other") {
       handReleasedAt ??= now;
-      if (now-handReleasedAt >= HIGH_FIVE_SETTINGS.releaseMs) handArmed = true;
+      if (now-handReleasedAt >= RAISED_HAND.releaseMs) handArmed = true;
     } else handReleasedAt = null;
     return 0;
   }
@@ -1198,12 +1212,12 @@ function showHand(f, finishing) {
   if (el.hidden) { el.hidden = false; el.className = "handring" + (finishing ? " finish" : ""); }
   $("hfill").style.width = (f * 100) + "%";
   const left = Math.ceil((finishing ? HAND_HOLD_FINISH_S : HAND_HOLD_START_S) * (1 - f));
-  $("htext").textContent = finishing ? `Hold your open palm to finish… ${left}` : `Open palm seen. Hold it still… ${left}`;
-  if (finishing) { if (statusBefore === null) statusBefore = $("status").textContent; $("status").textContent = `Open palm: hold it still to finish… ${left}`; }
+  $("htext").textContent = finishing ? `Keep your hand up to finish… ${left}` : `Hand seen. Keep it up… ${left}`;
+  if (finishing) { if (statusBefore === null) statusBefore = $("status").textContent; $("status").textContent = `Hand raised: keep it up to finish… ${left}`; }
 }
 function restoreStatus() { if (statusBefore !== null) { $("status").textContent = statusBefore; statusBefore = null; } }
 function beginCountdown() {
-  if (countdownStart !== null || running || !stream || !handRecognizer) return;
+  if (countdownStart !== null || running || !stream) return;
   countdownStart = performance.now(); resetHand(); showHand(0, false);
   const audioStarted = appVoice.play();
   $("brief").classList.remove("up"); setExerciseSidebar(false); $("countdown").hidden = false;
@@ -1243,49 +1257,50 @@ function cameraFailed(e) {
   };
 }
 /* Live picture beside optional instructions while the patient gets into position; no session is recorded yet.
-   Body overlays are display only. The independent hand model watches for an open palm. */
-let previewId = 0, previewLastVideoTime = -1, previewLastFrameAt = null, previewAll = null, previewLeg = null, previewPoseAt = -Infinity, previewJoints = null;
-function preview() { previewJoints = null; previewLeg = null; cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; previewStep(); }
+   Body overlays are display only. A raised hand is read from the same pose result. */
+let previewId = 0, previewLastVideoTime = -1, previewLastFrameAt = null, previewAll = null, previewLeg = null, previewPoseAt = -Infinity, previewJoints = null, previewPoseMs = 0, previewPoseSkip = 1;
+function preview() { previewJoints = null; previewLeg = null; previewPoseMs = 0; previewPoseSkip = 2; outline = newOutline(); cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; previewStep(); }
 
 function previewStep() {
   if (running || !stream) return;
   previewId = requestAnimationFrame(previewStep);
   const now = performance.now();
   if (previewLastFrameAt !== null && now - previewLastFrameAt > HAND_SAMPLE_MAX_GAP_MS) {
-    resetHand(); previewJoints?.reset(); previewLeg = null; previewAll = null; showHand(0, false); $("handfill").style.width = "0";
+    resetHand(); previewJoints?.reset(); previewLeg = null; previewAll = null; showHand(0, false); $("handfill").style.width = "0";   // the outline needs no telling: it drops a result that has grown too old by itself
     if (countdownStart !== null) cancelCountdown(true);
   }
+  const newFrame = video.readyState >= 2 && video.currentTime !== previewLastVideoTime;
+  let bodyNow;   // stays undefined unless the pose runs on this frame
+  if (newFrame) {
+    previewLastVideoTime = video.currentTime; previewLastFrameAt = now;
+    // The pose runs as often as this device can afford: every frame when it is quick, every few when it is not.
+    if (landmarker && ++previewN % previewPoseSkip === 0 && video.videoWidth > 0) {
+      const t1 = performance.now();
+      let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
+      previewPoseMs += 0.2 * ((performance.now() - t1) - previewPoseMs); previewPoseSkip = Math.max(2, Math.min(6, Math.ceil(previewPoseMs / 25)));   // at most every other picture: the outline is carried between results, and the graphics processor is left free to play the video
+      previewAll = res?.landmarks?.[0] || null; previewPoseAt = now; bodyNow = previewAll;
+      previewLeg = (previewJoints ??= new JointFilter(canvas.height)).apply(previewAll ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null, now / 1000);
+      aimOutline(previewLeg, previewLastVideoTime);   // timed by the picture the pose was made from
+    }
+    const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null;
+    if (current.kind !== "hold") {
+      const view = inspectExerciseLeg(now-previewPoseAt <= 450 ? previewAll : null, $("side").value, canvas.width, canvas.height);
+      $("track").textContent = view.message;
+      $("track").className = "track " + (view.clear ? "ok" : "off");
+    }
+    if ($("showangle").checked) {
+      $("angleTile").style.display = "block";
+      const angle = leg ? kneeFlexionDeg(leg.hip, leg.knee, leg.ankle) : NaN;
+      const shown = angleDisplay.update(angle, now);
+      $("angle").textContent = Number.isFinite(shown) ? shown.toFixed(0) : "–";
+      $("fill").style.width = Number.isFinite(shown) ? pct(shown)+"%" : "0";
+    }
+  }
+  const gesture = newFrame && countdownStart === null ? sampleHand(now, bodyNow) : null;
+  paintOverlay(performance.now());   // every screen refresh, whether or not a new camera frame has arrived; the clock is read again because the pose may just have taken a while
   // A frozen image cannot complete a gesture or finish the countdown.
-  if (video.readyState < 2 || video.currentTime === previewLastVideoTime) {
-    if (video.readyState >= 2 && now-previewPoseAt > 450) clearOverlay();   // an outline this old no longer belongs to the picture
-    return;
-  }
-  previewLastVideoTime = video.currentTime; previewLastFrameAt = now;
-  clearOverlay();
-
-  if (landmarker && ++previewN % 3 === 0 && video.videoWidth > 0) {
-    let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
-    previewAll = res?.landmarks?.[0] || null; previewPoseAt = now;
-    previewLeg = (previewJoints ??= new JointFilter(canvas.height)).apply(previewAll ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null, now / 1000);
-  }
-  const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null;
-  if (current.kind !== "hold") {
-    const view = inspectExerciseLeg(now-previewPoseAt <= 450 ? previewAll : null, $("side").value, canvas.width, canvas.height);
-    $("track").textContent = view.message;
-    $("track").className = "track " + (view.clear ? "ok" : "off");
-  }
-  if (previewLeg && now-previewPoseAt <= 450) drawLeg(ctx, previewLeg, legStyle());
-
-  if ($("showangle").checked) {
-    $("angleTile").style.display = "block";
-    const angle = leg ? kneeFlexionDeg(leg.hip, leg.knee, leg.ankle) : NaN;
-    const shown = angleDisplay.update(angle, now);
-    $("angle").textContent = Number.isFinite(shown) ? shown.toFixed(0) : "–";
-    $("fill").style.width = Number.isFinite(shown) ? pct(shown)+"%" : "0";
-  }
+  if (!newFrame) return;
   if (countdownStart !== null) { if (tickCountdown(now)) startSession(); return; }
-  const gesture = sampleHand(now);
-  if (now-lastHandAt <= 450) drawHands(ctx, lastHandResult, canvas.width, canvas.height);
   if (gesture !== null) {
     const f = handHold(gesture === "open", HAND_HOLD_START_S, now);
     $("handfill").style.width = (f * 100) + "%"; showHand(f, false);
@@ -1297,6 +1312,7 @@ function startSession() {
   if (!stream || running) return;
   cancelAnimationFrame(previewId); cancelCountdown(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   const fps = stream.getVideoTracks()[0].getSettings().frameRate || 30;
+  outline = newOutline();
   trace = new AngleTrace(1, canvas.height); monitor = new FlowMonitor(canvas.width, canvas.height, fps);
   angleDisplay.reset();
   frameNo = 0; lastVideoTime = -1; prescribedDone = false; startedAt = new Date(); t0 = performance.now(); poseMs = 0; poseSkip = 1; lastLm = null; lastAngle = NaN; lastAll = null; peak = NaN; low = NaN;
@@ -1327,14 +1343,13 @@ function step() {
   if (handLastSample !== null && now - handLastSample > HAND_SAMPLE_MAX_GAP_MS) { resetHand(); showHand(0, true); }
   if (video.currentTime === lastVideoTime) {
     legGate?.advance(t);
-    if (video.readyState >= 2 && now-lastPoseAt > 450) clearOverlay();
+    paintSession(now);   // the outline keeps moving between camera frames
     return;
   }
   lastVideoTime = video.currentTime; frameNo++;
-  clearOverlay();
 
   // measurement layer: frame -> landmarks -> angle. Gets the frame and the clock only.
-  let lm = null, angle = NaN;
+  let lm = null, angle = NaN, bodyNow;   // bodyNow stays undefined unless the pose runs on this frame
   if (landmarker && frameNo % poseSkip === 0 && video.videoWidth > 0) {
     const t1 = performance.now();
     let res = null;
@@ -1343,9 +1358,10 @@ function step() {
     poseMs += 0.2 * ((performance.now() - t1) - poseMs); poseSkip = Math.max(1, Math.min(60, Math.ceil(poseMs / 25)));
     lastPoseAt = now;
 
-    lastAll = (res && res.landmarks && res.landmarks[0]) ? res.landmarks[0] : null;
+    lastAll = (res && res.landmarks && res.landmarks[0]) ? res.landmarks[0] : null; bodyNow = lastAll;
     if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.2);
     angle = trace.add(frameNo, t, lm); lastLm = lm; lastAngle = angle;
+    aimOutline(trace.lastLm, lastVideoTime);   // trace.lastLm is the operated leg after the One Euro filter: the joints the angle itself comes from
   } else if (landmarker) { lm = lastLm; angle = lastAngle; }
   peak = trace.quantile(0.95);   // "best today" is the 95th percentile of the trusted frames so far, not the single highest frame
 
@@ -1355,8 +1371,8 @@ function step() {
 
   if (count >= current.count && !prescribedDone) { prescribedDone = true; $("status").textContent = `That's your ${current.count}. Finish when you're ready, or carry on.`; $("status").className = "status ok"; }
 
-  // The starting palm must first disappear or close before a new high five can finish.
-  const gesture = sampleHand(now);
+  // The starting hand must first come down before a raised hand can finish.
+  const gesture = sampleHand(now, bodyNow);
   if (gesture !== null) {
     const f = finishHand(gesture, now); showHand(f, true);
     if (f >= 1) { resetHand(); $("handring").hidden = true; finish(false); return; }
@@ -1381,9 +1397,10 @@ function step() {
     if (!Number.isNaN(peak)) $("angleSub").innerHTML = (current.aim.kind === "bend" ? `bend towards <b>${current.aim.deg}°</b>` : `straight is <b>0°</b>`) + ` · best today <b>${peak.toFixed(0)}°</b>`;
   }
 
-  // trace.lastLm is the operated leg after the One Euro filter: the joints the angle itself comes from.
-  if (trace.lastLm && now-lastPoseAt <= 450) drawLeg(ctx, trace.lastLm, legStyle());
-  if (now-lastHandAt <= 450) drawHands(ctx, lastHandResult, canvas.width, canvas.height);
+  paintSession(performance.now());   // read again: the pose above may have taken a while, and the outline is carried to the moment it is drawn
+}
+function paintSession(now) {
+  paintOverlay(now);
   const [bx, by, bw, bh] = [canvas.width*10/32,canvas.height*.12,canvas.width*22/32,canvas.height*.78]; ctx.strokeStyle = "rgba(255,255,255,.65)"; ctx.lineWidth = 3; ctx.strokeRect(bx, by, bw, bh);
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
 }

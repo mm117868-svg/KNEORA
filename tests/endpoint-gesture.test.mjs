@@ -30,31 +30,33 @@ function setup(t,{missingKnee=false,handFailure=false}={}){
  const status=[],results=[],starts=[],ready=[];
  const video={srcObject:null,readyState:2,currentTime:0,videoWidth:1000,videoHeight:500,play:async()=>{}};
  const ctx={drawImage(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},arc(){},fill(){}};
- const landmarks=Array.from({length:33},()=>null);
+ const landmarks=Array.from({length:33},()=>({x:.5,y:.5,visibility:0,presence:0}));
  // Distinct knees confirm the camera keeps the operated side throughout capture.
  for(const [id,x,y] of [[23,.2,.5],[25,.5,.5],[27,.5,.8],[24,.2,.4],[26,.4,.4],[28,.6,.4]])landmarks[id]={x,y,visibility:.99,presence:.99};
+ // The right arm: shoulder, hip and a wrist that is either held high or resting by the hip.
+ landmarks[12]={x:.25,y:.2,visibility:.95};landmarks[11]={x:.26,y:.2,visibility:.4};
+ const body=()=>{const lm=landmarks.map(p=>({...p}));lm[16]={x:.3,y:hand==='open'?.02:.42,visibility:hand==='absent'?0:.95};if(missingKnee)lm[25].visibility=lm[26].visibility=0;return lm;};
  const camera=createEndpointCamera({video,canvas:{getContext:()=>ctx},onStatus:s=>status.push(s),onReady:r=>ready.push(r),onCaptureStart:s=>starts.push(s),onResult:r=>results.push(r),
   getStream:async()=>({getTracks:()=>[{stop:()=>stopped++}]}),
-  modelLoader:async options=>{assert.equal(options.variant,'heavy');assert.equal(options.runningMode,'IMAGE');return {model:'TEST pose',landmarker:{setOptions:async()=>{},detect:()=>({landmarks:missingKnee?[]:[landmarks]}),detectForVideo:()=>assert.fail('Endpoint pictures must use IMAGE detection'),close:()=>closed++}};},
-  handLoader:async()=>{if(handFailure)throw Error('Missing model');return {close:()=>closed++,recognizeForVideo:()=>({landmarks:hand==='absent'?[]:[Array.from({length:21},()=>({x:.2,y:.2}))],gestures:hand==='absent'?[]:[[{categoryName:hand==='open'?'Open_Palm':'Closed_Fist',score:.9}]]})};}
+  modelLoader:async options=>{assert.equal(options.variant,'heavy');assert.equal(options.runningMode,'IMAGE');return {model:'TEST pose',landmarker:{setOptions:async()=>{},detect:()=>({landmarks:[body()]}),detectForVideo:()=>assert.fail('Endpoint pictures must use IMAGE detection'),close:()=>closed++}};},
  });
  return {camera,status,results,starts,ready,video,setHand:v=>hand=v,closed:()=>closed,stopped:()=>stopped,
   frames:n=>{for(let i=0;i<n;i++){time+=100;video.currentTime=time/1000;callback(time);}}};
 }
-test('open palm captures an averaged burst without a button and never repeats while held',async t=>{
- const h=setup(t);await h.camera.start('right');h.frames(21);assert.equal(h.starts.length,1);assert.equal(h.starts[0].trigger,'open_palm');
+test('a raised hand captures an averaged burst without a button and never repeats while held',async t=>{
+ const h=setup(t);await h.camera.start('right');h.frames(21);assert.equal(h.starts.length,1);assert.equal(h.starts[0].trigger,'raised_hand');
  assert.equal(h.camera.capture(),false);h.frames(60);t.mock.timers.tick(5999);assert.equal(h.results.length,0);t.mock.timers.tick(1);
  assert.equal(h.results.length,1);assert.equal(h.results[0].summary.mean,0);assert.equal(h.results[0].summary.accepted,10);
  h.frames(40);assert.equal(h.starts.length,1);
  h.setHand('absent');h.frames(6);h.setHand('open');h.frames(21);assert.equal(h.starts.length,2);
- h.camera.stop();t.mock.timers.tick(6000);assert.equal(h.results.length,1);assert.equal(h.closed(),2);assert.equal(h.stopped(),1);
+ h.camera.stop();t.mock.timers.tick(6000);assert.equal(h.results.length,1);assert.equal(h.closed(),1);assert.equal(h.stopped(),1);
 });
-test('button capture uses the same sequence and works without the hand model',async t=>{
- const h=setup(t,{handFailure:true});await h.camera.start('left');assert.equal(h.ready.at(-1),true);assert.match(h.status.at(-1),/unavailable/);
+test('button capture uses the same sequence, and no hand model is loaded',async t=>{
+ const h=setup(t);h.setHand('absent');await h.camera.start('left');assert.equal(h.ready.at(-1),true);assert.match(h.status.at(-1),/raise one hand/);
  assert.equal(h.camera.capture(),true);assert.equal(h.starts[0].trigger,'button');h.frames(60);t.mock.timers.tick(6000);
  assert.equal(h.results[0].summary.mean,90);h.camera.stop();
 });
-test('hand recognition never substitutes for missing knee landmarks',async t=>{
+test('a raised hand never substitutes for missing knee landmarks',async t=>{
  const h=setup(t,{missingKnee:true});await h.camera.start('right');h.frames(21);assert.equal(h.starts.length,1);h.frames(60);t.mock.timers.tick(6000);
  assert.equal(h.results[0],null);assert.match(h.status.at(-1),/Not enough clear pictures/);h.camera.stop();
 });

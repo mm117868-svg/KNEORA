@@ -1,4 +1,5 @@
-import {measurementSeriesKey} from './recovery-measurements.mjs?v=endpoint-3-flexible';
+import {measurementSeriesKey} from './recovery-measurements.mjs?v=interval-1';
+import {intervalText} from './confidence.mjs?v=1';
 import {postOpDay} from './progress-data.mjs';
 import {esc,shortDate} from './progress-shared.mjs';
 
@@ -68,7 +69,12 @@ export function combinedMovementChart(trends, elapsed) {
   const dayLines = [];
   for (let day = Math.ceil(minDay / dayStep) * dayStep; day <= maxDay; day += dayStep) dayLines.push(day);
   const minorDegrees = Array.from({length: high / 10 + 1}, (_, i) => i * 10).filter(value => value % 30);
-  const title = (p, motion) => `${motion === 'bend' ? 'Bending' : 'Straightening'} · Day ${p.day} · ${esc(shortDate(p.date))}: ${Math.round(p.value*10)/10}°${motion === 'straighten' ? ' bend remaining' : ''}`;
+  const interval = p => Number.isFinite(p.summary?.ci95?.low) && Number.isFinite(p.summary?.ci95?.high) ? p.summary.ci95 : null;
+  const title = (p, motion) => `${motion === 'bend' ? 'Bending' : 'Straightening'} · Day ${p.day} · ${esc(shortDate(p.date))}: ${Math.round(p.value*10)/10}°${motion === 'straighten' ? ' bend remaining' : ''}${interval(p) ? ` · 95% confidence interval ${intervalText(interval(p))}` : ''}`;
+  /* A whisker through each camera or depth result: the 95% confidence interval of that day's average, kept inside
+     the axes. It shows how steady the pictures behind the point were, not how accurate the camera is. A clinical
+     entry is a single reading and has none. */
+  const whisker = (p, colour) => { const ci = interval(p); if (!ci) return ''; const top = y(Math.min(high, Math.max(0, ci.high))), bottom = y(Math.min(high, Math.max(0, ci.low))); return `<path data-graph-interval d="M${x(p.day)} ${top}V${bottom}M${x(p.day)-4} ${top}h8M${x(p.day)-4} ${bottom}h8" fill="none" stroke="${colour}" stroke-width="1.5" stroke-opacity=".8"/>`; };
   return `<svg class="rs-movement-chart" viewBox="0 0 500 330" role="img" aria-label="Knee bending and straightening by days after surgery. ${trends.bend.length} bending and ${trends.straighten.length} straightening measurements. Both use degrees of knee bend; 0 degrees means straight. A faint band and a dashed line show published figures from other patients for context.">
     <text x="58" y="20" class="chart-axis-title">Y · Knee bend (degrees)</text>
     ${publishedContext(x, y, minDay, maxDay)}
@@ -77,8 +83,8 @@ export function combinedMovementChart(trends, elapsed) {
     ${Array.from({length:high/30+1},(_,i)=>i*30).map(value => `<line x1="58" x2="474" y1="${y(value)}" y2="${y(value)}" stroke="var(--line)"/><text x="48" y="${y(value)+4}" text-anchor="end">${value}°</text>`).join('')}
     <path d="M58 44V268H474" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
     ${ticks.map(day => `<text x="${x(day)}" y="290" text-anchor="middle">${day}</text>`).join('')}
-    <g data-graph-series="straighten">${trends.straighten.map(p => `<path d="M${x(p.day)} ${y(p.value)-7}l7 7-7 7-7-7Z" fill="none" stroke="#23734f" stroke-width="2.5"><title>${title(p,'straighten')}</title></path>`).join('')}</g>
-    <g data-graph-series="bend">${trends.bend.map(p => `<circle cx="${x(p.day)}" cy="${y(p.value)}" r="4.5" fill="var(--brand)"><title>${title(p,'bend')}</title></circle>`).join('')}</g>
+    <g data-graph-series="straighten">${trends.straighten.map(p => `${whisker(p, '#23734f')}<path d="M${x(p.day)} ${y(p.value)-7}l7 7-7 7-7-7Z" fill="none" stroke="#23734f" stroke-width="2.5"><title>${title(p,'straighten')}</title></path>`).join('')}</g>
+    <g data-graph-series="bend">${trends.bend.map(p => `${whisker(p, 'var(--brand)')}<circle cx="${x(p.day)}" cy="${y(p.value)}" r="4.5" fill="var(--brand)"><title>${title(p,'bend')}</title></circle>`).join('')}</g>
     ${all.length?'':'<text x="266" y="162" text-anchor="middle">No measurements yet</text>'}
     <text x="266" y="319" text-anchor="middle" class="chart-axis-title">X · Days after surgery · surgery = day 0</text>
   </svg>`;
