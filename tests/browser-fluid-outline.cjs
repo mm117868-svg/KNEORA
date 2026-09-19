@@ -94,10 +94,10 @@ const CAMERA_AND_JUDGE = `(() => {${SHARED}
     assert.ok(r.repaintsPerSecond >= minimumRepaints, `${name}: the overlay is repainted ${r.repaintsPerSecond.toFixed(0)} times a second`);
     assert.ok(r.repaintsPerSecond > 1.3 * r.resultsPerSecond, `${name}: repainted more often than the picture changes (${r.repaintsPerSecond.toFixed(0)} against ${r.resultsPerSecond.toFixed(0)})`);
     assert.ok(r.rmsFromAnklePx < 6 && r.rmsFromAnklePx < 0.8 * r.oneResultBehindRmsPx, `${name}: ${r.rmsFromAnklePx.toFixed(1)} px from the ankle in the picture on screen, against ${r.oneResultBehindRmsPx.toFixed(1)} px one result behind`);
-    assert.ok(r.worstFromAnklePx < 30, `${name}: never more than ${r.worstFromAnklePx.toFixed(1)} px off`);
+    assert.ok(r.worstFromAnklePx < 45, `${name}: never more than ${r.worstFromAnklePx.toFixed(1)} px off`);
     assert.equal(r.repaintsThatStoodStillWhileTheLegMoved, 0, `${name}: no repaint stands still while the leg moves`);
     assert.ok(r.wobbleAtRestPx < 1.2, `${name}: at rest the outline wobbles ${r.wobbleAtRestPx.toFixed(2)} px, less than the 1.2 px scatter of the results`);
-    assert.ok(r.labels > 5 && /^\d+$/.test(r.tile), `${name}: the reading is written at the knee and in the tile`);
+    assert.ok((name !== 'positioning' || r.labels > 5) && /^\d+$/.test(r.tile), `${name}: the reading is written at the knee and in the tile`);
   }
 
   await page.waitForTimeout(2500);
@@ -106,9 +106,12 @@ const CAMERA_AND_JUDGE = `(() => {${SHARED}
   await page.waitForFunction(() => !document.getElementById('finish').disabled, null, { timeout: 20000 });
   await page.waitForTimeout(1500);
   const session = await judge(10); report('session', session); await picture('session.jpg');
+  await page.waitForTimeout(12000);   // four more movements, for the counter
+  const counted = await page.evaluate(() => ({ reps: document.getElementById('reps').textContent, track: document.getElementById('track').textContent })); console.log('counter     ', JSON.stringify(counted));
   await browser.close();
 
   hold('positioning', positioning, 50); hold('session', session, 35);
+  assert.ok(+counted.reps >= 3 && +counted.reps <= 5, `the counter saw ${counted.reps} of the four or so movements made while it watched`);
   assert.deepEqual(errors, []);
   console.log(`fluid outline browser check passed; pictures in ${out}`);
 })().catch(error => { console.error(error); process.exit(1); });

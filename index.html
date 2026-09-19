@@ -159,6 +159,7 @@ details.more summary{cursor:pointer;font-weight:600}
 .brief .hands{margin-top:12px;padding:14px;border-radius:14px;background:var(--paper2);font-size:16px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;align-items:stretch;gap:10px}
 .brief .hands .bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden}
 .brief .hands .fill{height:100%;width:0;background:var(--brand);transition:width .1s linear}
+#hipTile[hidden]{display:none}
 .brief .start-now{display:block;width:100%;margin-top:14px;min-height:52px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer}.brief .start-now:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .brief .gesture-retry{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:var(--bone);color:var(--ink);padding:10px 14px;cursor:pointer}
 .countdown{position:absolute;inset:0;z-index:8;display:grid;place-items:center;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:clamp(120px,30vh,260px);color:#fff;text-shadow:0 6px 40px rgba(0,0,0,.7);cursor:pointer;text-align:center}
@@ -605,7 +606,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 
   <section class="phasepick">
     <span class="eyebrow">Your programme, week by week</span>
-    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. Position recognition uses a separate prototype model for each of these three exercises. Movement analysis starts automatically when your recording stops, and the full report appears here when it is ready. Your full report shows repetitions, joint angles, cadence, fastest and slowest repetitions, hold times, movement speeds and total time, with a breakdown of each repetition. You can also replay or download your video. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
+    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. A repetition is counted each time your joint moves away from its resting angle and comes back. It works for small movements of a few degrees. For straight leg raises the hip angle is shown as well. Movement analysis starts automatically when your recording stops, and the full report appears here when it is ready. Your full report shows repetitions, joint angles, cadence, fastest and slowest repetitions, hold times, movement speeds and total time, with a breakdown of each repetition. You can also replay or download your video. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
     <nav class="weeknav" id="weeknav" aria-label="Jump to a week"></nav>
   </section>
 
@@ -616,7 +617,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
   <div class="safety">
     <b>Listen to your knee.</b> Mild discomfort is normal; sharp pain is not. Stop and contact your surgeon if you notice fever, calf pain, spreading numbness or wound drainage. This programme supports your physiotherapist's plan; it does not replace it.
   </div>
-  <p class="foot">The outline shows the hip, knee and ankle of your operated leg and gives a whole-session knee angle. The experimental position model counts straight-leg raises, seated knee extensions and heel slides; it does not yet confirm which leg moved. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: pubmed-metrics-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
+  <p class="foot">The outline shows the hip, knee and ankle of your operated leg and gives a whole-session knee angle. A repetition is counted each time your operated leg moves away from its resting angle and comes back. After you finish, your recording is analysed on this device. You can replay or download it and share its measurements with your physiotherapist.  · Version: pubmed-metrics-1 · <a href="video-analysis/">Analyse a recorded exercise</a> · <a href="report.html">Physio report</a> · <a href="bench.html">Bench view</a></p>
   <footer class="app-footer" aria-label="Company and app information">
     <div class="footer-heading"><div><span class="eyebrow">Cambridge Kinematics<sup class="brand-trademark" aria-hidden="true">™</sup></span><h2>Supporting your recovery,<br>one day at a time.</h2></div><span class="footer-status">In development</span></div>
     <div class="footer-company"><strong>Cambridge Kinematics Limited</strong><p>A private limited company registered in England and Wales.</p><p>Cambridge, England</p></div>
@@ -637,6 +638,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
     <div class="two">
       <div class="tile reps" id="repsTile"><div class="lab" id="repsLab">Repetitions</div><div class="val num"><span id="reps">0</span><small id="repsOf"></small></div><div class="sub" id="repsSub">&nbsp;</div></div>
       <div class="tile angle" id="angleTile"><div class="lab">Knee bend</div><div class="val num"><span id="angle">—</span><small>°</small></div><div class="bar"><div class="zone" id="zone"></div><div class="fill" id="fill"></div></div><div class="sub" id="angleSub">0° is straight</div></div>
+      <div class="tile angle" id="hipTile" hidden><div class="lab">Hip raise</div><div class="val num"><span id="hipAngle">—</span><small>°</small></div><div class="sub" id="hipSub">0° is the leg in line with your body</div></div>
     </div>
     <div class="tile hold" id="holdTile" style="display:none"><div class="lab">Hold timer</div><div class="ring"><div class="cue" id="holdCue">Get ready</div><div class="count num" id="holdCount"></div></div><div class="sub" id="holdSub"></div></div>
     </div></div>
@@ -688,7 +690,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 <script type="module">
 import {showExerciseGuide} from './exercise-guides/guide-player.js?v=magnific-1';
 import {LivePositionCounter,readPositionFrame} from './tools/position-recogniser/live.mjs';
-let positionModel=null,positionCounter=null;
+let positionModel=null,positionCounter=null,repCounter=null;
 const positionCanvas=document.createElement('canvas');positionCanvas.width=positionCanvas.height=128;
 const positionCtx=positionCanvas.getContext('2d',{willReadFrequently:true});
 async function preparePositionModel(exercise){positionModel=null;if(!['straight_leg_raise','seated_extension','heel_slide'].includes(exercise))return;try{const r=await fetch(new URL('./tools/position-recogniser/models/'+exercise+'.json',import.meta.url));if(!r.ok)throw Error('Model unavailable');positionModel=await r.json();if(positionModel.exercise!==exercise)throw Error('Wrong model');}catch(e){positionModel=null;console.warn('Position model unavailable');}}
@@ -712,6 +714,8 @@ import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-
 import {raisedHandState, drawRaisedHand, RAISED_HAND} from "./raised-hand.mjs?v=1";
 import {FluidOutline, PictureClock, drawOutline} from "./fluid-outline.mjs?v=fluid-1";
 import {trendCI95} from "./confidence.mjs?v=1";
+import {slrView} from "./slr-view.mjs?v=1";
+import {AngleRepCounter} from "./angle-rep-counter.mjs?v=1";
 
 
 /* ---------------- Exercise library ----------------
@@ -1007,6 +1011,14 @@ let outline = newOutline();
    slows or stalls. A result is timed by the picture it was made from; the drawing, by the picture now on screen. */
 const pictureClock = new PictureClock();
 const aimOutline = (leg, pictureS) => leg ? outline.target([leg.hip, leg.knee, leg.ankle], pictureS, leg.visibility) : outline.lose(pictureS);
+/* Straight leg raise only: the hip angle beside the knee angle, and, while getting into position, whether the other
+   knee looks bent. Display only; see slr-view.mjs. */
+function showSlr(body, positioning) {
+  const on = current?.id === "straight_leg_raise" && $("showangle").checked; $("hipTile").hidden = !on; if (!on) return;
+  const view = slrView(body, $("side").value, canvas.width, canvas.height);
+  $("hipAngle").textContent = view.hip === null ? "–" : view.hip.toFixed(0);
+  $("hipSub").textContent = !positioning ? "0° is the leg in line with your body" : view.otherBent === null ? "Other knee not in view" : view.otherBent ? "Other knee bent: good" : "Bend your other knee, foot flat, before you start";
+}
 function paintOverlay(now) {
   clearOverlay();
   const pictureNow = pictureClock.read(video.currentTime, now / 1000);
@@ -1079,7 +1091,6 @@ async function openExercise(ex) {
   if (!isExerciseAvailable(ex)) return;
   if (!["left", "right"].includes($("side").value)) { location.href="./#side"; return; }
   if (!await showExerciseGuide(ex)) return;
-  await preparePositionModel(ex.id);
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; resetHand(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   $("voiceStatus").textContent = "";
   appVoice.prepare();
@@ -1087,7 +1098,7 @@ async function openExercise(ex) {
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
   $("briefSetup").textContent = SETUP; $("exerciseInstructions").open=false; setExerciseSidebar(true);
   $("instr").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
-  $("repsLab").textContent = ex.kind === "hold" ? "Holds" : "Repetitions"; $("reps").textContent = "0"; $("repsOf").textContent = ` / ${ex.count}`; $("repsSub").innerHTML = ex.kind === "hold" ? `${ex.hold} s hold, ${ex.rest} s rest` : "position recognition prototype";
+  $("repsLab").textContent = ex.kind === "hold" ? "Holds" : "Repetitions"; $("reps").textContent = "0"; $("repsOf").textContent = ` / ${ex.count}`; $("repsSub").innerHTML = ex.kind === "hold" ? `${ex.hold} s hold, ${ex.rest} s rest` : "movements out and back";
 
   $("holdTile").style.display = ex.kind === "hold" ? "block" : "none"; $("holdCue").textContent = "Get ready"; $("holdCount").textContent = ""; $("holdSub").textContent = "";
   angleDisplay.reset(); $("angle").textContent = "—"; $("fill").style.width = "0"; $("angleTile").classList.remove("inzone");
@@ -1136,7 +1147,7 @@ async function openCamera(gen) {
 }
 /* ---------------- repetition-count layer ----------------
    The knee tracker and pixel-motion counter run independently. Both counts go into the record. */
-const countBy = () => current && current.kind === "hold" ? "timer" : "position";
+const countBy = () => current && current.kind === "hold" ? "timer" : "angle";
 const smallMovement = () => countBy() === "small";
 const trackWanted = () => ["track","small"].includes(countBy());
 const trackCounting = () => !!(tracker && tracker.ready && trackWanted());
@@ -1152,7 +1163,7 @@ async function startTracker() {
 
 /* Keep the independent movement count visible when the knee tracker is selected. */
 function showCounts() {
-  if (monitor) $("repsSub").textContent = "position recognition prototype";
+  if (monitor) $("repsSub").textContent = "movements out and back";
 
 }
 
@@ -1167,7 +1178,7 @@ function refreshHint() {
     text = "Press Start (or the space bar) when you are ready. You will have a countdown to get into position.";
     $("status").textContent = "Press Start to begin recording.";
   }
-  text += " After the countdown, keep your leg resting and still for 3 seconds for position recognition.";
+  text += "";
   if(appVoice.state !== "ready") text += " Watch the countdown on screen if audio is unavailable.";
   $("handtext").textContent = text;
 }
@@ -1278,7 +1289,7 @@ function previewStep() {
       const t1 = performance.now();
       let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
       previewPoseMs += 0.2 * ((performance.now() - t1) - previewPoseMs); previewPoseSkip = Math.max(2, Math.min(6, Math.ceil(previewPoseMs / 25)));   // at most every other picture: the outline is carried between results, and the graphics processor is left free to play the video
-      previewAll = res?.landmarks?.[0] || null; previewPoseAt = now; bodyNow = previewAll;
+      previewAll = res?.landmarks?.[0] || null; previewPoseAt = now; bodyNow = previewAll; showSlr(previewAll, true);
       previewLeg = (previewJoints ??= new JointFilter(canvas.height)).apply(previewAll ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null, now / 1000);
       aimOutline(previewLeg, previewLastVideoTime);   // timed by the picture the pose was made from
     }
@@ -1315,7 +1326,7 @@ function startSession() {
   outline = newOutline();
   trace = new AngleTrace(1, canvas.height); monitor = new FlowMonitor(canvas.width, canvas.height, fps);
   angleDisplay.reset();
-  frameNo = 0; lastVideoTime = -1; prescribedDone = false; startedAt = new Date(); t0 = performance.now(); poseMs = 0; poseSkip = 1; lastLm = null; lastAngle = NaN; lastAll = null; peak = NaN; low = NaN;
+  frameNo = 0; lastVideoTime = -1; prescribedDone = false; startedAt = new Date(); t0 = performance.now(); poseMs = 0; poseSkip = 2; lastLm = null; lastAngle = NaN; lastAll = null; peak = NaN; low = NaN;
   chunks = []; recorder = null;
   if (window.MediaRecorder) {
     try { const mime = pickRecorderMime(); recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined); const recordingChunks = chunks; recorder.ondataavailable = e => { if (e.data.size) recordingChunks.push(e.data); }; recorder.start(1000); $("rec").classList.add("on"); } catch (e) { recorder = null; }
@@ -1323,10 +1334,9 @@ function startSession() {
   if (current.kind === "hold") hold = { phase: "hold", until: t0 + current.hold * 1000, cycles: 0 };
   tracker = null;
   if (trackWanted() && jsfeatLib) { tracker = new KneeTracker(canvas.width, canvas.height, fps, {smallMovement:smallMovement()}); tracker.attach(jsfeatLib); }
-  legGate = null;
-  positionCounter = new LivePositionCounter(positionModel,current.id);
+  legGate = null; tracker = null; repCounter = new AngleRepCounter();
   gateBoxReference = null; manualCountingBox = false; monitor.locked = true;
-  monitor.box = [canvas.width*.075,canvas.height*.075,canvas.width*.85,canvas.height*.85].map(Math.round);
+  monitor.box = [0, 0, canvas.width, canvas.height];   // the whole picture
   running = true; setExerciseSidebar(false); $("brief").classList.remove("up"); $("finish").disabled = false; $("reset").disabled = current.kind === "hold"; $("boxbtn").disabled = true; $("boxbtn").hidden = true;
   $("status").textContent = current.kind === "hold" ? "Follow the timer." : "Keep going."; $("status").className = "status";
   loop();
@@ -1355,19 +1365,20 @@ function step() {
     let res = null;
     try { res = landmarker.detectForVideo(video, Math.round(t1)); } catch (e) { console.warn("pose: " + e.message); }
     legGate?.observe(res?.landmarks?.[0] || null, t, canvas.width, canvas.height);
-    poseMs += 0.2 * ((performance.now() - t1) - poseMs); poseSkip = Math.max(1, Math.min(60, Math.ceil(poseMs / 25)));
+    poseMs += 0.2 * ((performance.now() - t1) - poseMs); poseSkip = Math.max(2, Math.min(60, Math.ceil(poseMs / 25)));   // at most every other picture, which leaves the graphics processor free to play the video
     lastPoseAt = now;
 
-    lastAll = (res && res.landmarks && res.landmarks[0]) ? res.landmarks[0] : null; bodyNow = lastAll;
+    lastAll = (res && res.landmarks && res.landmarks[0]) ? res.landmarks[0] : null; bodyNow = lastAll; showSlr(lastAll, false);
     if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.2);
     angle = trace.add(frameNo, t, lm); lastLm = lm; lastAngle = angle;
     aimOutline(trace.lastLm, lastVideoTime);   // trace.lastLm is the operated leg after the One Euro filter: the joints the angle itself comes from
   } else if (landmarker) { lm = lastLm; angle = lastAngle; }
   peak = trace.quantile(0.95);   // "best today" is the 95th percentile of the trusted frames so far, not the single highest frame
 
-  // Position recognition alone supplies the repetition count. Pose remains for the overlay and angles.
-  if(current.kind!=="hold") positionCounter.update(readPositionFrame(video,positionCtx),t);
-  const count = current.kind === "hold" ? hold.cycles : positionCounter.cycle.reps;
+  /* Repetitions: the joint angle leaves the resting position and comes back (angle-rep-counter.mjs). The knee angle,
+     or for a straight leg raise the hip angle, since there the knee stays straight. */
+  if (current.kind !== "hold" && bodyNow !== undefined) repCounter.update(current.id === "straight_leg_raise" ? (slrView(lastAll, $("side").value, canvas.width, canvas.height).hip ?? NaN) : angle, t);
+  const count = current.kind === "hold" ? hold.cycles : repCounter.reps;
 
   if (count >= current.count && !prescribedDone) { prescribedDone = true; $("status").textContent = `That's your ${current.count}. Finish when you're ready, or carry on.`; $("status").className = "status ok"; }
 
@@ -1377,14 +1388,14 @@ function step() {
     const f = finishHand(gesture, now); showHand(f, true);
     if (f >= 1) { resetHand(); $("handring").hidden = true; finish(false); return; }
   }
-  if (current.kind !== "hold") { $("reps").textContent = !positionCounter.ready ? "Not measured" : count; if (trackCounting() && frameNo % 15 === 0) showCounts(); }
+  if (current.kind !== "hold") { $("reps").textContent = count; if (trackCounting() && frameNo % 15 === 0) showCounts(); }
   const m = Math.floor(t / 60), s = Math.floor(t % 60); $("clock").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   if (current.kind !== "hold") {
-    $("track").textContent = positionCounter.message;
-    $("track").className = "track " + (positionCounter.ready ? "ok" : "");
-    $("repsSub").textContent = "position recognition prototype";
+    $("track").textContent = lm ? repCounter.message() : "Keep your exercise leg in view.";
+    $("track").className = "track " + (lm && repCounter.ready ? "ok" : "");
+    $("repsSub").textContent = "movements out and back";
     if (!prescribedDone && !statusBefore) {
-      $("status").textContent = positionCounter.message;
+      $("status").textContent = repCounter.ready ? "Recording. Follow your exercise plan." : repCounter.message();
       $("status").className = "status";
     }
   } else { $("track").textContent = lm ? "leg in view" : "keep the exercise leg in view"; }
@@ -1401,7 +1412,13 @@ function step() {
 }
 function paintSession(now) {
   paintOverlay(now);
-  const [bx, by, bw, bh] = [canvas.width*10/32,canvas.height*.12,canvas.width*22/32,canvas.height*.78]; ctx.strokeStyle = "rgba(255,255,255,.65)"; ctx.lineWidth = 3; ctx.strokeRect(bx, by, bw, bh);
+  if (current.kind !== "hold" && repCounter) {   // the count, large enough to read from the exercise position
+    const k = canvas.width / 1280, w = 250 * k, h = 150 * k, x = canvas.width - w - 24 * k, y = 84 * k, done = repCounter.reps >= current.count;
+    ctx.save(); ctx.fillStyle = "rgba(5,10,20,.72)"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 18 * k) : ctx.rect(x, y, w, h); ctx.fill();
+    ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillStyle = done ? "#3ddc84" : "#fff"; ctx.font = `800 ${Math.round(92 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(String(repCounter.reps), x + w * .36, y + h * .72);
+    ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = `600 ${Math.round(34 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(`/ ${current.count}`, x + w * .74, y + h * .7);
+    ctx.font = `600 ${Math.round(17 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(done ? "DONE · FINISH WHEN READY" : "REPETITIONS", x + w / 2, y + h * .92); ctx.restore();
+  }
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
 }
 
@@ -1435,10 +1452,9 @@ async function finish(abandon = false) {
   const target = current.target ?? 90;
   const mon = monitor.summary(duration);
   const tr = trackWanted() && tracker ? tracker.summary(duration) : null;
-  const pv = null;
-  const positionResult = current.kind === "hold" ? null : positionCounter.summary(duration);
-  const source = current.kind === "hold" ? "timer" : "position_recognition";
-  const count = current.kind === "hold" ? hold.cycles : positionResult?.repetitions ?? 0;
+  const pv = null, positionResult = null, angleCount = current.kind === "hold" ? null : repCounter.summary(duration);
+  const source = current.kind === "hold" ? "timer" : "angle_hysteresis";
+  const count = current.kind === "hold" ? hold.cycles : angleCount?.repetitions ?? 0;
   // This confirmation follows recorder finalisation and stopCamera(), never just reaching the target count.
   const confirmation = completionNotice(count, current.count);
   const confirmationSpoken = appVoice.play(confirmation.key);
@@ -1449,7 +1465,7 @@ async function finish(abandon = false) {
   const rec = { schema_version: 1, patient_id: $("patient").value, operation_date: op, days_post_op: daysPostOp(op, startedAt),
     exercise: current.id, prescribed_reps: current.count, prescribed_minutes: null, started_at: localIso(startedAt), duration_s: +duration.toFixed(1),
     fps: +(frameNo / Math.max(1, duration)).toFixed(1), video_file: videoBlob && $("savevideo").checked && $("savefiles").checked ? (videoBlob.type.includes("mp4") ? "video.mp4" : "video.webm") : "",
-    measurement: summarise(trace, duration, target), monitoring: mon, patient_count: null, tracking: tr, pose_validation: pv, count_source: source, position_recognition: positionResult, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
+    measurement: summarise(trace, duration, target), monitoring: mon, patient_count: null, tracking: tr, pose_validation: pv, count_source: source, position_recognition: positionResult, angle_count: angleCount, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
     recording: { captured: !!videoBlob?.size, bytes: videoBlob?.size || 0, mime_type: videoBlob?.type || null },
 
     software_version: SOFTWARE, app: { page: "index.html", build: "pubmed-metrics-1", phase, aim: current.aim } };
@@ -1528,7 +1544,7 @@ if (new URLSearchParams(location.search).has("debug")) window.kr = { get monitor
 
 $("back").onclick = closeExercise;
 $("finish").onclick = () => finish(false);
-$("reset").onclick = () => { if (monitor) { monitor.reset(); if (tracker) tracker.reset(); legGate?.reset(); positionCounter?.reset(); $("reps").textContent = "0"; prescribedDone = false; $("status").textContent = "Count reset."; $("status").className = "status"; } };
+$("reset").onclick = () => { if (monitor) { monitor.reset(); if (tracker) tracker.reset(); legGate?.reset(); $("reps").textContent = "0"; prescribedDone = false; $("status").textContent = "Count reset."; $("status").className = "status"; } };
 
 document.addEventListener("keydown", e => {
   if (!$("ex").classList.contains("open") || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;

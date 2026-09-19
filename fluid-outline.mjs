@@ -176,7 +176,7 @@ export class PictureClock {
    reading is steady, wider when the readings disagree or the knee is moving. Steadiness, not accuracy. */
 const TAU = Math.PI * 2;
 
-export function drawOutline(ctx, points, { alpha = 1, colour = '#3ddc84', light = '#a9f5cb', scale = 1, angle = null, halfWidth = null, label = true } = {}) {
+export function drawOutline(ctx, points, { alpha = 1, colour = '#ff3b3b', light = '#ffb0a8', scale = 1, angle = null, halfWidth = null, label = true } = {}) {
   if (!usable(points) || points.length !== 3 || !(alpha > 0)) return;
   const [hip, knee, ankle] = points, w = Math.max(3, 5 * scale);
   const thigh = Math.hypot(hip[0] - knee[0], hip[1] - knee[1]), shin = Math.hypot(ankle[0] - knee[0], ankle[1] - knee[1]);
@@ -190,8 +190,8 @@ export function drawOutline(ctx, points, { alpha = 1, colour = '#3ddc84', light 
     // the 95% interval of the displayed reading, as a wedge either side of the shin
     if (Number.isFinite(halfWidth) && halfWidth >= 0.5) {
       const hw = Math.min(halfWidth, 25) * Math.PI / 180;
-      ctx.fillStyle = 'rgba(61,220,132,.22)'; ctx.beginPath(); ctx.moveTo(knee[0], knee[1]); ctx.arc(knee[0], knee[1], shin, shinDir - hw, shinDir + hw); ctx.closePath?.(); ctx.fill();
-      ctx.strokeStyle = 'rgba(169,245,203,.6)'; ctx.lineWidth = Math.max(1, scale); ctx.stroke();   // a fine edge, so a narrow band can still be seen
+      ctx.fillStyle = 'rgba(255,59,59,.24)'; ctx.beginPath(); ctx.moveTo(knee[0], knee[1]); ctx.arc(knee[0], knee[1], shin, shinDir - hw, shinDir + hw); ctx.closePath?.(); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,176,168,.7)'; ctx.lineWidth = Math.max(1, scale); ctx.stroke();   // a fine edge, so a narrow band can still be seen
     }
     // where the shin would lie with the knee straight, and the arc from there to the shin
     const r = Math.max(18 * scale, Math.min(thigh, shin) * 0.3);
