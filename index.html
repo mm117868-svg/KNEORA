@@ -604,8 +604,8 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
         <label class="setting-check"><input type="checkbox" id="savefiles" checked><span>Save session files to Downloads<small>Download the session files when you finish. Your browser controls where downloads are saved.</small></span></label>
       </fieldset>
       <fieldset class="setting-box session-settings"><legend>Start and finish sessions</legend>
-        <p class="small-note"><b>Start from your exercise position.</b> Raise one hand above your shoulder and keep it up for two seconds, or press Start (or the space bar). A five-second Marin countdown gives you time to lower your hand and settle before recording starts. Your shoulder and hand need to be in the picture for the raised hand to be seen; the Start button works without.</p>
-        <p class="small-note">To finish, raise a hand for three seconds or select Finish. The app confirms when recording has stopped and you can move from your exercise position.</p>
+        <p class="small-note"><b>Start from your exercise position.</b> Wave a hand above your shoulder, or hold one up high for two seconds, or press Start (or the space bar). A five-second Marin countdown gives you time to lower your hand and settle before recording starts. Your shoulder and hand need to be in the picture for the raised hand to be seen; the Start button works without.</p>
+        <p class="small-note">To finish, wave again, hold a hand up for three seconds, or select Finish. The app confirms when recording has stopped and you can move from your exercise position.</p>
         <p class="small-note">Spoken guidance uses Marin, an AI-generated voice with a soft, warm British female delivery. The countdown stays visible if audio is unavailable.</p>
         <p class="small-note">MediaPipe detects the hand gesture on this device. Camera access is needed; the microphone is not used.</p>
       </fieldset>
@@ -723,7 +723,7 @@ import { renderProgressToDate } from "./progress-to-date.mjs?v=pubmed-1";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
 import { patientRecords, completedExercisesForDay, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=cards-1";
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-1";
-import {raisedHandState, drawRaisedHand, RAISED_HAND} from "./raised-hand.mjs?v=1";
+import {raisedHandState, drawRaisedHand, RAISED_HAND, WaveDetector} from "./raised-hand.mjs?v=wave-1";
 import {FluidOutline, PictureClock, drawOutline} from "./fluid-outline.mjs?v=fluid-1";
 import {trendCI95} from "./confidence.mjs?v=1";
 import {slrView} from "./slr-view.mjs?v=1";
@@ -806,7 +806,7 @@ const ICONS = {
 const PHASES = { 1: "Week 0–1", 2: "Week 1–4", 3: "Week 4–8", 4: "Week 8+" };
 const PHASE_DAYS = { 1: "days 0 to 6 after the operation", 2: "days 7 to 27", 3: "days 28 to 55", 4: "day 56 onwards" };
 const phaseForDay = d => d === null ? null : d < 7 ? 1 : d < 28 ? 2 : d < 56 ? 3 : 4;
-const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. To start, raise one hand above your shoulder for two seconds, or press Start. Shorts or bare legs help. Hold briefly at the starting position while the counting box is placed around your selected leg. Include the complete leg movement in the picture.";
+const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. To start, wave a hand above your shoulder, or press Start. Shorts or bare legs help. Hold briefly at the starting position while the counting box is placed around your selected leg. Include the complete leg movement in the picture.";
 
 
 const $ = id => document.getElementById(id);
@@ -1124,7 +1124,7 @@ async function openExercise(ex) {
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
   else { z.style.left = "0"; z.style.right = (100 - pct(ex.aim.deg)) + "%"; z.style.borderLeft = "none"; z.style.borderRight = "2px solid var(--green)"; $("angleSub").innerHTML = `straight is <b>0°</b>`; }
   $("angleTile").style.display = $("showangle").checked && poseState !== "off" && poseState !== "failed" ? "block" : "none";
-  $("status").textContent = "Get into position, then raise a hand or press Start."; $("status").className = "status";
+  $("status").textContent = "Get into position, then wave a hand above your shoulder, or press Start."; $("status").className = "status";
   $("finish").disabled = true; $("reset").disabled = true; $("boxbtn").disabled = true; $("clock").textContent = "00:00";
   $("track").textContent = "camera starting"; $("track").className = "track off";
   $("done").className = "done"; $("done").innerHTML = ""; $("handring").hidden = true; $("countdown").hidden = true; $("countdown").innerHTML = "";
@@ -1192,7 +1192,7 @@ function refreshHint() {
   let text;
   if (landmarker) {
     text = "When ready, put one arm straight up, well above your head, and keep it there for 2 seconds, or press Start (or the space bar). Lower your hand during the countdown, then begin your exercise.";
-    $("status").textContent = "Raise a hand for 2 seconds, or press Start, to begin recording.";
+    $("status").textContent = "Wave a hand above your shoulder, or press Start, to begin recording.";
   } else {
     text = "Press Start (or the space bar) when you are ready. You will have a countdown to get into position.";
     $("status").textContent = "Press Start to begin recording.";
@@ -1206,6 +1206,7 @@ function refreshHint() {
    A hand raised above its shoulder, anywhere across the picture, read from the pose result (raised-hand.mjs). */
 const HAND_HOLD_START_S = 2, HAND_HOLD_FINISH_S = 3, COUNTDOWN_S = 5;
 const HAND_SAMPLE_MAX_GAP_MS = 500;
+const wave = new WaveDetector(); let waving = false;   // a wave starts and finishes too: quicker than a held hand, and the hand need only be a little above the shoulder
 let startLowSince = null, startArmed = false;   // a raise only counts after the hand has been seen down for a second
 let handSince = null, handLastSample = null, countdownStart = null, previewN = 0, handArmed = false, statusBefore = null;
 let lastHandAt = -Infinity, lastHandResult = null, handReleasedAt = null, handReleaseSample = null;
@@ -1228,10 +1229,11 @@ function finishHand(state, now) {
   }
   return handHold(state === "open", HAND_HOLD_FINISH_S, now);
 }
-function resetHand() { handSince = null; handLastSample = null; }
+function resetHold() { handSince = null; handLastSample = null; }
+function resetHand() { resetHold(); wave.reset(); waving = false; }   // the held hand and the wave both start again
 function handHold(raised, holdS, now) {
-  if (!raised) { resetHand(); return 0; }
-  if (handLastSample !== null && (now - handLastSample > HAND_SAMPLE_MAX_GAP_MS || now < handLastSample)) resetHand();
+  if (!raised) { resetHold(); return 0; }
+  if (handLastSample !== null && (now - handLastSample > HAND_SAMPLE_MAX_GAP_MS || now < handLastSample)) resetHold();
   if (handSince === null) handSince = now;
   handLastSample = now;
   return Math.min(1, (now - handSince) / (holdS * 1000));
@@ -1243,7 +1245,7 @@ function showHand(f, finishing) {
   if (el.hidden) { el.hidden = false; el.className = "handring" + (finishing ? " finish" : ""); }
   $("hfill").style.width = (f * 100) + "%";
   const left = Math.ceil((finishing ? HAND_HOLD_FINISH_S : HAND_HOLD_START_S) * (1 - f));
-  $("htext").textContent = finishing ? `Keep your hand up to finish… ${left}` : `Hand seen. Keep it up… ${left}`;
+  $("htext").textContent = waving ? (finishing ? "Wave seen. Keep waving to finish…" : "Wave seen. Keep waving…") : finishing ? `Keep your hand up to finish… ${left}` : `Hand seen. Keep it up… ${left}`;
   if (finishing) { if (statusBefore === null) statusBefore = $("status").textContent; $("status").textContent = `Hand raised: keep it up to finish… ${left}`; }
 }
 function restoreStatus() { if (statusBefore !== null) { $("status").textContent = statusBefore; statusBefore = null; } }
@@ -1336,7 +1338,7 @@ function previewStep() {
     /* A deliberate signal only: the hand has to be seen down for a second before a raise can start anything, so walking
        into the picture with an arm up, or reaching to adjust the screen, starts nothing. */
     if (gesture === "other") { startLowSince ??= now; if (now - startLowSince >= 1000) startArmed = true; } else if (gesture !== "open") startLowSince = null;
-    const f = handHold(startArmed && gesture === "open", HAND_HOLD_START_S, now);
+    const held = handHold(startArmed && gesture === "open", HAND_HOLD_START_S, now), waved = startArmed ? wave.update(lastHandResult, canvas.width, canvas.height, now) : 0, f = Math.max(held, waved); waving = waved > held;
     $("handfill").style.width = (f * 100) + "%"; showHand(f, false);
     if (f >= 1) beginCountdown();
   }
@@ -1408,7 +1410,7 @@ function step() {
   // The starting hand must first come down before a raised hand can finish.
   const gesture = sampleHand(now, bodyNow);
   if (gesture !== null) {
-    const f = finishHand(gesture, now); showHand(f, true);
+    const held = finishHand(gesture, now), waved = handArmed ? wave.update(lastHandResult, canvas.width, canvas.height, now) : 0, f = Math.max(held, waved); waving = waved > held; showHand(f, true);
     if (f >= 1) { resetHand(); $("handring").hidden = true; finish(false); return; }
   }
   if (current.kind !== "hold") { $("reps").textContent = count; if (trackCounting() && frameNo % 15 === 0) showCounts(); }

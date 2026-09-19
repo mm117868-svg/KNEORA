@@ -10,7 +10,7 @@ import {pickSide, JointFilter, kneeFlexionDeg} from '../kneerec.js';
 import {FluidOutline, PictureClock, drawOutline} from '../fluid-outline.mjs';
 import {trendCI95} from '../confidence.mjs';
 import {inspectExerciseLeg} from '../pose-gate.js';
-import {raisedHandState, RAISED_HAND} from '../raised-hand.mjs';
+import {raisedHandState, RAISED_HAND, WaveDetector} from '../raised-hand.mjs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const between = (from, to) => { const a = html.indexOf(from), b = html.indexOf(to, a); assert.ok(a >= 0 && b > a, `${from} … ${to}`); return html.slice(a, b); };
@@ -33,7 +33,7 @@ function run(side, {found = true, palm = false, frames = 6} = {}) {
   const $ = id => { if (!elements.has(id)) elements.set(id, {hidden: true, style: {}, textContent: '', innerHTML: '', className: '', value: id === 'side' ? side : '', checked: id === 'showangle', classList: {add() {}, remove() {}, toggle() {}}, addEventListener() {}}); return elements.get(id); };
   let now = 1000, handUp = false;
   const context = vm.createContext({$, ctx, canvas: {width: W, height: H}, video: {readyState: 4, currentTime: 0, videoWidth: W}, stream: {}, running: false, current: {kind: 'reps'},
-    pickSide, JointFilter, FluidOutline, PictureClock, drawOutline, trendCI95, kneeFlexionDeg, inspectExerciseLeg, raisedHandState, RAISED_HAND, drawRaisedHand() {}, pct: d => d, performance: {now: () => now},
+    pickSide, JointFilter, FluidOutline, PictureClock, drawOutline, trendCI95, kneeFlexionDeg, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, drawRaisedHand() {}, pct: d => d, performance: {now: () => now},
     angleDisplay: {shown: NaN, sample: [], sampleTimes: [], update(a) { this.shown = a; this.sample = [a - 1, a + 1, a - 1, a + 1]; this.sampleTimes = [0, 33, 66, 100]; return a; }}, appVoice: {play() { return true; }, stop() {}}, refreshHint() {}, setExerciseSidebar() {}, startSession() {},
     requestAnimationFrame() { return 1; }, cancelAnimationFrame() {}, landmarker: {detectForVideo: () => ({landmarks: found ? [handUp ? raised : body] : []})},
     requestAnimationFrameUnused: null});

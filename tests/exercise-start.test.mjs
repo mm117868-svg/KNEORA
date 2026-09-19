@@ -6,7 +6,7 @@ import {JointFilter} from '../kneerec.js';
 import {AppVoice, completionNotice} from '../app-voice.mjs';
 import {finishRecording} from '../video-analysis/live.mjs';
 import {inspectExerciseLeg} from '../pose-gate.js';
-import {raisedHandState,raisedWrist,RAISED_HAND} from '../raised-hand.mjs';
+import {raisedHandState,raisedWrist,RAISED_HAND,WaveDetector} from '../raised-hand.mjs';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const source = html.slice(html.indexOf('const HAND_HOLD_START_S'), html.indexOf('function cameraFailed(e)')) +
@@ -23,7 +23,7 @@ function previewHarness({armed = true} = {}) {
     return elements.get(id);
   };
   let now = 0, starts = 0, spoken = 0, stopped = 0, detects = 0, landmarks = pose();
-  const context = vm.createContext({setExerciseSidebar(){},$, stream: {}, running: false, current:{kind:'reps'}, JointFilter, outline:{target(){},lose(){},at(){return [];}}, aimOutline(){}, paintOverlay(){}, showSlr(){}, inspectExerciseLeg, raisedHandState, RAISED_HAND, drawRaisedHand(){}, performance: {now: () => now},
+  const context = vm.createContext({setExerciseSidebar(){},$, stream: {}, running: false, current:{kind:'reps'}, JointFilter, outline:{target(){},lose(){},at(){return [];}}, aimOutline(){}, paintOverlay(){}, showSlr(){}, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, drawRaisedHand(){}, performance: {now: () => now},
     appVoice: {play(){spoken++; return true;}, stop(){stopped++;}}, refreshHint(){},
     video: {readyState: 4, currentTime: 0, videoWidth: 1280}, canvas: {width: 1280, height: 720}, ctx: {drawImage(){}},
     requestAnimationFrame(){return 1;}, cancelAnimationFrame(){}, pickSide(){return null;},
@@ -39,6 +39,11 @@ function previewHarness({armed = true} = {}) {
 test('a raised hand starts the five-second countdown',()=>{
  const h=previewHarness();h.run(0,1960);assert.equal(h.counting,false);h.run(2000,2280);assert.equal(h.counting,true);assert.equal(h.spoken,1);
  const begin=vm.runInContext('countdownStart',h.context);h.run(2320,begin+4960,{sample:pose(false)});assert.equal(h.starts,0);h.frame(begin+5000,{sample:pose(false)});assert.equal(h.starts,1);
+});
+test('a wave of a hand only a little above the shoulder starts the countdown in about a second and a half, and a still hand there never does',()=>{
+ const low=x=>{const lm=pose(false);lm[15]={x,y:.22,visibility:.95};lm[13]={x:.64,y:.3,visibility:.9};return lm;};   // too low for the held signal
+ const still=previewHarness();still.run(0,6000,{sample:low(.7)});assert.equal(still.counting,false);
+ const h=previewHarness();for(let t=0;t<=1800&&!h.counting;t+=40)h.frame(t,{sample:low(.7+.05*Math.sin(2*Math.PI*1.6*t/1000))});assert.equal(h.counting,true);
 });
 test('an arm already up when the patient comes into view starts nothing until it has been seen down for a second', () => {
  const h=previewHarness({armed:false});h.run(0,6000);assert.equal(h.counting,false,'six seconds of raised arm, never seen lowered');
