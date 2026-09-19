@@ -41,7 +41,7 @@ test('fail-safes: a noisy view needs a bigger movement, and settling somewhere n
   assert.equal(run({reps: 8, size: 8, noise: 3, seed: 2}).reps <= 2, true, 'with 3 degrees of jitter an 8 degree movement is not trusted');
   assert.equal(run({reps: 8, size: 40, noise: 3, seed: 2}).reps, 8, 'a clear movement still counts through the same jitter');
   const counter = new AngleRepCounter(); let t = 0; const feed = (angle, seconds) => { for (let k = 0; k < seconds * 15; k++) counter.update(angle, t += 1 / 15); };
-  feed(85, 2); feed(40, 12); feed(40, 3);
+  feed(85, 2); feed(40, 21); feed(40, 3);
   assert.equal(counter.reps, 0); assert.ok(counter.events.some(e => e.reason === 'position_changed'));
   for (let i = 0; i < 3; i++) { feed(10, 2); feed(40, 2); }
   assert.equal(counter.reps, 3, 'and counting carries on from the new position');
@@ -63,4 +63,11 @@ test('the resting value is only learned in the starting position, so starting mi
   feed(x => 10 + 75 * stroke(x), 1.2); feed(() => 85, 1.5); assert.equal(counter.ready, true);
   for (let i = 0; i < 3; i++) { feed(x => 85 - 75 * stroke(x), 1.2); feed(() => 10, 1); feed(x => 10 + 75 * stroke(x), 1.2); feed(() => 85, 1); }
   assert.equal(counter.reps, 3);
+});
+
+test('the hold timer is not picky: it runs for as long as the leg is away from rest, wherever it is', () => {
+  const counter = new AngleRepCounter(undefined, 'up'); let t = 0; const feed = (angle, seconds) => { for (let k = 0; k < seconds * 15; k++) counter.update(angle(k / 15 / seconds), t += 1 / 15); };
+  feed(() => 0, 2); feed(x => 40 * stroke(x), 1); feed(x => 40 - 15 * x, 2); feed(x => 25 + 10 * Math.sin(x * 9), 2);   // up, sagging, wobbling: still off the bed
+  assert.ok(counter.holdS(t) > 4.3, `held ${counter.holdS(t).toFixed(1)} s`);
+  feed(x => 30 * (1 - stroke(x)), 1); feed(() => 0, 1); assert.equal(counter.holdS(t), 0); assert.equal(counter.reps, 1); assert.ok(counter.events.at(-1).hold_s > 5);
 });

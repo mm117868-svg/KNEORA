@@ -17,12 +17,12 @@
        noisy view needs a bigger movement before anything counts;
      a movement whose return was not seen (the leg out of sight for more than two seconds) is not counted;
      a movement shorter than 0.3 s, or within 0.6 s of the last count, is not counted;
-     if the leg settles somewhere new and stays there for eight seconds, that is taken as a change of position, not
+     if the leg settles somewhere new and stays there for twenty seconds (longer than any hold), that is taken as a change of position, not
        a movement: nothing is counted and the resting angle is learned again;
      the caller passes NaN whenever the pose model is unsure of the leg, which is treated as the leg out of sight.
 
    It counts movements completed. It does not judge their quality, and it never tells the patient off. */
-export const ANGLE_COUNTER = Object.freeze({smoothS: 0.15, restLearnS: 1.0, restFollowS: 2.5, minDeg: 5, enterShare: 0.4, exitShare: 0.35, settleS: 0.12, minAwayS: 0.3, minGapS: 0.6, maxLostS: 2, noiseTimes: 6, stuckS: 8});
+export const ANGLE_COUNTER = Object.freeze({smoothS: 0.15, restLearnS: 1.0, restFollowS: 2.5, minDeg: 5, enterShare: 0.4, exitShare: 0.35, settleS: 0.12, minAwayS: 0.3, minGapS: 0.6, maxLostS: 2, noiseTimes: 6, stuckS: 20});
 const median = a => { const s = [...a].sort((x, y) => x - y); return s.length % 2 ? s[s.length >> 1] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2; };
 
 export class AngleRepCounter {
@@ -32,8 +32,8 @@ export class AngleRepCounter {
   reset() { this.reps = 0; this.events = []; this.smooth = null; this.lastT = null; this.rest = null; this.learn = []; this.learnFrom = null; this.state = 'learning'; this.since = null; this.awayAt = null; this.peak = 0; this.peaks = []; this.lastRepAt = -Infinity; this.lostAt = null; this.holdSince = null; this.held = 0; this.noise = 0; this.steadyFrom = null; this.steadyLo = 0; this.steadyHi = 0; }
   get ready() { return this.rest !== null; }
   get enter() { return Math.max(this.s.minDeg, this.s.noiseTimes * this.noise, this.peaks.length >= 2 ? this.s.enterShare * median(this.peaks.slice(-6)) : 0); }
-  /* How long the leg has been held near the far end of the current movement, in seconds: for the on-screen hold timer.
-     Near means within 15% of the furthest point reached, and not still travelling outwards. */
+  /* How long the current movement has been held, in seconds, for the on-screen hold timer. Not picky: the hold runs
+     for as long as the leg is away from its resting position (off the bed, for a leg raise), wherever it is. */
   holdS(t) { return this.state === 'away' && this.holdSince !== null && Number.isFinite(t) ? Math.max(0, t - this.holdSince) : 0; }
   message() { return !this.ready ? (this.restBand && this.smooth !== null && (this.smooth < this.restBand[0] || this.smooth > this.restBand[1]) ? 'Go to the starting position and stay there for a moment.' : 'Stay in your starting position for a moment.') : this.state === 'away' ? 'Movement seen. Return to the starting position.' : 'Counting your movements.'; }
 
@@ -62,9 +62,8 @@ export class AngleRepCounter {
     // settled somewhere new for a long time: a change of position, not a movement
     if (this.steadyFrom === null || this.smooth < this.steadyLo || this.smooth > this.steadyHi) { this.steadyFrom = t; this.steadyLo = this.smooth - this.s.minDeg / 2; this.steadyHi = this.smooth + this.s.minDeg / 2; }
     else if (t - this.steadyFrom >= this.s.stuckS) { this.events.push({t, status: 'unconfirmed', reason: 'position_changed'}); this.rest = null; this.learn = []; this.learnFrom = null; this.state = 'learning'; this.since = null; this.steadyFrom = null; return 0; }
-    if (size > this.peak + 0.5) this.holdSince = null;                  // still travelling outwards: the hold has not begun
     this.peak = Math.max(this.peak, size);
-    if (size >= 0.85 * this.peak) { this.holdSince ??= t; this.held = Math.max(this.held, t - this.holdSince); } else this.holdSince = null;
+    this.holdSince ??= this.awayAt; this.held = t - this.holdSince;
     if (size <= Math.max(this.s.exitShare * this.peak, 0.5 * this.s.minDeg)) {
       this.since ??= t; if (t - this.since < this.s.settleS) return 0;
       const held = this.since - this.awayAt, counted = held >= this.s.minAwayS && t - this.lastRepAt >= this.s.minGapS;
