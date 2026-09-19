@@ -10,21 +10,25 @@ webcam is, under which conditions, and by how much.
 
 ## Install, in order of least effort
 
-The camera has no official macOS support, so one of these three has to work.
-Try them in this order and stop at the first that opens the camera.
+The official `pyrealsense2` package on PyPI has Linux and Windows builds only
+(checked at 2.58.4, 30 August 2026), so on a Mac one of these two has to work.
+Stop at the first that opens the camera.
 
 ```bash
-cd ~/"AI TeleRehab/depth-bench"
+cd depth-bench                                   # inside your clone of this repository
 python3.12 -m venv .venv
 .venv/bin/pip install -r requirements.txt        # mediapipe and numpy, always needed
 ```
 
-1. Prebuilt Apple Silicon wheel:
-   `.venv/bin/pip install realsense-applesilicon`
-2. Prebuilt macOS packages from cansik:
+1. Prebuilt macOS packages from cansik, which install the `pyrealsense2` module
+   this code imports. Apple Silicon, macOS 15 or later:
    `.venv/bin/pip install pyrealsense2-macosx`
-3. Build librealsense from source, following the LightBuzz macOS guide, then
+2. Build librealsense from source, following the LightBuzz macOS guide, then
    point the virtual environment at the built `pyrealsense2`.
+
+`realsense-applesilicon` is not an option here: it installs a different module
+(`realsense.wrapper`) with its own interface, and `capture.py` would not find
+`pyrealsense2`.
 
 Check it opened:
 
@@ -32,8 +36,18 @@ Check it opened:
 .venv/bin/python -c "import pyrealsense2 as rs; print(rs.context().query_devices())"
 ```
 
-Plug the camera into a MacBook port directly. RealSense is unreliable through
-hubs and docks, and a bad hub looks exactly like a broken camera.
+If the list comes back empty with the camera plugged in, run the same line with
+`sudo`. Since librealsense 2.50 some versions of macOS only show the device to
+a process running as root, and cansik's notes say the same. The two open crash
+reports on M series Macs (librealsense issues 14302 and 14648) are both in the
+motion sensor start-up of the D455 and D435i. The D415 has no motion sensor, so
+it may not be affected, but that is untested here.
+
+Plug the camera into a MacBook port directly, with a USB 3 cable. RealSense is
+unreliable through hubs and docks, a charging cable will drop it to USB 2 and a
+low frame rate, and both look exactly like a broken camera.
+
+On a Linux machine none of this applies: `pip install pyrealsense2`.
 
 ## Run a capture
 
@@ -42,9 +56,13 @@ hubs and docks, and a bad hub looks exactly like a broken camera.
   --patient P001 --op-date 2026-08-20 --side left --motion bend
 ```
 
+The pose model is `../models/pose_landmarker_full.task`, the file the patient
+app serves, so both halves of the repository find joints with the same model.
+Pass `--model` to try another.
+
 It calibrates the limb lengths from three seconds of still frames, waits for
 Enter, captures a 1.4 second hold to match the app's own burst, and writes two
-files into `captures/`:
+files into `depth-bench/captures/`, which git ignores:
 
 - `..._depth.json`, the `knee-depth-endpoint-v1` file the recovery summary
   already imports, so a reading reaches the app with no change to it
@@ -74,11 +92,28 @@ The maths runs without hardware:
 python3 -m unittest discover -s tests -v
 ```
 
-Fifteen checks on constructed geometry. The one that matters is
+Or `make test-depth` from the repository root. The checks run on constructed
+geometry. The one that matters is
 `test_the_projected_angle_drifts_off_axis_and_the_measured_one_does_not`: at 45
 degrees off axis a real 60 degree bend projects as 50.8, and the depth reading
 stays at 60. If that check ever stops passing, the camera is not earning its
 place.
+
+## How it is tied to the app
+
+`tests/fixtures/knee-depth-endpoint-v1.sample.json` is one constructed hold,
+written by `depth_bench/export.py`: a real 60 degree bend seen from 45 degrees
+off square, eleven good frames and one the bench refuses. Two tests read it.
+
+- `tests/test_contract.py` checks the exporter still writes exactly that file.
+- `../tests/depth-bench-contract.test.mjs` checks the app's importer still
+  accepts it, reads 60 degrees from it, refuses it for the wrong patient, knee
+  or day, and that the acceptance rules repeated in `export.py` are still the
+  importer's own.
+
+So a change to the file format, or to the rules, on one side only fails
+`make test`. After an intended change, write the fixture again with
+`python3 depth-bench/tests/contract_fixture.py --write`.
 
 ## Bench protocol, short card
 

@@ -5,10 +5,13 @@ MediaPipe finds the joints once on the colour frame, and the depth branch reads
 the same three pixels. Both angles therefore descend from one detection of one
 frame, which is the whole point of the instrument.
 
-Run it with run_bench.command, or:
+Run it with run_bench.command, or from the depth-bench folder:
 
     .venv/bin/python -m depth_bench.capture --patient P001 --op-date 2026-08-20 \
         --side left --motion bend --date 2026-09-19
+
+The pose model is the one the patient app serves, ../models/pose_landmarker_full.task,
+so both halves of the repository find joints with the same file.
 
 Nothing leaves the laptop. No video is written, only joint coordinates.
 """
@@ -22,7 +25,10 @@ from .geometry import (RULES, deproject, evaluate_frame, knee_angle_3d, patch_de
                        segment_lengths, summarise, surface_to_centre)
 
 SIDES = {"left": (23, 25, 27), "right": (24, 26, 28)}
-DEFAULT_MODEL = os.path.expanduser("~/Documents/GitHub/knee-recovery/models/pose_landmarker_full.task")
+BENCH_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # .../depth-bench
+REPO_DIR = os.path.dirname(BENCH_DIR)                                     # the repository root
+DEFAULT_MODEL = os.path.join(REPO_DIR, "models", "pose_landmarker_full.task")
+DEFAULT_OUT = os.path.join(BENCH_DIR, "captures")
 
 
 def open_camera(width=1280, height=720, fps=30):
@@ -217,7 +223,7 @@ def run(args):
     print("Written to %s" % args.out)
 
 
-def main(argv=None):
+def build_parser():
     parser = argparse.ArgumentParser(description="Capture one knee end position with a RealSense D415.")
     parser.add_argument("--patient", required=True)
     parser.add_argument("--op-date", required=True, help="operation date, YYYY-MM-DD")
@@ -233,8 +239,12 @@ def main(argv=None):
                              "Leave at zero until it has been measured on the jig.")
     parser.add_argument("--reference", type=float, default=None, help="jig angle in degrees, for bench runs")
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--out", default=os.path.expanduser("~/AI TeleRehab/depth-bench/captures"))
-    return run(parser.parse_args(argv))
+    parser.add_argument("--out", default=DEFAULT_OUT, help="folder for the two export files")
+    return parser
+
+
+def main(argv=None):
+    return run(build_parser().parse_args(argv))
 
 
 if __name__ == "__main__":

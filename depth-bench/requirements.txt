@@ -3,6 +3,7 @@
 mediapipe==0.10.14
 numpy>=1.26,<2.2
 # pyrealsense2 is not on PyPI for macOS. Install one of these instead, in order:
-#   pip install realsense-applesilicon
-#   pip install pyrealsense2-macosx
+#   pip install pyrealsense2-macosx      (Apple Silicon, macOS 15 or later)
 #   build librealsense from source
+# On Linux: pip install pyrealsense2
+# realsense-applesilicon installs a different module and will not work here.
