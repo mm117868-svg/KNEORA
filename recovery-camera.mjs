@@ -1,6 +1,6 @@
 import {loadPose} from './kneerec.js?v=endpoint-heavy-images-1';
 import {kneeFrame,summariseEndpoint} from './recovery-measurements.mjs?v=interval-1';
-import {raisedHandState,drawRaisedHand} from './raised-hand.mjs?v=1';
+import {raisedHandState,drawRaisedHand,WaveDetector} from './raised-hand.mjs?v=wave-1';
 import {EndpointGesture} from './endpoint-gesture.mjs';
 import {EndpointPreviewAverage} from './endpoint-smoothing.mjs?v=steadiness-1';
 import {FluidOutline,drawOutline} from './fluid-outline.mjs?v=fluid-1';
@@ -24,7 +24,7 @@ export function cameraMessage(error){
    live reading (confidence.mjs). Display only. What is saved comes from the measured pictures alone. */
 export function createEndpointCamera({video,canvas,workCanvas=null,onStatus=()=>{},onResult=()=>{},onReady=()=>{},onCaptureStart=()=>{},onGesture=()=>{},onAngle=()=>{},onTrigger=null,modelLoader=loadPose,getStream=()=>navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}},audio:false})}){
  let generation=0,stream=null,model=null,raf=null,timer=null,bucket=null,lastVideo=-1,lastInference=0,side='left',modelName='';
- const gesture=new EndpointGesture();let gesturePaused=false;
+ const gesture=new EndpointGesture(),wave=new WaveDetector();let gesturePaused=false,waveReady=false,lowSince=null;   // a held hand or a wave, whichever the patient finds easier
  const smoother=new EndpointPreviewAverage();
  const outline=new FluidOutline();let shown=null,handsSeen=null,handsAt=-Infinity;
  const ctx=canvas.getContext('2d');
@@ -52,7 +52,7 @@ export function createEndpointCamera({video,canvas,workCanvas=null,onStatus=()=>
    const result=await load(token);if(token!==generation){result.landmarker.close();return;}
    model=result.landmarker;modelName=result.model;
    onReady(true);onGesture({stage:'ready',progress:0});
-   onStatus('Camera ready. Once positioned, raise one hand above your shoulder for two seconds, or use the red capture button. Use the countdown to settle comfortably.');
+   onStatus('Camera ready. Once positioned, wave a hand above your shoulder (or hold one up high for two seconds), or use the red capture button. Use the countdown to settle comfortably.');
    function tick(now){
     if(token!==generation||!model)return;raf=requestAnimationFrame(tick);
     if(video.readyState<2||video.currentTime===lastVideo){if(now-lastInference>500&&shown)forget(now);if(work!==canvas)paint(now);return;}
@@ -83,9 +83,12 @@ export function createEndpointCamera({video,canvas,workCanvas=null,onStatus=()=>
     // view can still trigger capture, but cannot produce a falsely usable result.
     if(body!==undefined&&!bucket&&!gesturePaused){
      handsSeen=body;handsAt=now;
-     const signal=gesture.update(raisedHandState(body,work.width,work.height),now,video.currentTime);
-     if(signal.trigger)requestCapture('raised_hand');
-     else onGesture({stage:signal.progress>0?'holding':signal.armed?'ready':'release',progress:signal.progress});
+     const state=raisedHandState(body,work.width,work.height),signal=gesture.update(state,now,video.currentTime);
+     // A wave counts only once the hand has been seen down for half a second, since the camera opened or since the last capture.
+     if(!waveReady){if((state==='other'||state==='absent')&&!(body&&wave.hand(body,work.width,work.height))){lowSince??=now;if(now-lowSince>=500)waveReady=true;}else lowSince=null;}
+     const waved=waveReady&&signal.armed?wave.update(body,work.width,work.height,now):(wave.reset(),0);
+     if(signal.trigger||waved>=1){wave.reset();waveReady=false;lowSince=null;requestCapture(signal.trigger?'raised_hand':'wave');}
+     else onGesture({stage:waved>signal.progress?'waving':signal.progress>0?'holding':signal.armed?'ready':'release',progress:Math.max(signal.progress,waved)});
     }else handsSeen=null;
     paint(now+(performance.now()-began));   // measuring the picture took a while, and the outline is carried to the moment it is drawn
    }

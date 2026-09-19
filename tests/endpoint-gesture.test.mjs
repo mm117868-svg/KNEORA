@@ -35,7 +35,8 @@ function setup(t,{missingKnee=false,handFailure=false}={}){
  for(const [id,x,y] of [[23,.2,.5],[25,.5,.5],[27,.5,.8],[24,.2,.4],[26,.4,.4],[28,.6,.4]])landmarks[id]={x,y,visibility:.99,presence:.99};
  // The right arm: shoulder, hip and a wrist that is either held high or resting by the hip.
  landmarks[12]={x:.25,y:.2,visibility:.95};landmarks[11]={x:.26,y:.2,visibility:.4};
- const body=()=>{const lm=landmarks.map(p=>({...p}));lm[16]={x:.3,y:hand==='open'?.0:.42,visibility:hand==='absent'?0:.95};lm[14]={x:.28,y:hand==='open'?.1:.32,visibility:.9};if(missingKnee)lm[25].visibility=lm[26].visibility=0;return lm;};
+ const body=()=>{const lm=landmarks.map(p=>({...p}));lm[16]=hand==='wave'?{x:.3+.06*Math.sin(2*Math.PI*1.5*time/1000),y:.14,visibility:.95}:{x:.3,y:hand==='open'?.0:.42,visibility:hand==='absent'?0:.95};   // a wave: a little above the shoulder, side to side
+ lm[14]={x:.28,y:hand==='open'?.1:.32,visibility:.9};if(missingKnee)lm[25].visibility=lm[26].visibility=0;return lm;};
  const camera=createEndpointCamera({video,canvas:{getContext:()=>ctx},onStatus:s=>status.push(s),onReady:r=>ready.push(r),onCaptureStart:s=>starts.push(s),onResult:r=>results.push(r),
   getStream:async()=>({getTracks:()=>[{stop:()=>stopped++}]}),
   modelLoader:async options=>{assert.equal(options.variant,'heavy');assert.equal(options.runningMode,'IMAGE');return {model:'TEST pose',landmarker:{setOptions:async()=>{},detect:()=>({landmarks:[body()]}),detectForVideo:()=>assert.fail('Endpoint pictures must use IMAGE detection'),close:()=>closed++}};},
@@ -51,8 +52,14 @@ test('a raised hand captures an averaged burst without a button and never repeat
  h.setHand('absent');h.frames(6);h.setHand('open');h.frames(21);assert.equal(h.starts.length,2);
  h.camera.stop();t.mock.timers.tick(6000);assert.equal(h.results.length,1);assert.equal(h.closed(),1);assert.equal(h.stopped(),1);
 });
+test('a wave captures too, within two seconds of starting it, once the hand has been seen down',async t=>{
+ const h=setup(t);h.setHand('absent');await h.camera.start('right');h.frames(8);h.setHand('wave');h.frames(20);assert.equal(h.starts.length,1);assert.equal(h.starts[0].trigger,'wave');
+});
+test('a wave made before the hand has ever been seen down captures nothing',async t=>{
+ const h=setup(t);h.setHand('wave');await h.camera.start('right');h.frames(40);assert.equal(h.starts.length,0);
+});
 test('button capture uses the same sequence, and no hand model is loaded',async t=>{
- const h=setup(t);h.setHand('absent');await h.camera.start('left');assert.equal(h.ready.at(-1),true);assert.match(h.status.at(-1),/raise one hand/);
+ const h=setup(t);h.setHand('absent');await h.camera.start('left');assert.equal(h.ready.at(-1),true);assert.match(h.status.at(-1),/wave a hand above your shoulder/);
  assert.equal(h.camera.capture(),true);assert.equal(h.starts[0].trigger,'button');h.frames(60);t.mock.timers.tick(6000);
  assert.equal(h.results[0].summary.mean,90);h.camera.stop();
 });

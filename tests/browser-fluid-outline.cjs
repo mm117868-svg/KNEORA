@@ -37,7 +37,7 @@ const MODELS = `${SHARED}
   const busy = ms => { const end = performance.now() + ms; while (performance.now() < end); };
   function body(ms) { const leg = legAt(ms), lm = Array.from({ length: 33 }, (_, i) => ({ x: .55 + (i % 7) * .03, y: .1 + (i % 5) * .05, z: 0, visibility: .9, presence: .9 }));
     const put = (i, p, v = .97) => { lm[i] = { x: (p[0] + scatter()) / W, y: (p[1] + scatter()) / H, z: 0, visibility: v, presence: v }; };
-    put(0, [860, 150]); put(11, [850, 200]); put(12, [860, 205], .4); put(13, window.__raise ? [870, 100] : [830, 320]); put(15, window.__raise ? [880, 5] : [800, 430]); put(23, leg.hip); put(25, leg.knee); put(27, leg.ankle); put(29, [leg.ankle[0] + 12, leg.ankle[1] + 28]); put(31, [leg.ankle[0] - 50, leg.ankle[1] + 34]);
+    put(0, [860, 150]); put(11, [850, 200]); put(12, [860, 205], .4); put(13, window.__raise ? [870, 100] : window.__wave ? [885, 185] : [830, 320]); put(15, window.__raise ? [880, 5] : window.__wave ? [900 + 70 * Math.sin(2 * Math.PI * 1.5 * performance.now() / 1000), 120] : [800, 430]);   /* a wave: the hand a little above the shoulder, side to side */ put(23, leg.hip); put(25, leg.knee); put(27, leg.ankle); put(29, [leg.ankle[0] + 12, leg.ankle[1] + 28]); put(31, [leg.ankle[0] - 50, leg.ankle[1] + 34]);
     put(24, [leg.hip[0] + 12, leg.hip[1] + 8], .35); put(26, [572, 470], .35); put(28, [585, 655], .35); put(30, [600, 690], .3); put(32, [535, 695], .3); return lm; }
   export const FilesetResolver = { forVisionTasks: async () => ({}) };
   export const PoseLandmarker = { createFromOptions: async () => ({ setOptions: async () => {}, close() {},
@@ -103,7 +103,9 @@ const CAMERA_AND_JUDGE = `(() => {${SHARED}
 
   await page.waitForTimeout(2500);
   const positioning = await judge(10); report('positioning', positioning); await picture('positioning.jpg');
-  await page.evaluate(() => { window.__raise = true; }); await page.waitForTimeout(2600); await page.evaluate(() => { window.__raise = false; });   // two seconds of raised hand, then the countdown
+  await page.evaluate(() => { window.__wave = true; });   // a wave starts it: no held pose
+  const waveBegan = Date.now(); await page.waitForFunction(() => !document.getElementById('countdown').hidden, null, { timeout: 6000 }); const waveMs = Date.now() - waveBegan; console.log('wave        ', `countdown began ${waveMs} ms after the wave started`);
+  await page.evaluate(() => { window.__wave = false; });
   await page.waitForFunction(() => !document.getElementById('finish').disabled, null, { timeout: 20000 });
   await page.waitForTimeout(1500);
   const session = await judge(10); report('session', session); await picture('session.jpg'); await page.screenshot({path: path.join(out, 'page-session.png')});   // the whole page, to see the readout over the picture
@@ -118,6 +120,7 @@ const CAMERA_AND_JUDGE = `(() => {${SHARED}
   await page.click('#barMenu'); await page.waitForFunction(() => !document.getElementById('done').classList.contains('show'));
   await browser.close();
 
+  assert.ok(waveMs < 3000, `the wave started the countdown in ${waveMs} ms`);
   hold('positioning', positioning, 50); hold('session', session, 35);
   assert.ok(+counted.reps >= 3 && +counted.reps <= 5, `the counter saw ${counted.reps} of the four or so movements made while it watched`);
   assert.deepEqual(errors, []);

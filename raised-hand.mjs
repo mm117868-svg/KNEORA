@@ -70,6 +70,7 @@ export class WaveDetector {
   progress(tMs) { this.turns = this.turns.filter(t => tMs - t <= this.s.windowMs); return Math.min(1, this.turns.length / this.s.reversals); }
   /* the wrist that is above its shoulder, with its sideways position in trunk lengths */
   hand(body, width, height) {
+    if (!Array.isArray(body)) return null;
     for (const [wrist, shoulder, hip, other] of SIDES) {
       const w = body[wrist], s = body[shoulder];
       if (!seen(w, this.s.visibility) || !seen(s, this.s.visibility)) continue;
