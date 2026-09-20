@@ -15,6 +15,18 @@ or surgeon's plan.
 
 Live app: <https://mm117868-svg.github.io/KNEORA/>
 
+Simplified phone exercise version: <https://mm117868-svg.github.io/KNEORA/phone.html>
+It is designed to use the iPhone or Android camera to run the same three active exercises. At
+the end, the patient can share a small KNEORA session file and import it on the
+computer under the same prototype username. This is an explicit local transfer,
+not an account service or automatic upload.
+
+Cambridge Kinematics does not collect the patient details or exercise records
+entered into this prototype. They remain in browser storage on the device that
+created them unless the user deliberately downloads or shares a session file.
+The public website host still receives the ordinary technical request data
+needed to serve a webpage, such as an IP address.
+
 ## How the parts fit
 
 ```mermaid
@@ -69,7 +81,9 @@ in `index.html`) and are repeated here because they decided what was combined.
    goes from landmarks to a knee angle to whole-session statistics and never
    marks where a repetition starts or ends. Counting sees pixels and the clock
    only, never landmarks, joints or angles.
-2. Nothing scores a repetition or corrects the patient during an exercise.
+2. Live cues describe the visible exercise geometry, such as keeping the knee
+   straight or pointing the toes towards the ceiling. They do not score the
+   patient, diagnose a problem or alter the prescribed plan.
 3. The app never reads MediaPipe's predicted depth. Depth comes from a sensor
    built to measure it, which is what the bench is for.
 4. The patient chooses the operated leg. The app does not guess, and only that
@@ -103,7 +117,9 @@ app's importer by the shared fixture, and its Mac install notes were corrected.
   person.
 - An open palm two metres or more from the camera can be too small for the hand
   model to find. The Start button remains available.
-- Records stay in the browser that made them. There is no account and no sync.
+- Records stay in the browser that made them unless the patient explicitly
+  shares a session file to another device. The prototype username groups local
+  records but is not a secure account, login or automatic sync service.
 
 ## Ownership
 

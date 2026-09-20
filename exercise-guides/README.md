@@ -49,7 +49,7 @@ The [interactive model viewer](model.html) supports playback and scrubbing. The 
 
 ## App integration
 
-The root `index.html` has a separate **Watch example** link beside each exercise, both in today's list and in the week-by-week programme. It opens the demonstration video in a new tab. Selecting an available exercise opens camera setup directly, with no guide to skip. The operated-leg requirement and existing exercise availability, counting, targets and recording code are preserved. The standalone guide library still uses `guide-player.js` for its demonstration of the watch-or-skip interaction.
+The root `index.html` has a separate **Watch demonstration** link beside every exercise that has a video, both in today's list and in the week-by-week programme. It opens the demonstration library in a new tab. The first time an available exercise is opened on a device, the demonstration screen is shown before camera setup. The patient may watch it or select **Skip and start exercise**. After that first completed entry, the same exercise opens directly, while the voluntary demonstration links remain available. Closing the first demonstration returns to the exercise list and does not mark it as seen. The operated-leg requirement and existing exercise availability, counting, targets and recording code are preserved.
 
 The guides are served alongside the patient app in GitHub Pages. If rebuilding from a generated site, preserve the integration in the template that generates the root page and copy this `exercise-guides/` directory as static assets. `source/app-integration.patch` records the initial root-page change. The underlying source generator is maintained outside this repository.
 

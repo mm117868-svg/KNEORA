@@ -232,3 +232,41 @@ export function drawOutline(ctx, points, { alpha = 1, colour = '#ff3b3b', light 
   }
   ctx.restore?.();
 }
+
+/* Straight leg raise only. Draw the operated-side shoulder-to-hip trunk reference and label the live hip raise.
+   The thigh is already part of drawOutline, so it is used for the arc but not painted twice. */
+export function drawHipOutline(ctx, points, {alpha=1,colour='#ff3b3b',scale=1,angle=null}={}) {
+  if(!usable(points)||points.length!==3||!(alpha>0))return;
+  const [shoulder,hip,knee]=points,w=Math.max(3,5*scale),trunk=Math.hypot(hip[0]-shoulder[0],hip[1]-shoulder[1]),thigh=Math.hypot(knee[0]-hip[0],knee[1]-hip[1]);
+  if(trunk<1||thigh<1)return;
+  ctx.save?.();ctx.globalAlpha=alpha;ctx.lineCap='round';ctx.lineJoin='round';
+  const segment=()=>{ctx.beginPath();ctx.moveTo(shoulder[0],shoulder[1]);ctx.lineTo(hip[0],hip[1]);ctx.stroke();};
+  ctx.strokeStyle='rgba(5,10,20,.55)';ctx.lineWidth=w+Math.max(3,4*scale);segment();ctx.strokeStyle=colour;ctx.lineWidth=w;segment();
+  for(const [p,r] of [[shoulder,w*1.25],[hip,w*1.45]]){ctx.beginPath();ctx.arc(p[0],p[1],r,0,TAU);ctx.fillStyle=colour;ctx.fill();ctx.lineWidth=Math.max(2,2.5*scale);ctx.strokeStyle='#fff';ctx.stroke();}
+  if(Number.isFinite(angle)){
+    const reference=Math.atan2(hip[1]-shoulder[1],hip[0]-shoulder[0]),thighDir=Math.atan2(knee[1]-hip[1],knee[0]-hip[0]);
+    let sweep=thighDir-reference;while(sweep>Math.PI)sweep-=TAU;while(sweep<-Math.PI)sweep+=TAU;
+    const r=Math.max(22*scale,Math.min(trunk,thigh)*.28);
+    for(const [style,extra] of [['rgba(5,10,20,.45)',Math.max(1.5,2*scale)],['rgba(255,255,255,.95)',0]]){
+      ctx.strokeStyle=style;ctx.setLineDash?.([6*scale,6*scale]);ctx.lineWidth=Math.max(1.5,2*scale)+extra;ctx.beginPath();ctx.moveTo(hip[0],hip[1]);ctx.lineTo(hip[0]+Math.cos(reference)*r*1.5,hip[1]+Math.sin(reference)*r*1.5);ctx.stroke();ctx.setLineDash?.([]);
+      ctx.lineWidth=Math.max(2,2.5*scale)+extra;ctx.beginPath();ctx.arc(hip[0],hip[1],r,reference,reference+sweep,sweep<0);ctx.stroke();
+    }
+    const toward=reference+sweep/2,out=r+30*scale,lx=hip[0]+Math.cos(toward)*out,ly=hip[1]+Math.sin(toward)*out,text=`HIP ${Math.round(angle)}°`;
+    ctx.font=`700 ${Math.round(18*scale)}px Archivo, Arial, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=Math.max(3,4*scale);ctx.strokeStyle='rgba(5,10,20,.75)';ctx.strokeText?.(text,lx,ly);ctx.fillStyle='#fff';ctx.fillText?.(text,lx,ly);
+  }
+  ctx.restore?.();
+}
+
+/* Straight leg raise foot direction. Zero degrees is the heel-to-toe line pointing to the top of a level image. */
+export function drawToeOutline(ctx,points,{alpha=1,colour='#ff3b3b',scale=1,angle=null}={}){
+  if(!usable(points)||points.length!==2||!(alpha>0))return;const [heel,toe]=points,length=Math.hypot(toe[0]-heel[0],toe[1]-heel[1]),w=Math.max(3,5*scale);if(length<1)return;
+  ctx.save?.();ctx.globalAlpha=alpha;ctx.lineCap='round';
+  const segment=()=>{ctx.beginPath();ctx.moveTo(heel[0],heel[1]);ctx.lineTo(toe[0],toe[1]);ctx.stroke();};ctx.strokeStyle='rgba(5,10,20,.55)';ctx.lineWidth=w+Math.max(3,4*scale);segment();ctx.strokeStyle=colour;ctx.lineWidth=w;segment();
+  for(const p of [heel,toe]){ctx.beginPath();ctx.arc(p[0],p[1],w*1.25,0,TAU);ctx.fillStyle=colour;ctx.fill();ctx.lineWidth=Math.max(2,2.5*scale);ctx.strokeStyle='#fff';ctx.stroke();}
+  if(Number.isFinite(angle)){
+    const up=-Math.PI/2,foot=Math.atan2(toe[1]-heel[1],toe[0]-heel[0]);let sweep=foot-up;while(sweep>Math.PI)sweep-=TAU;while(sweep<-Math.PI)sweep+=TAU;const r=Math.max(20*scale,Math.min(50*scale,length*.45));
+    ctx.setLineDash?.([6*scale,6*scale]);ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=Math.max(2,2.5*scale);ctx.beginPath();ctx.moveTo(heel[0],heel[1]);ctx.lineTo(heel[0],heel[1]-r*1.5);ctx.stroke();ctx.setLineDash?.([]);ctx.beginPath();ctx.arc(heel[0],heel[1],r,up,up+sweep,sweep<0);ctx.stroke();
+    const toward=up+sweep/2,out=r+25*scale,lx=heel[0]+Math.cos(toward)*out,ly=heel[1]+Math.sin(toward)*out,text=`TOE ${Math.round(angle)}°`;ctx.font=`700 ${Math.round(16*scale)}px Archivo, Arial, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=Math.max(3,4*scale);ctx.strokeStyle='rgba(5,10,20,.75)';ctx.strokeText?.(text,lx,ly);ctx.fillStyle='#fff';ctx.fillText?.(text,lx,ly);
+  }
+  ctx.restore?.();
+}

@@ -6,7 +6,7 @@
    which is what the app used to do, and FluidOutline. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FluidOutline, FLUID, drawOutline} from '../fluid-outline.mjs';
+import {FluidOutline, FLUID, drawOutline, drawHipOutline, drawToeOutline} from '../fluid-outline.mjs';
 import {kneeFlexionDeg} from '../kneerec.js';
 
 function seeded(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -172,6 +172,28 @@ test('the label carries the reading and, when there is one, its 95% interval; th
   assert.ok(swept(r.of('arc').find(c => Math.abs(c[3] - Math.hypot(20, 200)) < 1e-9)) <= 50 + 1e-6, 'a very wide interval is capped so it cannot cover the picture');
   r = recorder(); drawOutline(r.ctx, points, {});
   assert.equal(r.of('fillText').length, 0, 'with the angle switched off only the leg is drawn');
+});
+
+test('straight leg raise draws a shoulder to hip reference and labels the live hip angle',()=>{
+  const points=[[200,400],[500,400],[700,300]],r=recorder();drawHipOutline(r.ctx,points,{angle:26.6});
+  assert.ok(r.of('moveTo').some(c=>c[1]===points[0][0]&&c[2]===points[0][1]));
+  assert.ok(r.of('lineTo').some(c=>c[1]===points[1][0]&&c[2]===points[1][1]));
+  assert.equal(r.of('fillText').at(-1)[1],'HIP 27°');
+});
+
+test('hip reference draws nothing when its key landmarks are missing',()=>{
+  for(const points of [null,[[1,1],[2,2]],[[1,1],[1,1],[2,2]]]){const r=recorder();drawHipOutline(r.ctx,points,{angle:20});assert.equal(r.calls.length,0);}
+});
+
+test('straight leg raise draws heel to toe against a vertical-up reference and labels the direction',()=>{
+  const points=[[500,500],[500,420]],r=recorder();drawToeOutline(r.ctx,points,{angle:0});
+  assert.ok(r.of('moveTo').some(c=>c[1]===500&&c[2]===500));
+  assert.ok(r.of('lineTo').some(c=>c[1]===500&&c[2]<500),'the ceiling reference points up');
+  assert.equal(r.of('fillText').at(-1)[1],'TOE 0°');
+});
+
+test('toe reference draws nothing when heel or toe is missing',()=>{
+  for(const points of [null,[[1,1]],[[1,1],[1,1]]]){const r=recorder();drawToeOutline(r.ctx,points,{angle:20});assert.equal(r.calls.length,0);}
 });
 
 test('nothing is drawn for a leg that is invisible, incomplete or has no length, and the drawing state is put back', () => {

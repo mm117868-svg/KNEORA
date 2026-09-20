@@ -35,10 +35,9 @@ test('every exercise has what a card needs', () => {
   }
 });
 
-test('a pending card links to a demonstration only when the video exists', () => {
+test('every exercise with a video has a Watch demonstration link, including active exercises', () => {
   for (const ex of all) {
     const link = exerciseDemoLink(ex);
-    if (isExerciseAvailable(ex)) { assert.equal(link, '', ex.id); continue; }
     if (ex.guide === false) { assert.equal(link, '', ex.id); assert.equal(hasVideo(ex.id), false, `${ex.id} now has a video: remove guide: false`); }
     else { assert.match(link, new RegExp(`magnific/#${ex.id}"`), ex.id); assert.ok(hasVideo(ex.id), `${ex.id}: no demonstration video`); }
   }
