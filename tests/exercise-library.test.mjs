@@ -8,11 +8,11 @@ import vm from 'node:vm';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const library = html.slice(html.indexOf('const LIB = {'), html.indexOf('const PHASES = '));
-const demo = html.match(/function exerciseDemoLink\(ex\) \{[\s\S]*?\n\}/);
-assert.ok(library.length > 0 && demo, 'library or exerciseDemoLink not found in index.html');
+const demo = html.match(/function exerciseDemoLink\(ex\) \{[\s\S]*?\n\}/),position=html.match(/function exercisePosition\(ex\)\{[\s\S]*?\n\}/);
+assert.ok(library.length > 0 && demo && position, 'library or exercise card helper not found in index.html');
 const context = vm.createContext({ esc: s => String(s), encodeURIComponent });
-vm.runInContext(`${library}\n${demo[0]}\nthis.out = { LIB, ACTIVE_EXERCISES, ICONS, isExerciseAvailable, exerciseDemoLink };`, context);
-const { LIB, ACTIVE_EXERCISES, ICONS, isExerciseAvailable, exerciseDemoLink } = context.out;
+vm.runInContext(`${library}\n${demo[0]}\n${position[0]}\nthis.out = { LIB, ACTIVE_EXERCISES, ICONS, isExerciseAvailable, exerciseDemoLink, exercisePosition };`, context);
+const { LIB, ACTIVE_EXERCISES, ICONS, isExerciseAvailable, exerciseDemoLink, exercisePosition } = context.out;
 const all = Object.entries(LIB).flatMap(([phase, list]) => list.map(ex => ({ ...ex, phase: +phase })));
 const hasVideo = id => fs.existsSync(new URL(`../exercise-guides/magnific/${id}.mp4`, import.meta.url));
 
@@ -41,6 +41,11 @@ test('every exercise with a video has a Watch demonstration link, including acti
     if (ex.guide === false) { assert.equal(link, '', ex.id); assert.equal(hasVideo(ex.id), false, `${ex.id} now has a video: remove guide: false`); }
     else { assert.match(link, new RegExp(`magnific/#${ex.id}"`), ex.id); assert.ok(hasVideo(ex.id), `${ex.id}: no demonstration video`); }
   }
+});
+
+test('every approved exercise has a position image and a short two-step explanation',()=>{
+  assert.match(html,/class="exercise-how"/);assert.match(html,/ex\.steps\.slice\(0,2\)\.join/);
+  for(const ex of all){const figure=exercisePosition(ex);if(ex.guide===false)assert.match(figure,/Position diagram pending/);else{assert.match(figure,new RegExp(`${ex.id}\\.jpg`));assert.ok(fs.existsSync(new URL(`../exercise-guides/videos/${ex.id}.jpg`,import.meta.url)),`${ex.id}: no position image`);}}
 });
 
 test('adding exercises did not move the ones already there', () => {

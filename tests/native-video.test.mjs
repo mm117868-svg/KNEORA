@@ -51,8 +51,8 @@ test('the recovery check shows the video element with the canvas laid over it', 
 test('changed modules carry new version tags, so a cached copy is not mixed with a new page', () => {
   const index = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const tag = (text, file) => text.match(new RegExp(file.replace('.', '\\.') + '\\?v=([\\w-]+)'))?.[1];
-  assert.equal(tag(index, 'recovery-summary.mjs'), 'wave-1');
-  assert.equal(tag(index, 'recovery-summary.css'), 'log-1');
+  assert.equal(tag(index, 'recovery-summary.mjs'), 'paired-check-1');
+  assert.equal(tag(index, 'recovery-summary.css'), 'paired-check-1');
   /* A module asked for under two different tags is loaded twice. Every page and module that uses one of these must
      ask for the same copy. */
   const sources = ['index.html', 'recovery-summary.mjs', 'recovery-camera.mjs', 'recovery-trends.mjs', 'recovery-measurements.mjs'].map(name => [name, fs.readFileSync(new URL(`../${name}`, import.meta.url), 'utf8')]);

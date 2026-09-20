@@ -29,7 +29,7 @@ const age=Number(today.slice(0,4))-1960;
   const graphs=await page.locator('[data-recovery-graphs]').boundingBox(),form=await page.locator('#recoveryCheck').boundingBox();assert.ok(graphs.y+graphs.height<=form.y);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await page.screenshot({path:path.join(os.tmpdir(),'recovery-summary-'+width+'.png')});
-  await page.locator('[data-start-motion="straighten"]').click();assert.equal(await page.locator('[name=motion]').inputValue(),'straighten');
+  await page.locator('[data-start-sequence]').click();assert.equal(await page.locator('[name=motion]').inputValue(),'bend');assert.equal(await page.locator('[data-measurement-plan]').inputValue(),'both');
  }
  await page.goto(base+'tests/recovery-summary-fixture.html');await page.locator('.rs-primary-trend').first().waitFor();
  assert.match(await page.locator('[data-trend-stat=straighten]').innerText(),/5°/);

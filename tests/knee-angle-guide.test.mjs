@@ -14,3 +14,9 @@ test('the home page explains that zero is straight and camera readings are estim
   const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),guide=fs.readFileSync(new URL('../knee-angle-guide.mjs',import.meta.url),'utf8');
   assert.match(guide,/0° means the knee is straight/);assert.match(html+guide,/camera estimate/i);assert.match(html,/Measurements in everyday language/);
 });
+
+test('the interactive knee keeps a minimal whole-body context and named joint parts',()=>{
+  const guide=fs.readFileSync(new URL('../knee-angle-guide.mjs',import.meta.url),'utf8');
+  for(const part of ['guide-person','guide-femur','guide-patella','guide-tibia','guide-fibula','guide-foot'])assert.match(guide,new RegExp(part));
+  assert.match(guide,/data-knee-lower/);assert.match(guide,/rotate\(\$\{g\.deg\} 250 270\)/);
+});
