@@ -576,7 +576,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 .metric-diagram-pair{display:grid;gap:12px;margin:8px 0 16px}.metric-diagram-pair figure{margin:0;min-width:0}.metric-diagram-pair figcaption{font-size:12px;color:var(--muted);margin-bottom:6px}.metric-diagram-pair .metric-angle-diagram{margin:0}.metric-original .metric-angle-diagram{height:112px}.metric-angle-diagram .limb{fill:none;stroke:var(--ink);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
 .ex-card .tag.status-wip,.ex-card .tag.status-prototype{color:#fff;font-size:11px;font-weight:800;padding:8px 10px;line-height:1.35;letter-spacing:.035em;box-shadow:0 1px 4px #0003;max-width:calc(100% - 48px);white-space:normal;text-align:center}
 .ex-card .tag.status-wip{background:#202624}.ex-card .tag.status-prototype{background:#17613e}
-#trackingQuality{display:block;font-weight:700;color:#98401b}#trackingQuality[data-usable="true"]{color:#17613e}
+#trackingQuality{display:block;font-weight:700;color:#98401b}#trackingQuality[data-usable="true"]{color:#17613e}.track[hidden],.rehab-coaching[hidden]{display:none!important}
 .phone-qr-card{display:flex;align-items:center;gap:28px;padding:24px;border:1px solid var(--line);background:var(--bone);margin:24px 0;grid-column:1/-1}.phone-qr-card img{display:block;width:224px;height:224px;background:white;max-width:none}.phone-qr-card h2{margin:8px 0}.phone-qr-card p{line-height:1.6}.phone-mode .phone-qr-card,.progress-view .phone-qr-card{display:none}@media(max-width:600px){.phone-qr-card{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
@@ -708,7 +708,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       <button class="iconbtn" id="instructionToggle" aria-label="Hide instructions" aria-controls="exercisePanel" aria-expanded="true" title="Exercise instructions">☰</button>
       <button class="iconbtn" id="boxbtn" title="Draw the counting box: drag on the picture" aria-label="Adjust counting box" disabled>▭</button>
     </div>
-    <div class="track off" id="track">camera off</div>
+    <div class="track off" id="track" hidden aria-hidden="true">camera off</div>
 
     <div class="veil" id="veil">
       <div class="spin" id="spin"></div>
@@ -723,7 +723,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
     <div class="countdown" id="countdown" hidden></div>
 
     <div class="exercise-toolbar">
-    <aside class="rehab-coaching" id="rehabCoaching"><div class="rehab-heading"><span id="coachKind">Exercise guidance</span><button id="coachMute" type="button" aria-pressed="false">Mute Marin</button></div><small id="trackingQuality" aria-live="polite"></small><small>Tracking visibility and stability, not clinical accuracy.</small><p id="coachText" role="status" aria-live="polite"></p><div class="rehab-foot"><span>Follow your physiotherapist’s plan. Stop if you get sharp pain.</span><a id="coachSource" target="_blank" rel="noopener">NHS guidance</a></div><small id="coachAudioState"></small></aside>
+    <aside class="rehab-coaching" id="rehabCoaching" hidden aria-hidden="true"><div class="rehab-heading"><span id="coachKind">Exercise guidance</span><button id="coachMute" type="button" aria-pressed="false">Mute Marin</button></div><small id="trackingQuality"></small><small>Tracking visibility and stability, not clinical accuracy.</small><p id="coachText"></p><div class="rehab-foot"><span>Follow your physiotherapist’s plan. Stop if you get sharp pain.</span><a id="coachSource" target="_blank" rel="noopener">NHS guidance</a></div><small id="coachAudioState"></small></aside>
     <div class="status" id="status">Getting ready…</div>
     <div class="actions">
       <button class="btn small" id="reset" disabled>Reset count</button>
@@ -751,8 +751,8 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 
 <script type="module">
 import {createCameraDisplay} from "./camera-display.mjs?v=1";
-import {INTEL_CAMERA_ID,createIntelExerciseCamera,intelAvailable,distanceLabel} from "./intel-exercise-camera.mjs";
-import {RehabCoach,RehabVoice,coachingKeys} from "./rehab-coach.mjs";
+import {INTEL_CAMERA_ID,createIntelExerciseCamera,intelAvailable,distanceLabel} from "./intel-exercise-camera.mjs?v=handpose-1";
+import {RehabCoach,RehabVoice} from "./rehab-coach.mjs";
 import {showExerciseGuide} from './exercise-guides/guide-player.js?v=magnific-1';
 import {confirmFirstExerciseGuide} from './exercise-guide-state.mjs?v=first-view-1';
 import {LivePositionCounter,readPositionFrame} from './tools/position-recogniser/live.mjs';
@@ -779,9 +779,10 @@ import { patientRecords, completedExercisesForDay, renderPatientProgress, render
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-1";
 import {raisedHandState, drawRaisedHand, RAISED_HAND, WaveDetector} from "./raised-hand.mjs?v=wave-1";
 import {loadHighFive, highFiveState, HIGH_FIVE_SETTINGS} from "./high-five.mjs?v=open-palm-2";
-import {FluidOutline, PictureClock, drawOutline, drawHipOutline, drawToeOutline} from "./fluid-outline.mjs?v=exercise-landmarks-2";
+import {FluidOutline, PictureClock, drawOutline, drawHipOutline, drawToeOutline, drawLandmarkPath} from "./fluid-outline.mjs?v=exercise-landmarks-3";
 import {trendCI95} from "./confidence.mjs?v=1";
 import {slrView, slrKeyLandmarks, slrToeLandmarks} from "./slr-view.mjs?v=exercise-landmarks-2";
+import {squatLandmarkPaths} from "./squat-view.mjs?v=trunk-feet-1";
 import {liveExerciseFeedback} from "./live-exercise-feedback.mjs?v=1";
 import {AngleRepCounter,ANGLE_COUNTER} from "./angle-rep-counter.mjs?v=forgiving-1";
 import {renderPhysioReport} from "./physio-report.mjs?v=1";
@@ -1094,18 +1095,20 @@ listCams();
 /* ---------------- exercise screen ---------------- */
 const video = $("video"), canvas = $("canvas"), ctx = canvas.getContext("2d");
 const cameraDisplay = createCameraDisplay();
-const intelExerciseCamera=createIntelExerciseCamera({onDistance:depth=>{$("kneeDistance").textContent=distanceLabel(depth);},onError:async error=>{
+const intelExerciseCamera=createIntelExerciseCamera({onDistance:depth=>{$("kneeDistance").textContent=distanceLabel(depth);},onFrame:(frame,now)=>{
+  if(running||!handRecognizer)return;
+  if(countdownStart===null&&now-lastPalmAt>=HIGH_FIVE_SETTINGS.sampleMs){lastPalmAt=now;try{lastPalmResult=handRecognizer.recognizeForVideo(frame,Math.round(now));}catch{lastPalmResult=null;}}
+  handleIntelPalmFrame(now);
+},onError:async error=>{
   if(running){await finish(false);$("status").textContent=error.message+" The exercise recording has stopped.";}
   else {stopCamera();cameraFailed(error);}
 }});
 const trackingQuality=new TrackingQuality();
 const rehabCoach=new RehabCoach();
-let coachEnabled=voiceEnabled();
-function updateCoachMute(){coachEnabled=voiceEnabled();$("coachMute").textContent=coachEnabled?'Mute Marin':'Enable Marin';$("coachMute").setAttribute('aria-pressed',String(!coachEnabled));$("voiceEnabled").checked=coachEnabled;}
-$("coachMute").onclick=()=>{setVoiceEnabled(!voiceEnabled());updateCoachMute();};
-$("voiceEnabled").onchange=()=>{setVoiceEnabled($("voiceEnabled").checked);updateCoachMute();};
-addEventListener('kneora-voice-change',updateCoachMute);
-updateCoachMute();
+const coachEnabled=false;
+$('voiceEnabled').checked=voiceEnabled();
+$("voiceEnabled").onchange=()=>setVoiceEnabled($("voiceEnabled").checked);
+addEventListener('kneora-voice-change',()=>{$("voiceEnabled").checked=voiceEnabled();});
 function fitCameraView() {
   const stage=$("ex").querySelector('.stage'),footer=stage.querySelector('.exercise-toolbar').offsetHeight,reserve=footer+54,availableHeight=Math.max(80,stage.clientHeight-reserve),scale=Math.min(stage.clientWidth/canvas.width,availableHeight/canvas.height);
   stage.style.setProperty('--exercise-footer-height',footer+'px');
@@ -1144,16 +1147,18 @@ const clearOverlay = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
 /* The joints handed to the outline have been through the One Euro filter, which leaves them a little behind a moving
    leg. The outline is told by how much, so it is drawn on the leg and not on the filter's trail. */
 const jointLag = new JointFilter(), newOutline = () => new FluidOutline(canvas.height, undefined, speed => jointLag.lagS(speed));
-let outline = newOutline(), hipOutline = newOutline(), toeOutline = newOutline();
+let outline = newOutline(), hipOutline = newOutline(), toeOutline = newOutline(), squatTorsoOutline=newOutline(), squatLeftOutline=newOutline(), squatRightOutline=newOutline(), squatLeftFootOutline=newOutline(), squatRightFootOutline=newOutline();
 /* The outline keeps the video's own clock, so it sits on the leg in the picture that is showing even when the camera
    slows or stalls. A result is timed by the picture it was made from; the drawing, by the picture now on screen. */
 const pictureClock = new PictureClock();
 const aimOutline = (leg, body, pictureS) => {
-  if(leg)outline.target([leg.hip,leg.knee,leg.ankle],pictureS,leg.visibility);else outline.lose(pictureS);
+  const squat=current?.id==='mini_squat'||current?.id==='squat',squatPaths=squat?squatLandmarkPaths(body,canvas.width,canvas.height):null;
+  if(leg&&!squat)outline.target([leg.hip,leg.knee,leg.ankle],pictureS,leg.visibility);else outline.lose(pictureS);
   const hipPoints=current?.id==="straight_leg_raise"?slrKeyLandmarks(body,$("side").value,canvas.width,canvas.height,leg):null;
   if(hipPoints)hipOutline.target(hipPoints,pictureS,leg.visibility);else hipOutline.lose(pictureS);
   const toePoints=current?.id==="straight_leg_raise"?slrToeLandmarks(body,$("side").value,canvas.width,canvas.height):null;
   if(toePoints)toeOutline.target(toePoints,pictureS,leg?.visibility);else toeOutline.lose(pictureS);
+  for(const [tracker,points] of [[squatTorsoOutline,squatPaths?.torso],[squatLeftOutline,squatPaths?.leftLeg],[squatRightOutline,squatPaths?.rightLeg],[squatLeftFootOutline,squatPaths?.leftFoot],[squatRightFootOutline,squatPaths?.rightFoot]])if(points)tracker.target(points,pictureS,squatPaths.visibility);else tracker.lose(pictureS);
 };
 /* Straight leg raise only: the hip angle beside the knee angle, and, while getting into position, whether the other
    knee looks bent. Display only; see slr-view.mjs. */
@@ -1178,6 +1183,7 @@ function paintOverlay(now) {
     angle: showAngle && !part.fading ? angleDisplay.shown : null, halfWidth: steadiness ? steadiness.halfWidth : null });
   if(current?.id==="straight_leg_raise")for(const part of hipOutline.at(pictureNow))drawHipOutline(ctx,part.points,{alpha:part.alpha,scale:canvas.width/1100,angle:!part.fading?liveHipAngle:null});
   if(current?.id==="straight_leg_raise")for(const part of toeOutline.at(pictureNow))drawToeOutline(ctx,part.points,{alpha:part.alpha,scale:canvas.width/1100,angle:!part.fading?liveToeAngle:null});
+  if(current?.id==='mini_squat'||current?.id==='squat')for(const tracker of [squatTorsoOutline,squatLeftOutline,squatRightOutline,squatLeftFootOutline,squatRightFootOutline])for(const part of tracker.at(pictureNow))drawLandmarkPath(ctx,part.points,{alpha:part.alpha,scale:canvas.width/1100});
   if (now - lastHandAt <= 450) drawRaisedHand(ctx, lastHandResult, canvas.width, canvas.height);
   const observed=running?lastAll:previewAll,age=now-(running?lastPoseAt:previewPoseAt),ids=$("side").value==='left'?[23,25,27]:[24,26,28];
   const visible=quality.usable&&age<450&&ids.every(id=>{const p=observed?.[id];return p&&p.visibility>=.5&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1;});
@@ -1264,8 +1270,7 @@ async function openExercise(ex) {
   loadHandModel();
   appVoice.prepare();
   appVoice.prepare("repetitions_complete"); appVoice.prepare("session_ended");
-  trackingQuality.reset();rehabCoach.reset();rehabVoice.reset();$("coachAudioState").textContent='Preparing Marin exercise guidance...';
-  Promise.all(coachingKeys(ex.id).map(key=>appVoice.prepare(key))).then(results=>{if(current!==ex)return;$("coachAudioState").textContent=results.length&&results.every(Boolean)?'Marin voice is AI-generated.':results.length?'New Marin guidance recordings are not installed yet. Written cues are available.':'Follow the written exercise instructions.';});
+  trackingQuality.reset();rehabCoach.reset();rehabVoice.reset();$("coachAudioState").textContent='';
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
   $("briefSetup").textContent = (isExerciseWorkInProgress(ex) ? "Work in progress. This exercise is available to preview, but its counting and measurements are still being developed and have not been clinically validated. " : "") + SETUP; $("exerciseInstructions").open=isExerciseWorkInProgress(ex); setExerciseSidebar(true);
   $("instr").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
@@ -1377,11 +1382,21 @@ let handSince = null, handLastSample = null, countdownStart = null, previewN = 0
 let lastHandAt = -Infinity, lastHandResult = null, handReleasedAt = null, handReleaseSample = null;
 let lastPalmAt = -Infinity, lastPalmResult = null;
 function sampleOpenPalm(now) {
+  if($("camsel").value==='intel-realsense-depth')return now-lastPalmAt<=HAND_SAMPLE_MAX_GAP_MS?highFiveState(lastPalmResult):null;
   if (!handRecognizer || now-lastPalmAt < HIGH_FIVE_SETTINGS.sampleMs) return null;
   lastPalmAt = now;
   try { lastPalmResult = handRecognizer.recognizeForVideo(video, Math.round(now)); }
   catch { lastPalmResult = null; }
   return highFiveState(lastPalmResult);
+}
+/* Intel canvas frames have their own reliable arrival clock. A zero-frame-rate canvas stream can retain one
+   video timestamp, so the palm hold and countdown are advanced here rather than waiting for video.currentTime. */
+function handleIntelPalmFrame(now){
+  if($("camsel").value!=='intel-realsense-depth'||running||!stream||!current)return;
+  if(countdownStart!==null){if(tickCountdown(now))startSession();return;}
+  const gesture=sampleOpenPalm(now);if(gesture===null)return;
+  const f=handHold(gesture==='open',HAND_HOLD_START_S,now);waving=false;
+  $("handfill").style.width=(f*100)+"%";showHand(f,false);if(f>=1)beginCountdown();
 }
 /* body: the whole-body pose result made from this very frame (null when nobody was found); undefined when the pose
    did not run on this frame, and then there is nothing new to look at. */
@@ -1465,7 +1480,7 @@ function cameraFailed(e) {
 /* Live picture beside optional instructions while the patient gets into position; no session is recorded yet.
    Body overlays are display only. The separate gesture model watches for an open palm at a limited rate. */
 let previewId = 0, previewLastVideoTime = -1, previewLastFrameAt = null, previewAll = null, previewLeg = null, previewPoseAt = -Infinity, previewJoints = null, previewPoseMs = 0, previewPoseSkip = 1;
-function preview() { previewJoints = null; previewLeg = null; previewPoseMs = 0; previewPoseSkip = 2; outline = newOutline(); hipOutline = newOutline(); cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; lastPalmAt = -Infinity; lastPalmResult = null; previewStep(); }
+function preview() { previewJoints = null; previewLeg = null; previewPoseMs = 0; previewPoseSkip = 2; outline = newOutline(); hipOutline = newOutline(); toeOutline=newOutline(); squatTorsoOutline=newOutline(); squatLeftOutline=newOutline(); squatRightOutline=newOutline(); squatLeftFootOutline=newOutline(); squatRightFootOutline=newOutline(); cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; lastPalmAt = -Infinity; lastPalmResult = null; previewStep(); }
 
 function previewStep() {
   if (running || !stream) return;
@@ -1485,9 +1500,10 @@ function previewStep() {
       let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
       previewPoseMs += 0.2 * ((performance.now() - t1) - previewPoseMs); previewPoseSkip = Math.max(2, Math.min(6, Math.ceil(previewPoseMs / 25)));   // at most every other picture: the outline is carried between results, and the graphics processor is left free to play the video
       const quality=trackingQuality.update(res?.landmarks,$("side").value,now);
-      previewAll = quality.usable ? res?.landmarks?.[0] || null : null; previewPoseAt = now; bodyNow = previewAll; showSlr(previewAll, true, now);
+      const rawBody=res?.landmarks?.[0]||null;
+      previewAll = quality.usable ? rawBody : null; previewPoseAt = now; bodyNow = previewAll; showSlr(previewAll, true, now);
       previewLeg = (previewJoints ??= new JointFilter(canvas.height)).apply(previewAll ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.5) : null, now / 1000);
-      aimOutline(previewLeg, previewAll, previewLastVideoTime);   // timed by the picture the pose was made from
+      aimOutline(previewLeg, rawBody, previewLastVideoTime);   // timed by the picture the pose was made from
     }
     const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.5) : null;
     if (current.kind !== "hold") {
@@ -1520,7 +1536,7 @@ function startSession() {
   sessionPausedAt=null;$("pauseSession").textContent="Pause";
   cancelAnimationFrame(previewId); cancelCountdown(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   const fps = stream.getVideoTracks()[0].getSettings().frameRate || 30;
-  outline = newOutline(); hipOutline = newOutline();
+  outline = newOutline(); hipOutline = newOutline(); toeOutline=newOutline(); squatTorsoOutline=newOutline(); squatLeftOutline=newOutline(); squatRightOutline=newOutline(); squatLeftFootOutline=newOutline(); squatRightFootOutline=newOutline();
   trace = new AngleTrace(1, canvas.height); monitor = new FlowMonitor(canvas.width, canvas.height, fps);
   angleDisplay.reset(); hipAngleDisplay.reset(); toeAngleDisplay.reset(); liveHipAngle=NaN; liveToeAngle=NaN;
   frameNo = 0; lastVideoTime = -1; prescribedDone = false; startedAt = new Date(); t0 = performance.now(); poseMs = 0; poseSkip = 2; lastLm = null; lastAngle = NaN; lastAll = null; peak = NaN; low = NaN;
@@ -1567,10 +1583,11 @@ function step() {
     poseMs += 0.2 * ((performance.now() - t1) - poseMs); poseSkip = Math.max(2, Math.min(60, Math.ceil(poseMs / 25)));   // at most every other picture, which leaves the graphics processor free to play the video
     lastPoseAt = now;
 
-    lastAll = quality.usable ? res?.landmarks?.[0] || null : null; bodyNow = lastAll; showSlr(lastAll, false, now);
+    const rawBody=res?.landmarks?.[0]||null;
+    lastAll = quality.usable ? rawBody : null; bodyNow = lastAll; showSlr(lastAll, false, now);
     if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.5);
     angle = trace.add(frameNo, t, lm); lastLm = lm; lastAngle = angle;
-    aimOutline(trace.lastLm, lastAll, lastVideoTime);   // trace.lastLm is the operated leg after the One Euro filter: the joints the angle itself comes from
+    aimOutline(trace.lastLm, rawBody, lastVideoTime);   // trace.lastLm is the operated leg after the One Euro filter: the joints the angle itself comes from
   } else if (landmarker) { lm = lastLm; angle = lastAngle; }
   peak = trace.quantile(0.95);   // "best today" is the 95th percentile of the trusted frames so far, not the single highest frame
 
