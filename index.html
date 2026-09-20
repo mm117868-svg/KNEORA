@@ -647,7 +647,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 
   <section class="phasepick">
     <span class="eyebrow">Your programme, week by week</span>
-    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. A repetition is counted each time your joint moves away from its resting angle and comes back. It works for small movements of a few degrees. For straight leg raises the hip angle is shown as well. Movement analysis starts automatically when your recording stops, and the full report appears here when it is ready. Your full report shows repetitions, joint angles, cadence, fastest and slowest repetitions, hold times, movement speeds and total time, with a breakdown of each repetition. You can also replay or download your video. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises are shown as pending and will be introduced in due course. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
+    <p class="small-note">We are focusing first on heel slides, straight leg raises and seated knee extension, with accurate repetition counting and assessment of movement quality as our development priorities. A repetition is counted each time your joint moves away from its resting angle and comes back. It works for small movements of a few degrees. For straight leg raises the hip angle is shown as well. Movement analysis starts automatically when your recording stops, and the full report appears here when it is ready. Your full report shows repetitions, joint angles, cadence, fastest and slowest repetitions, hold times, movement speeds and total time, with a breakdown of each repetition. You can also replay or download your video. Camera measurements and provisional SLR estimates are not validated clinical scores. Other exercises can be opened as work-in-progress previews while their counting and measurements are developed. The week you are in now is marked from your operation date; do the ones your physiotherapist has given you.</p>
     <nav class="weeknav" id="weeknav" aria-label="Jump to a week"></nav>
   </section>
 
@@ -664,7 +664,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
     <div class="footer-company"><strong>Cambridge Kinematics Limited</strong><p>A private limited company registered in England and Wales.</p><p>Cambridge, England</p></div>
     <p class="footer-essential">Knee Recovery is a development prototype. Follow your physiotherapist’s or surgeon’s plan. The app does not replace professional medical advice, diagnosis or treatment.</p>
     <div class="footer-notices">
-      <details id="app-disclaimer"><summary>About the app and medical disclaimer</summary><div class="footer-detail"><p>This prototype has not been clinically validated for diagnosis or treatment decisions. Camera estimates and repetition counts can be inaccurate or unavailable. They do not confirm that an exercise is safe or correctly performed, and provisional video estimates are not validated clinical scores.</p><p>Only perform exercises your treating clinician has advised. Do not change your rehabilitation plan on the basis of an app result. Stop exercising if you experience sharp pain and seek advice from your clinical team. The app is not an emergency service and sessions are not monitored by a clinician.</p><p>The exercise library and week labels provide a general structure, not an individual prescription. Some exercises remain pending while the app is developed.</p><span id="engine" hidden></span><nav aria-label="Technical views"><a href="video-analysis/">Analyse a recorded exercise</a><a href="report.html">Physio report</a><a href="bench.html">Technical bench view</a></nav></div></details>
+      <details id="app-disclaimer"><summary>About the app and medical disclaimer</summary><div class="footer-detail"><p>This prototype has not been clinically validated for diagnosis or treatment decisions. Camera estimates and repetition counts can be inaccurate or unavailable. They do not confirm that an exercise is safe or correctly performed, and provisional video estimates are not validated clinical scores.</p><p>Only perform exercises your treating clinician has advised. Do not change your rehabilitation plan on the basis of an app result. Stop exercising if you experience sharp pain and seek advice from your clinical team. The app is not an emergency service and sessions are not monitored by a clinician.</p><p>The exercise library and week labels provide a general structure, not an individual prescription. Exercises labelled “Work in progress” are available as previews while their counting and measurement features are developed.</p><span id="engine" hidden></span><nav aria-label="Technical views"><a href="video-analysis/">Analyse a recorded exercise</a><a href="report.html">Physio report</a><a href="bench.html">Technical bench view</a></nav></div></details>
       <details id="data-notice"><summary>Privacy and your data</summary><div class="footer-detail"><p><strong>Cambridge Kinematics does not collect the patient details or exercise records entered into this prototype.</strong> Patient details, preferences, activity dates, exercise ticks, questionnaire reminders and results, and saved session results stay in this browser on this device. There is no patient account, central patient database or automatic synchronisation between devices. Clearing browser site data can remove these records, and other people using the same browser profile may be able to view them.</p><p>Camera frames are processed on this device. When enabled in Settings, exercise video can be recorded and session files downloaded. Downloaded files are separate from browser storage; keep them securely and share them only with people you choose.</p><p>Spoken prompts use generated Marin audio played by this device. The exercise flow does not request microphone access or listen for voice commands.</p><p>The website is hosted by GitHub Pages and loads fonts and, when needed, model resources from external providers. These services receive normal web-request information such as your IP address. Local processing does not mean that visiting the website makes no network requests.</p><nav aria-label="Privacy information"><a href="?view=exercises-today#cameraOptions">Manage your settings</a><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub privacy information</a></nav></div></details>
     </div>
     <div class="footer-ip" id="intellectual-property"><p>Cambridge Kinematics is a trade mark of Cambridge Kinematics Limited.</p><p class="trade-mark-reference">UK trade mark application: UK00004438535. Registration pending.</p></div>
@@ -810,7 +810,7 @@ const LIB = {
     { id: "mini_squat", icon: "squat", title: "Mini squat", tag: "Strength", kind: "reps", count: 12, aim: { kind: "bend", deg: 60 }, target: 60,
       blurb: "A shallow standing bend, holding a counter.",
       steps: ["Stand side-on to the camera, holding a counter or chair.", "Bend both knees to a shallow squat.", "Stand tall. That is one repetition."] },
-    // From Vivek's original page (legacy/vivek-tkr-rehab). Pending, with his aim carried over unreviewed. guide: false means no demonstration video exists yet.
+    // From Vivek's original page (legacy/vivek-tkr-rehab). Work in progress, with his aim carried over unreviewed. guide: false means no demonstration video exists yet.
     { id: "forward_step_up", icon: "stand", title: "Forward step-up", tag: "Function", kind: "reps", count: 10, aim: { kind: "bend", deg: 70 }, target: 70, guide: false,
       blurb: "Step up onto a low step, leading with the operated leg.",
       steps: ["Stand side-on to the camera, facing a low step, with a rail or counter in reach.", "Step up, leading with the operated leg.", "Step back down slowly. That is one repetition."] },
@@ -825,15 +825,18 @@ const LIB = {
     { id: "single_leg_stance", icon: "lift", title: "Single-leg balance", tag: "Hold", kind: "hold", hold: 10, rest: 5, count: 5, aim: { kind: "straight", deg: 15 }, target: 90,
       blurb: "Balance on the operated leg near a counter.",
       steps: ["Stand near a counter for safety, side-on to the camera.", "Lift the other foot and balance on the operated leg.", "Hold while the timer counts, then rest."] },
-    // From Vivek's original page (legacy/vivek-tkr-rehab). Pending, with his aim carried over unreviewed.
+    // From Vivek's original page (legacy/vivek-tkr-rehab). Work in progress, with his aim carried over unreviewed.
     { id: "functional_bend", icon: "slide", title: "Functional bend", tag: "Bend", kind: "reps", count: 12, aim: { kind: "bend", deg: 120 }, target: 120, guide: false,
       blurb: "Keep a deep bend for stairs and low chairs.",
       steps: ["Sit or lie side-on to the camera with the operated leg straight.", "Bend the knee as far as is comfortable.", "Return to straight. That is one repetition.", "Stop short of sharp pain."] },
   ],
 };
-// Keep future exercises visible while restricting entry to the current exercise set.
-const ACTIVE_EXERCISES = new Set(["heel_slide", "straight_leg_raise", "seated_extension"]);
+// Every exercise can be opened in this prototype. Only the three established exercises have exercise-specific
+// counting and measurement work completed; the others remain clearly labelled as work in progress.
+const ESTABLISHED_EXERCISES = new Set(["heel_slide", "straight_leg_raise", "seated_extension"]);
+const ACTIVE_EXERCISES = new Set(Object.values(LIB).flat().map(ex => ex.id));
 const isExerciseAvailable = ex => ACTIVE_EXERCISES.has(ex.id);
+const isExerciseWorkInProgress = ex => !ESTABLISHED_EXERCISES.has(ex.id);
 const ICONS = {
   flex: '<path d="M5 19V5M5 12h9a4 4 0 0 0 4-4"/>',
   slide: '<path d="M4 17h7l5-9M4 17l3-3"/><circle cx="17" cy="6" r="2"/>',
@@ -952,10 +955,10 @@ function renderWeeks() {
   $("weeknav").innerHTML = Object.keys(LIB).map(p => `<a href="#week${p}" class="${+p === now ? "now" : ""}">${esc(PHASES[p])}${+p === now ? " · now" : ""}</a>`).join("");
   $("weeks").innerHTML = Object.keys(LIB).map(p => `<section class="week${+p === now ? " now" : ""}" id="week${p}" aria-label="${esc(PHASES[p])}">
     <div class="head"><h2>${esc(PHASES[p])}</h2><span class="days">${esc(PHASE_DAYS[p])}</span>${+p === now ? '<span class="badge">you are here</span>' : ""}</div>
-    <div class="list">${LIB[p].map((ex, i) => `<div class="exercise-row"><button class="ex-card" data-p="${p}" data-i="${i}"${isExerciseAvailable(ex) ? "" : ' disabled aria-disabled="true"'}>
+    <div class="list">${LIB[p].map((ex, i) => `<div class="exercise-row"><button class="ex-card" data-p="${p}" data-i="${i}">
       ${exercisePosition(ex)}
-      <div><div class="ex-heading"><h3>${esc(ex.title)}</h3>${isExerciseAvailable(ex)?'<span class="exercise-completion" hidden><span class="completion-tick" aria-hidden="true">✓</span>Done today</span>':''}</div><p>${esc(ex.blurb)}</p><p class="exercise-how"><strong>How to do it.</strong> ${esc(ex.steps.slice(0,2).join(' '))}</p><p class="meta">${isExerciseAvailable(ex) ? `${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}` : "To be introduced in due course"}</p>${isExerciseAvailable(ex) && ex.kind !== "hold" ? `<p class="meta tracks">${esc(exerciseProfile(ex.id).tracks)}</p>` : ""}</div>
-      <div class="tag">${isExerciseAvailable(ex) ? esc(ex.tag) : "Pending"}</div></button>${exerciseDemoLink(ex)}</div>`).join("")}</div></section>`).join("");
+      <div><div class="ex-heading"><h3>${esc(ex.title)}</h3><span class="exercise-completion" hidden><span class="completion-tick" aria-hidden="true">✓</span>Done today</span></div><p>${esc(ex.blurb)}</p><p class="exercise-how"><strong>How to do it.</strong> ${esc(ex.steps.slice(0,2).join(' '))}</p><p class="meta">${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}</p><p class="meta tracks">${isExerciseWorkInProgress(ex) ? "Guided prototype · counting and measurement are still being developed" : esc(exerciseProfile(ex.id).tracks)}</p></div>
+      <div class="tag">${isExerciseWorkInProgress(ex) ? "Work in progress" : esc(ex.tag)}</div></button>${exerciseDemoLink(ex)}</div>`).join("")}</div></section>`).join("");
   $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; openExercise(LIB[phase][+b.dataset.i]); });
 }
 function renderToday() {
@@ -966,7 +969,7 @@ function renderToday() {
   if (!["left","right"].includes($("side").value)) host.querySelector('.list').insertAdjacentHTML('beforebegin','<p class="setup-prompt">Before your first session, <a href="#side">select your operated leg in Settings →</a></p>');
   const list=host.querySelector('.list');
   $("week"+now).querySelectorAll('.ex-card:not(:disabled)').forEach(card=>{const copy=card.closest(".exercise-row").cloneNode(true),button=copy.querySelector(".ex-card");button.onclick=()=>{phase=now;openExercise(LIB[now][+button.dataset.i]);};list.append(copy);});
-  if(!list.children.length)list.innerHTML='<p class="small-note">The exercises in this phase are pending. Browse the full programme below and follow your physiotherapist’s plan.</p>';
+  if(!list.children.length)list.innerHTML='<p class="small-note">There are no exercises listed for this phase yet. Browse the full programme below and follow your physiotherapist’s plan.</p>';
 }
 function renderHome() {
   renderedDay = todayKey();
@@ -1190,7 +1193,6 @@ $("voiceTest").onclick = async () => {
 
 
 async function openExercise(ex) {
-  if (!isExerciseAvailable(ex)) return;
   if (!["left", "right"].includes($("side").value)) { location.href="#side"; return; }
   /* The demonstration screen is required on the first opening on this device, but the video itself is skippable.
      Later openings go straight to the exercise; voluntary Watch demonstration controls remain available. */
@@ -1201,7 +1203,7 @@ async function openExercise(ex) {
   appVoice.prepare();
   appVoice.prepare("repetitions_complete"); appVoice.prepare("session_ended");
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
-  $("briefSetup").textContent = SETUP; $("exerciseInstructions").open=false; setExerciseSidebar(true);
+  $("briefSetup").textContent = (isExerciseWorkInProgress(ex) ? "Work in progress. This exercise is available to preview, but its counting and measurements are still being developed and have not been clinically validated. " : "") + SETUP; $("exerciseInstructions").open=isExerciseWorkInProgress(ex); setExerciseSidebar(true);
   $("instr").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
   $("repsLab").textContent = ex.kind === "hold" ? "Holds" : "Repetitions"; $("reps").textContent = "0"; $("repsOf").textContent = ` / ${ex.count}`; $("repsSub").innerHTML = ex.kind === "hold" ? `${ex.hold} s hold, ${ex.rest} s rest` : "movements out and back";
 
@@ -1210,7 +1212,7 @@ async function openExercise(ex) {
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
   else { z.style.left = "0"; z.style.right = (100 - pct(ex.aim.deg)) + "%"; z.style.borderLeft = "none"; z.style.borderRight = "2px solid var(--green)"; $("angleSub").innerHTML = `straight is <b>0°</b>`; }
   $("angleTile").style.display = $("showangle").checked && poseState !== "off" && poseState !== "failed" ? "block" : "none";
-  $("status").textContent = "Get into position, then hold an open palm towards the camera, or press Start."; $("status").className = "status";
+  $("status").textContent = isExerciseWorkInProgress(ex) ? "Work in progress. Follow your prescribed exercise and treat counting and measurements as experimental." : "Get into position, then hold an open palm towards the camera, or press Start."; $("status").className = "status";
   $("finish").disabled = true; $("reset").disabled = true; $("boxbtn").disabled = true; $("clock").textContent = "00:00";
   $("track").textContent = "camera starting"; $("track").className = "track off";
   $("done").className = "done"; $("done").innerHTML = ""; $("handring").hidden = true; $("countdown").hidden = true; $("countdown").innerHTML = "";
@@ -1593,7 +1595,7 @@ async function finish(abandon = false) {
   mon.early_stop = count < current.count;
   const op = $("opdate").value || null;
   const rec = { schema_version: 1, patient_id: $("patient").value, operation_date: op, days_post_op: daysPostOp(op, startedAt),
-    exercise: current.id, prescribed_reps: current.count, prescribed_minutes: null, started_at: localIso(startedAt), duration_s: +duration.toFixed(1),
+    exercise: current.id, exercise_status: ["heel_slide", "straight_leg_raise", "seated_extension"].includes(current.id) ? "established_prototype" : "work_in_progress", prescribed_reps: current.count, prescribed_minutes: null, started_at: localIso(startedAt), duration_s: +duration.toFixed(1),
     fps: +(frameNo / Math.max(1, duration)).toFixed(1), video_file: videoBlob && $("savevideo").checked && $("savefiles").checked ? (videoBlob.type.includes("mp4") ? "video.mp4" : "video.webm") : "",
     measurement: summarise(trace, duration, target), monitoring: mon, patient_count: null, tracking: tr, pose_validation: pv, count_source: source, position_recognition: positionResult, angle_count: angleCount, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
     recording: { captured: !!videoBlob?.size, bytes: videoBlob?.size || 0, mime_type: videoBlob?.type || null },

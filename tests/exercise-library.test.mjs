@@ -1,5 +1,5 @@
 /* The exercise library lives in index.html, so it is lifted out and checked here, as the other page tests do.
-   These checks cover the two exercises carried over from Vivek's original page and the rule that a pending
+   These checks cover the two exercises carried over from Vivek's original page and the rule that a work-in-progress
    card never links to a demonstration that does not exist. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -11,18 +11,28 @@ const library = html.slice(html.indexOf('const LIB = {'), html.indexOf('const PH
 const demo = html.match(/function exerciseDemoLink\(ex\) \{[\s\S]*?\n\}/),position=html.match(/function exercisePosition\(ex\)\{[\s\S]*?\n\}/);
 assert.ok(library.length > 0 && demo && position, 'library or exercise card helper not found in index.html');
 const context = vm.createContext({ esc: s => String(s), encodeURIComponent });
-vm.runInContext(`${library}\n${demo[0]}\n${position[0]}\nthis.out = { LIB, ACTIVE_EXERCISES, ICONS, isExerciseAvailable, exerciseDemoLink, exercisePosition };`, context);
-const { LIB, ACTIVE_EXERCISES, ICONS, isExerciseAvailable, exerciseDemoLink, exercisePosition } = context.out;
+vm.runInContext(`${library}\n${demo[0]}\n${position[0]}\nthis.out = { LIB, ACTIVE_EXERCISES, ESTABLISHED_EXERCISES, ICONS, isExerciseAvailable, isExerciseWorkInProgress, exerciseDemoLink, exercisePosition };`, context);
+const { LIB, ACTIVE_EXERCISES, ESTABLISHED_EXERCISES, ICONS, isExerciseAvailable, isExerciseWorkInProgress, exerciseDemoLink, exercisePosition } = context.out;
 const all = Object.entries(LIB).flatMap(([phase, list]) => list.map(ex => ({ ...ex, phase: +phase })));
 const hasVideo = id => fs.existsSync(new URL(`../exercise-guides/magnific/${id}.mp4`, import.meta.url));
 
-test("Vivek's two exercises are in the library once each, in his phases, and pending", () => {
+test("Vivek's two exercises are in the library once each, in his phases, and unlocked as work in progress", () => {
   for (const [id, phase] of [['forward_step_up', 3], ['functional_bend', 4]]) {
     const found = all.filter(ex => ex.id === id);
     assert.equal(found.length, 1, id);
     assert.equal(found[0].phase, phase);
-    assert.equal(ACTIVE_EXERCISES.has(id), false);
-    assert.equal(isExerciseAvailable(found[0]), false);
+    assert.equal(ACTIVE_EXERCISES.has(id), true);
+    assert.equal(isExerciseAvailable(found[0]), true);
+    assert.equal(isExerciseWorkInProgress(found[0]), true);
+  }
+});
+
+test('all exercises are unlocked and only the established three are not marked work in progress', () => {
+  const established = new Set(['heel_slide', 'straight_leg_raise', 'seated_extension']);
+  for (const ex of all) {
+    assert.equal(isExerciseAvailable(ex), true, ex.id);
+    assert.equal(ESTABLISHED_EXERCISES.has(ex.id), established.has(ex.id), ex.id);
+    assert.equal(isExerciseWorkInProgress(ex), !established.has(ex.id), ex.id);
   }
 });
 
