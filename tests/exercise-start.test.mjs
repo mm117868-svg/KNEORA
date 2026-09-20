@@ -136,7 +136,7 @@ function finishHarness(count = 10) {
   const recorder = new Recorder();
   const elements = new Map();
   const $ = id => {if (!elements.has(id)) elements.set(id, {textContent: '', classList: {remove(){}}}); return elements.get(id);};
-  const context = vm.createContext({trackingQuality:new TrackingQuality(),setExerciseSidebar(){},$, hold:null, running: true, rafId: 0, t0: 0, openGen: 1, recorder, chunks: [],
+  const context = vm.createContext({trackingQuality:new TrackingQuality(),setExerciseSidebar(){},$, sessionPausedAt:null,hold:null, running: true, rafId: 0, t0: 0, openGen: 1, recorder, chunks: [],
     performance: {now: () => 10000}, cancelAnimationFrame(){}, finishRecording, console,
     stopCamera(){events.push('camera stopped');}, current: {kind: 'reps', count: 10},
     monitor: {summary: () => ({repetitions: count})}, positionCounter: {summary: () => ({repetitions: count})}, repCounter: {summary: () => ({repetitions: count,events:[]})}, legGate: {finish: () => ({repetitions: count})}, trackWanted: () => false,

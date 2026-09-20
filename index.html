@@ -620,7 +620,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
     <p class="profile-message" id="profileMessage" role="status"></p>
   </section>
 
-  <section class="phone-qr-card" aria-labelledby="phoneQrTitle"><a href="https://mm117868-svg.github.io/KNEORA/phone.html" target="_blank" rel="noopener"><img src="./assets/kneora-phone-qr.svg" width="224" height="224" alt="QR code to open Kneora on your phone"></a><div><span class="eyebrow">Use your phone</span><h2 id="phoneQrTitle">Scan to open Kneora</h2><p>Open your phone’s camera, point it at this code and tap the link. Allow camera access when you start an exercise.</p><p><a href="https://mm117868-svg.github.io/KNEORA/phone.html" target="_blank" rel="noopener">Open the phone exercise page ↗</a></p><p class="small-note">Opens the published phone version. This code does not pair devices or transfer patient details. Share a completed session file from your phone to review it on the computer.</p></div></section>
+  <section class="phone-qr-card" aria-labelledby="phoneQrTitle"><div id="remoteQr"></div><div><span class="eyebrow">Phone remote</span><h2 id="phoneQrTitle">Control this laptop from your phone</h2><p>Choose exercises, start, pause and finish from your phone. Keep both devices on the same Wi-Fi.</p><button type="button" id="pairRemote">Connect a phone</button><button type="button" id="disconnectRemote" hidden>Disconnect phone</button><p id="remoteStatus" role="status">Create a pairing code to connect.</p><a id="remoteLink" hidden target="_blank" rel="noopener">Open remote</a></div></section>
   <section class="session-import" id="sessionImport" aria-labelledby="sessionImportTitle"><span class="eyebrow">Join phone and computer</span><h2 id="sessionImportTitle">Import a phone session</h2><p>Select the Kneora session file shared from the patient’s phone. It is added to this prototype username’s local review history on this computer. The file is read locally and is not uploaded to Cambridge Kinematics.</p><label>Choose session file<input id="sessionImportFile" type="file" accept="application/json,.json"></label><span id="sessionImportStatus" role="status"></span></section>
 
   <section class="progress patient-progress" id="progress" aria-label="Your recovery progress"></section>
@@ -727,7 +727,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
     <div class="status" id="status">Getting ready…</div>
     <div class="actions">
       <button class="btn small" id="reset" disabled>Reset count</button>
-      <button class="btn finish" id="finish" disabled>Finish</button>
+      <button class="btn" id="pauseSession" type="button">Pause</button><button class="btn finish" id="finish" disabled>Finish</button>
     </div>
     </div>
     <div class="done" id="done"></div>
@@ -1124,6 +1124,7 @@ function setExerciseSidebar(visible) {
 }
 $("instructionToggle").onclick=()=>{const visible=$("ex").classList.contains("camera-expanded");setExerciseSidebar(visible);if(visible&&!$("brief").classList.contains("up"))$("exerciseInstructions").open=true;};
 let disposeAnalysis = () => {}, pendingAnswer = null;
+let sessionPausedAt=null;
 let current = null, stream = null, running = false, recorder = null, chunks = [], openGen = 0;
 let trace, monitor, t0, frameNo, lastVideoTime = -1, rafId = 0, startedAt, dragging = null, boxMode = false;
 let lastPoseAt = -Infinity;
@@ -1516,6 +1517,7 @@ function previewStep() {
 
 function startSession() {
   if (!stream || running) return;
+  sessionPausedAt=null;$("pauseSession").textContent="Pause";
   cancelAnimationFrame(previewId); cancelCountdown(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   const fps = stream.getVideoTracks()[0].getSettings().frameRate || 30;
   outline = newOutline(); hipOutline = newOutline();
@@ -1543,6 +1545,7 @@ function loop() {
   step();
 }
 function step() {
+  if(sessionPausedAt!==null)return;
   const now = performance.now(), t = (now - t0) / 1000;
   if (hold) tickHold(now);
   if (handLastSample !== null && now - handLastSample > HAND_SAMPLE_MAX_GAP_MS) { resetHand(); showHand(0, true); }
@@ -1662,6 +1665,7 @@ function tickHold(now) {
 }
 
 async function finish(abandon = false) {
+  if(sessionPausedAt!==null){t0+=performance.now()-sessionPausedAt;sessionPausedAt=null;}
   if (!running) return; running = false; cancelAnimationFrame(rafId);
   $("finish").disabled = true; $("status").textContent = "Stopping the recording. Please wait for confirmation.";
   const duration = (performance.now() - t0) / 1000;
@@ -1797,6 +1801,50 @@ document.addEventListener("keydown", e => {
   if (e.key === "q") finish(false); if (e.key === "r") $("boxbtn").click();
   if (e.key === "Escape") { if (countdownStart !== null) cancelCountdown(true); else closeExercise(); }
 });
+
+function toggleSessionPause(){
+ if(!running)return;
+ const now=performance.now();
+ if(sessionPausedAt===null){
+  if(recorder?.state==='recording')recorder.pause();
+  sessionPausedAt=now;appVoice.stop();$("status").textContent='Paused. Resume when ready.';$("pauseSession").textContent='Resume';
+  if(hold&&hold.still.started!==null){hold.attempts.push({held_s:hold.still.seconds,target_s:current.hold,status:'incomplete',reason:'patient_paused'});hold.still.reset();}
+ }else{
+  if(recorder?.state==='paused')recorder.resume();
+  const gap=now-sessionPausedAt;t0+=gap;if(hold?.phase==='rest')hold.until+=gap;
+  sessionPausedAt=null;trackingQuality.reset();angleDisplay.reset();resetHand();repCounter?.stillHold.reset();
+  $("status").textContent='Recording resumed.';$("pauseSession").textContent='Pause';
+ }
+}
+$("pauseSession").onclick=toggleSessionPause;
+let remoteToken=null,remoteTimer=null,remoteBusy=false;
+async function remoteApi(path,body){const r=await fetch('/api/remote/'+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(4000)});if(!r.ok)throw Error('Use the local Kneora launcher to connect a phone.');return r.json();}
+function remoteExercises(){const p=currentPhase();return p?LIB[p].map((e,i)=>({id:`${p}:${i}`,title:e.title})):[];}
+async function pollRemote(){
+ if(!remoteToken)return;
+ const guide=document.querySelector('.exercise-guide-dialog[open]');
+ const phase=guide?'guide':sessionPausedAt!==null?'paused':running?'running':countdownStart!==null?'countdown':stream?'ready':'waiting';
+ try{const d=await remoteApi('poll',{token:remoteToken,state:{phase,title:current?.title||'Choose an exercise',voice:voiceEnabled(),exercises:remoteExercises()}});
+ for(const c of d.commands){
+  if(c.action==='start'&&phase==='ready')beginCountdown();
+  if(c.action==='cancel'&&countdownStart!==null)cancelCountdown(true);
+  if(c.action==='pause'&&running&&sessionPausedAt===null)toggleSessionPause();
+  if(c.action==='resume'&&running&&sessionPausedAt!==null)toggleSessionPause();
+  if(c.action==='finish'&&running)void finish(false);
+  if(c.action==='voice')setVoiceEnabled(!voiceEnabled());
+  if(c.action==='continue'&&guide)guide.querySelector('.guide-skip').click();
+  if(c.action==='select'&&!running&&countdownStart===null&&!remoteBusy&&remoteExercises().some(e=>e.id===c.exercise)){
+   remoteBusy=true;const [p,i]=c.exercise.split(':').map(Number);if($("ex").classList.contains('open'))closeExercise();phaseForRemote(p);openExercise(LIB[p][i]).finally(()=>remoteBusy=false);
+  }
+ }
+ $('remoteStatus').textContent='Pairing available for 30 minutes. Scan the code with your phone.';
+ }catch{remoteToken=null;$('remoteStatus').textContent='Pairing ended. Create a new code.';$('remoteQr').replaceChildren();$('remoteLink').hidden=true;$('pairRemote').disabled=false;}
+ if(remoteToken)remoteTimer=setTimeout(pollRemote,500);
+}
+function phaseForRemote(p){phase=p;}
+$('pairRemote').onclick=async()=>{if(remoteToken)return;$('pairRemote').disabled=true;try{const d=await remoteApi('create',{});remoteToken=d.token;const img=document.createElement('img');img.src='data:image/svg+xml;base64,'+btoa(d.svg);img.alt='Scan to control this laptop';img.width=224;img.height=224;$('remoteQr').replaceChildren(img);$('remoteLink').href=d.url;$('remoteLink').hidden=false;$('disconnectRemote').hidden=false;pollRemote();}catch(e){$('remoteStatus').textContent=e.message;$('pairRemote').disabled=false;}};
+$('disconnectRemote').onclick=async()=>{const token=remoteToken;remoteToken=null;clearTimeout(remoteTimer);try{await remoteApi('poll',{token,close:true});}catch{}$('remoteQr').replaceChildren();$('remoteLink').hidden=true;$('disconnectRemote').hidden=true;$('pairRemote').disabled=false;$('remoteStatus').textContent='Phone disconnected.';};
+addEventListener('pagehide',()=>{if(remoteToken)navigator.sendBeacon('/api/remote/poll',new Blob([JSON.stringify({token:remoteToken,close:true})],{type:'application/json'}));});
 </script>
 </body>
 </html>

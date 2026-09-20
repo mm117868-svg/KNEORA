@@ -10,6 +10,7 @@ from pathlib import Path
 from .capture import REPO_DIR, DEFAULT_MODEL, open_camera, landmarker, read_frame
 from .comparison import compare
 from .height_3d import fit, prior
+from . import remote
 
 
 class Camera:
@@ -89,7 +90,9 @@ class Handler(SimpleHTTPRequestHandler):
             size=int(self.headers.get('Content-Length','0'))
             if not 0 < size <= 4096: raise ValueError('Invalid request size.')
             body=json.loads(self.rfile.read(size))
-            if self.path=='/api/intel/height-prior': result=prior(body.get('height_cm'),body.get('reference_group','combined'))
+            if self.path=='/api/remote/create': result=remote.create()
+            elif self.path=='/api/remote/poll': result=remote.desktop(body)
+            elif self.path=='/api/intel/height-prior': result=prior(body.get('height_cm'),body.get('reference_group','combined'))
             elif self.path=='/api/intel/start': result=camera.start(body.get('side'))
             elif self.path=='/api/intel/frame': result=camera.frame(body)
             elif self.path=='/api/intel/stop':

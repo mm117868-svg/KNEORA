@@ -9,3 +9,5 @@ numpy>=1.26,<2.2
 # realsense-applesilicon installs a different module and will not work here.
 
 pillow>=10
+
+qrcode>=8,<9
