@@ -42,7 +42,7 @@ test('the straight leg raise overlay adds only the operated shoulder to the thre
 });
 test('it is shown for the straight leg raise only, and the other-knee advice only before recording starts', () => {
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  assert.match(html, /current\?\.id === "straight_leg_raise" && \$\("showangle"\)\.checked/);
+  assert.match(html, /const on = current\?\.id === "straight_leg_raise";/);
   assert.match(html, /showSlr\(previewAll, true, now\)/); assert.match(html, /showSlr\(lastAll, false, now\)/);
 });
 test('repetitions come from the joint angle: the knee, or the hip for a straight leg raise', () => {

@@ -636,8 +636,8 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       </fieldset>
       <fieldset class="setting-box"><legend>Live camera display</legend>
         <p class="small-note">Brightness and contrast adjust automatically. The complete camera frame stays visible. <a href="intel-comparison.html">Compare Intel depth with a height-based estimate</a>.</p>
-        <label class="f">Hold at the far end of each movement<select id="holdtarget"><option value="0">No hold timer</option><option value="3">3 seconds</option><option value="5" selected>5 seconds</option><option value="10">10 seconds</option></select><small class="small-note">The timer starts after your knee settles. An early movement ends the hold and records the time achieved. Use the hold your physiotherapist gave you. 5 seconds is common in hospital exercise sheets; the research reviewed for this app sets no single correct hold.</small></label>
-        <label class="setting-check"><input type="checkbox" id="showangle" checked><span>Show my live knee angle<small>Display the MediaPipe knee angle while positioning, during the countdown and throughout the session. The ± beside it and the shaded band at the knee show how steady the reading is (a 95% interval of the last third of a second), not how accurate it is.</small></span></label>
+        <label class="f">Hold at the far end of each movement<select id="holdtarget"><option value="-1" selected>Variable · record hold duration</option><option value="0">No hold timer</option><option value="3">3 seconds</option><option value="5">5 seconds</option><option value="10">10 seconds</option></select><small class="small-note">Variable mode counts up once your knee settles and records the duration when you move or finish. There is no pass or fail duration. Choose a fixed target only if it is part of your physiotherapist’s plan.</small></label>
+        <p><strong>Live angles and required landmarks are always shown.</strong> They appear while positioning, during the countdown and throughout the exercise. Unavailable or unreliable angles show a dash. The ± value and shaded band describe short-term steadiness, not clinical accuracy.</p>
         <p class="small-note">Only the landmarks needed for the exercise are outlined. Heel slides and seated knee extensions show the operated hip, knee and ankle with the live knee angle. Straight leg raises also show the operated-side shoulder, heel and toe, with live hip-raise and toe-direction angles. A toe reading of 0° means the toes point towards the top of a level camera picture. The other leg, face and unrelated upper-body landmarks are never drawn. The outline is steadied for display; measurements use the original positions.</p>
         <p class="small-note">These displays need the pose model and a clear view of your leg. An unavailable angle is shown as a dash.</p>
       </fieldset>
@@ -783,7 +783,7 @@ import {FluidOutline, PictureClock, drawOutline, drawHipOutline, drawToeOutline}
 import {trendCI95} from "./confidence.mjs?v=1";
 import {slrView, slrKeyLandmarks, slrToeLandmarks} from "./slr-view.mjs?v=exercise-landmarks-2";
 import {liveExerciseFeedback} from "./live-exercise-feedback.mjs?v=1";
-import {AngleRepCounter} from "./angle-rep-counter.mjs?v=forgiving-1";
+import {AngleRepCounter,ANGLE_COUNTER} from "./angle-rep-counter.mjs?v=forgiving-1";
 import {renderPhysioReport} from "./physio-report.mjs?v=1";
 import {RepSignal} from "./rep-signal.mjs?v=1";
 import {exerciseProfile} from "./exercise-profiles.mjs?v=1";
@@ -901,8 +901,8 @@ if (PROGRESS_VIEW) document.title = `${PAGE_VIEW === "recovery-summary" ? "Recov
 const NOPOSE = PAGE_VIEW!=="exercises-today" || pageParams.has("nopose");
 
 /* ---------------- settings ---------------- */
-const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", holdtarget: "kr_app_hold" };
-const flags = { showangle: "kr_app_angle", savevideo: "kr_app_video", savefiles: "kr_app_files" };
+const prefs = { patient: "kr_patient", opdate: "kr_opdate", side: "kr_side", camsel: "kr_app_cam", holdtarget: "kr_app_hold_v2" };
+const flags = { savevideo: "kr_app_video", savefiles: "kr_app_files" };
 
 for (const k in prefs) { const v = localStorage.getItem(prefs[k]); if (v !== null && (k !== "camsel")) $(k).value = v; $(k).addEventListener("change", () => { localStorage.setItem(prefs[k], $(k).value); if(k==="patient")restorePatientProfile(); renderHome(); }); }
 for (const k in flags) { const v = localStorage.getItem(flags[k]); if (v !== null) $(k).checked = v === "1"; $(k).addEventListener("change", () => {localStorage.setItem(flags[k], $(k).checked ? "1" : "0"); updateSettingsSummary();}); }
@@ -1159,7 +1159,7 @@ const aimOutline = (leg, body, pictureS) => {
    knee looks bent. Display only; see slr-view.mjs. */
 let liveHipAngle=NaN,liveToeAngle=NaN;
 function showSlr(body, positioning, now=performance.now()) {
-  const on = current?.id === "straight_leg_raise" && $("showangle").checked; $("hipTile").hidden = !on; $("toeTile").hidden=!on; if (!on) return;
+  const on = current?.id === "straight_leg_raise"; $("hipTile").hidden = !on; $("toeTile").hidden=!on; if (!on) return;
   const view = slrView(body, $("side").value, canvas.width, canvas.height);
   liveHipAngle=hipAngleDisplay.update(view.hip??NaN,now);$("hipAngle").textContent = Number.isFinite(liveHipAngle) ? liveHipAngle.toFixed(0) : "–";
   liveToeAngle=toeAngleDisplay.update(view.toeUp??NaN,now);$("toeAngle").textContent=Number.isFinite(liveToeAngle)?liveToeAngle.toFixed(0):"–";
@@ -1173,16 +1173,16 @@ function paintOverlay(now) {
   clearOverlay();
   if(video.readyState>=2) cameraDisplay.draw(ctx,video,now);
   const pictureNow = pictureClock.read(video.currentTime, now / 1000);
-  const showAngle = $("showangle").checked && Number.isFinite(angleDisplay.shown), steadiness = showAngle ? trendCI95(angleDisplay.sampleTimes, angleDisplay.sample) : null;
+  const showAngle = Number.isFinite(angleDisplay.shown), steadiness = showAngle ? trendCI95(angleDisplay.sampleTimes, angleDisplay.sample) : null;
   for (const part of outline.at(pictureNow)) drawOutline(ctx, part.points, { alpha: part.alpha, scale: canvas.width / 1100,
     angle: showAngle && !part.fading ? angleDisplay.shown : null, halfWidth: steadiness ? steadiness.halfWidth : null });
-  if(current?.id==="straight_leg_raise")for(const part of hipOutline.at(pictureNow))drawHipOutline(ctx,part.points,{alpha:part.alpha,scale:canvas.width/1100,angle:$("showangle").checked&&!part.fading?liveHipAngle:null});
-  if(current?.id==="straight_leg_raise")for(const part of toeOutline.at(pictureNow))drawToeOutline(ctx,part.points,{alpha:part.alpha,scale:canvas.width/1100,angle:$("showangle").checked&&!part.fading?liveToeAngle:null});
+  if(current?.id==="straight_leg_raise")for(const part of hipOutline.at(pictureNow))drawHipOutline(ctx,part.points,{alpha:part.alpha,scale:canvas.width/1100,angle:!part.fading?liveHipAngle:null});
+  if(current?.id==="straight_leg_raise")for(const part of toeOutline.at(pictureNow))drawToeOutline(ctx,part.points,{alpha:part.alpha,scale:canvas.width/1100,angle:!part.fading?liveToeAngle:null});
   if (now - lastHandAt <= 450) drawRaisedHand(ctx, lastHandResult, canvas.width, canvas.height);
   const observed=running?lastAll:previewAll,age=now-(running?lastPoseAt:previewPoseAt),ids=$("side").value==='left'?[23,25,27]:[24,26,28];
   const visible=quality.usable&&age<450&&ids.every(id=>{const p=observed?.[id];return p&&p.visibility>=.5&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1;});
   const leg=visible?pickSide(observed,canvas.width,canvas.height,$("side").value,.5):null;
-  const exerciseCue=rehabCoach.update({exercise:current?.id,running,visible,knee:leg?kneeFlexionDeg(leg.hip,leg.knee,leg.ankle):NaN,away:running&&repCounter?.state==='away',holdSeconds:+$("holdtarget").value||0,heldSeconds:running&&repCounter?repCounter.holdS((now-t0)/1000):0,now,steps:current?.steps||[]});
+  const exerciseCue=rehabCoach.update({exercise:current?.id,running,visible,knee:leg?kneeFlexionDeg(leg.hip,leg.knee,leg.ankle):NaN,away:running&&repCounter?.state==='away',holdSeconds:+$("holdtarget").value===-1?Infinity:+$("holdtarget").value||0,heldSeconds:running&&repCounter?repCounter.holdS((now-t0)/1000):0,now,steps:current?.steps||[]});
   const cue=quality.usable?exerciseCue:{key:null,text:quality.message,kind:'visibility',source:null};
   if($("coachText").textContent!==cue.text)$("coachText").textContent=cue.text;
   $("coachKind").textContent=cue.kind==='visibility'?'Camera positioning':cue.kind==='camera-reminder'?'Movement reminder':'Exercise guidance';
@@ -1275,7 +1275,7 @@ async function openExercise(ex) {
   angleDisplay.reset(); hipAngleDisplay.reset(); toeAngleDisplay.reset(); liveHipAngle=NaN; liveToeAngle=NaN; $("angle").textContent = "—"; $("hipAngle").textContent = "—"; $("toeAngle").textContent = "—"; $("fill").style.width = "0"; $("angleTile").classList.remove("inzone");
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
   else { z.style.left = "0"; z.style.right = (100 - pct(ex.aim.deg)) + "%"; z.style.borderLeft = "none"; z.style.borderRight = "2px solid var(--green)"; $("angleSub").innerHTML = `straight is <b>0°</b>`; }
-  $("angleTile").style.display = $("showangle").checked && poseState !== "off" && poseState !== "failed" ? "block" : "none";
+  $("angleTile").style.display = "block";
   $("status").textContent = isExerciseWorkInProgress(ex) ? "Work in progress. Follow your prescribed exercise and treat counting and measurements as experimental." : "Get into position, then hold an open palm towards the camera, or press Start."; $("status").className = "status";
   $("finish").disabled = true; $("reset").disabled = true; $("boxbtn").disabled = true; $("clock").textContent = "00:00";
   $("track").textContent = "camera starting"; $("track").className = "track off";
@@ -1495,7 +1495,7 @@ function previewStep() {
       $("track").textContent = view.message;
       $("track").className = "track " + (view.clear ? "ok" : "off");
     }
-    if ($("showangle").checked) {
+    {
       $("angleTile").style.display = "block";
       const angle = leg ? kneeFlexionDeg(leg.hip, leg.knee, leg.ankle) : NaN;
       const shown = angleDisplay.update(angle, now);
@@ -1531,7 +1531,7 @@ function startSession() {
   if (current.kind === "hold") hold = { phase: "waiting", until: 0, cycles: 0, attempts: [], still: new StillHold() };
   tracker = null;
   if (trackWanted() && jsfeatLib) { tracker = new KneeTracker(canvas.width, canvas.height, fps, {smallMovement:smallMovement()}); tracker.attach(jsfeatLib); }
-  legGate = null; tracker = null; repCounter = new AngleRepCounter(undefined, exerciseProfile(current.id).direction, exerciseProfile(current.id).restBand); repSignal = new RepSignal(current.id, $("side").value);
+  legGate = null; tracker = null; repCounter = new AngleRepCounter(+$("holdtarget").value===-1?{...ANGLE_COUNTER,stuckS:Infinity}:undefined, exerciseProfile(current.id).direction, exerciseProfile(current.id).restBand); repSignal = new RepSignal(current.id, $("side").value);
   gateBoxReference = null; manualCountingBox = false; monitor.locked = true;
   monitor.box = [0, 0, canvas.width, canvas.height];   // the whole picture
   running = true; setExerciseSidebar(false); $("brief").classList.remove("up"); $("finish").disabled = false; $("reset").disabled = current.kind === "hold"; $("boxbtn").disabled = true; $("boxbtn").hidden = true;
@@ -1627,14 +1627,14 @@ function paintSession(now) {
        Bottom centre of the picture, clear of the readout. */
     const k = canvas.width / 1280, want = +$("holdtarget").value || 0, heldS = want ? repCounter.holdS((now - t0) / 1000) : 0;
     const ended=repCounter.stillHold.ended;
-    if(want&&ended&&ended.held_s<want){
-      ctx.save();ctx.fillStyle='rgba(5,10,20,.9)';ctx.fillRect(canvas.width*.15,canvas.height-110*k,canvas.width*.7,78*k);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font=`600 ${Math.round(25*k)}px Arial`;ctx.fillText(ended.reason==='tracking_lost'?'Tracking lost: hold could not be confirmed':`Hold ended early: ${ended.held_s.toFixed(1)} of ${want} s. Return when ready.`,canvas.width/2,canvas.height-63*k);ctx.restore();
+    if(want&&ended&&(want===-1||ended.held_s<want)){
+      ctx.save();ctx.fillStyle='rgba(5,10,20,.9)';ctx.fillRect(canvas.width*.15,canvas.height-110*k,canvas.width*.7,78*k);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font=`600 ${Math.round(25*k)}px Arial`;ctx.fillText(ended.reason==='tracking_lost'?'Tracking lost: hold could not be confirmed':want===-1?`Held for ${ended.held_s.toFixed(1)} s. Return when ready.`:`Hold ended early: ${ended.held_s.toFixed(1)} of ${want} s. Return when ready.`,canvas.width/2,canvas.height-63*k);ctx.restore();
     }
-    if (want && heldS > 0.25) { const reached = heldS >= want, w = 420 * k, hh = 84 * k, x = (canvas.width - w) / 2, hy = canvas.height - hh - 28 * k;
+    if (want && heldS > 0.25) { const reached = want>0 && heldS >= want, w = 420 * k, hh = 84 * k, x = (canvas.width - w) / 2, hy = canvas.height - hh - 28 * k;
       ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
       ctx.fillStyle = reached ? "rgba(20,120,70,.92)" : "rgba(5,10,20,.78)"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, hy, w, hh, 18 * k) : ctx.rect(x, hy, w, hh); ctx.fill();
-      ctx.fillStyle = "#fff"; ctx.font = `800 ${Math.round(34 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(reached ? "NOW RETURN SLOWLY" : `HOLD  ${Math.min(want, Math.floor(heldS) + 1)} / ${want}`, x + w / 2, hy + hh * .52);
-      ctx.fillStyle = "rgba(255,255,255,.3)"; ctx.fillRect(x + 22 * k, hy + hh * .72, w - 44 * k, 8 * k); ctx.fillStyle = "#fff"; ctx.fillRect(x + 22 * k, hy + hh * .72, (w - 44 * k) * Math.min(1, heldS / want), 8 * k);
+      ctx.fillStyle = "#fff"; ctx.font = `800 ${Math.round(34 * k)}px Archivo, Arial, sans-serif`; ctx.fillText(want===-1 ? `HOLD  ${heldS.toFixed(1)} s` : reached ? "NOW RETURN SLOWLY" : `HOLD  ${Math.min(want, Math.floor(heldS) + 1)} / ${want}`, x + w / 2, hy + hh * .52);
+      if(want>0){ctx.fillStyle = "rgba(255,255,255,.3)"; ctx.fillRect(x + 22 * k, hy + hh * .72, w - 44 * k, 8 * k); ctx.fillStyle = "#fff"; ctx.fillRect(x + 22 * k, hy + hh * .72, (w - 44 * k) * Math.min(1, heldS / want), 8 * k);}
       ctx.restore(); }
   }
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
@@ -1642,7 +1642,7 @@ function paintSession(now) {
 
 /* Stillness starts the pacing timer; it cannot confirm a quadriceps contraction. */
 function tickHold(now) {
-  const t=(now-t0)/1000;
+  const t=(now-t0)/1000,variable=+$("holdtarget").value===-1;
   if(hold.phase==='rest'){
     const left=Math.max(0,(hold.until-now)/1000);
     $("holdCue").textContent='Relax';$("holdCount").textContent=Math.ceil(left)+' s';$("holdTile").classList.remove('on');
@@ -1650,18 +1650,19 @@ function tickHold(now) {
   }else{
     const elapsed=hold.still.read(t),started=hold.still.started!==null&&hold.still.last!==null&&t-hold.still.last<=0.5;
     $("holdCue").textContent=started?'Hold steady':'Settle your knee';
-    $("holdCount").textContent=started?Math.ceil(Math.max(0,current.hold-elapsed))+' s':'';
+    $("holdCount").textContent=started?(variable?elapsed.toFixed(1):Math.ceil(Math.max(0,current.hold-elapsed)))+' s':'';
     $("holdTile").classList.toggle('on',started);
     if(hold.still.ended){
       const ended=hold.still.ended;
-      hold.attempts.push({...ended,target_s:current.hold,status:ended.reason==='tracking_lost'?'unconfirmed':'incomplete'});
+      hold.attempts.push({...ended,target_s:variable?null:current.hold,status:ended.reason==='tracking_lost'?'unconfirmed':variable?'recorded':'incomplete'});
+      if(variable&&ended.reason!=='tracking_lost'){hold.cycles++;$("reps").textContent=hold.cycles;}
       hold.phase='rest';hold.until=now+current.rest*1000;
-      hold.result=ended.reason==='tracking_lost'?'Tracking lost: hold not confirmed':`Hold incomplete: ${ended.held_s.toFixed(1)} of ${current.hold} s`;
+      hold.result=ended.reason==='tracking_lost'?'Tracking lost: hold not confirmed':variable?`Held for ${ended.held_s.toFixed(1)} s`:`Hold incomplete: ${ended.held_s.toFixed(1)} of ${current.hold} s`;
       hold.still.reset();
     }
-    if(elapsed>=current.hold){hold.attempts.push({status:'completed',held_s:elapsed,target_s:current.hold});hold.result='Hold completed';hold.cycles++;$("reps").textContent=hold.cycles;hold.phase='rest';hold.until=now+current.rest*1000;hold.still.reset();if(navigator.vibrate)navigator.vibrate(30);}
+    if(!variable&&elapsed>=current.hold){hold.attempts.push({status:'completed',held_s:elapsed,target_s:current.hold});hold.result='Hold completed';hold.cycles++;$("reps").textContent=hold.cycles;hold.phase='rest';hold.until=now+current.rest*1000;hold.still.reset();if(navigator.vibrate)navigator.vibrate(30);}
   }
-  $("holdSub").textContent=`${hold.cycles} of ${current.count} holds completed${hold.result ? " · "+hold.result : ""}`;
+  $("holdSub").textContent=`${hold.cycles} of ${current.count} holds ${variable?"recorded":"completed"}${hold.result ? " · "+hold.result : ""}`;
 }
 
 async function finish(abandon = false) {
@@ -1688,9 +1689,9 @@ async function finish(abandon = false) {
     const target=+$("holdtarget").value||0;
     const attempts=angleCount.events.filter(e=>e.status==='accepted').map(e=>({held_s:e.hold_s,reason:e.hold_end_reason}));
     if(repCounter.state==='away'&&repCounter.stillHold.started!==null)attempts.push({held_s:repCounter.stillHold.seconds,reason:repCounter.stillHold.ended?.reason||'session_ended'});
-    angleCount.hold_attempts=target?attempts.map(a=>({...a,target_s:target,status:a.held_s>=target?'completed':a.reason==='tracking_lost'?'unconfirmed':'incomplete'})):[];
+    angleCount.hold_attempts=target?attempts.map(a=>({...a,target_s:target===-1?null:target,status:a.reason==='tracking_lost'?'unconfirmed':target===-1?'recorded':a.held_s>=target?'completed':'incomplete'})):[];
   }
-  if(hold&&hold.phase!=='rest'&&hold.still.started!==null)hold.attempts.push({held_s:hold.still.seconds,target_s:current.hold,reason:hold.still.ended?.reason||'session_ended',status:hold.still.ended?.reason==='tracking_lost'?'unconfirmed':'incomplete'});
+  if(hold&&hold.phase!=='rest'&&hold.still.started!==null)hold.attempts.push({held_s:hold.still.seconds,target_s:+$("holdtarget").value===-1?null:current.hold,reason:hold.still.ended?.reason||'session_ended',status:hold.still.ended?.reason==='tracking_lost'?'unconfirmed':+$("holdtarget").value===-1?'recorded':'incomplete'});
   const count = current.kind === "hold" ? hold.cycles : angleCount?.repetitions ?? 0;
   // This confirmation follows recorder finalisation and stopCamera(), never just reaching the target count.
   const confirmation = completionNotice(count, current.count);
@@ -1705,8 +1706,8 @@ async function finish(abandon = false) {
     measurement: summarise(trace, duration, target), monitoring: mon, patient_count: null, tracking: tr, pose_validation: pv, count_source: source, position_recognition: positionResult, angle_count: angleCount, patient: { pain_0_10: null, difficulty_1_5: null, note: "" }, physio: { reviewed: false, note: "", flag: "" },
     recording: { captured: !!videoBlob?.size, bytes: videoBlob?.size || 0, mime_type: videoBlob?.type || null },
 
-    software_version: SOFTWARE, app: { page: "index.html", build: "pubmed-metrics-1", phase, aim: current.aim, hold_target_s: current.kind === "hold" ? null : (+$("holdtarget").value || 0) } };
-  if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles, attempts: hold.attempts };
+    software_version: SOFTWARE, app: { page: "index.html", build: "pubmed-metrics-1", phase, aim: current.aim, hold_mode:+$("holdtarget").value===-1?"variable":"fixed", hold_target_s: +$("holdtarget").value===-1?null:current.kind === "hold" ? null : (+$("holdtarget").value || 0) } };
+  if (current.kind === "hold") rec.hold = { mode:+$("holdtarget").value===-1?"variable":"fixed", hold_s: +$("holdtarget").value===-1?null:current.hold, rest_s: current.rest, cycles_completed: hold.cycles, attempts: hold.attempts };
   rec.measurement.trace_preview = tracePreview(trace.rows);
   const slot = storeRecord(rec) - 1;   // stored now, before the questions, so walking away from the laptop loses nothing
   refreshExerciseCompletion();
@@ -1808,7 +1809,7 @@ function toggleSessionPause(){
  if(sessionPausedAt===null){
   if(recorder?.state==='recording')recorder.pause();
   sessionPausedAt=now;appVoice.stop();$("status").textContent='Paused. Resume when ready.';$("pauseSession").textContent='Resume';
-  if(hold&&hold.still.started!==null){hold.attempts.push({held_s:hold.still.seconds,target_s:current.hold,status:'incomplete',reason:'patient_paused'});hold.still.reset();}
+  if(hold&&hold.still.started!==null){hold.attempts.push({held_s:hold.still.seconds,target_s:+$("holdtarget").value===-1?null:current.hold,status:+$("holdtarget").value===-1?'recorded':'incomplete',reason:'patient_paused'});hold.still.reset();}
  }else{
   if(recorder?.state==='paused')recorder.resume();
   const gap=now-sessionPausedAt;t0+=gap;if(hold?.phase==='rest')hold.until+=gap;

@@ -27,7 +27,7 @@ function previewHarness() {
     return elements.get(id);
   };
   let now = 0, starts = 0, spoken = 0, stopped = 0, detects = 0, handDetects = 0, landmarks = pose(), handResult = palm();
-  const context = vm.createContext({trackingQuality:new TrackingQuality(),setExerciseSidebar(){},$, stream: {}, running: false, current:{kind:'reps'}, JointFilter, outline:{target(){},lose(){},at(){return [];}}, aimOutline(){}, paintOverlay(){}, showSlr(){}, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, highFiveState, HIGH_FIVE_SETTINGS, drawRaisedHand(){}, performance: {now: () => now},
+  const context = vm.createContext({trackingQuality:new TrackingQuality(),setExerciseSidebar(){},$, stream: {}, running: false, current:{kind:'reps'}, JointFilter, outline:{target(){},lose(){},at(){return [];}}, aimOutline(){}, paintOverlay(){}, angleDisplay:{update(){return NaN;}}, showSlr(){}, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, highFiveState, HIGH_FIVE_SETTINGS, drawRaisedHand(){}, performance: {now: () => now},
     appVoice: {play(){spoken++; return true;}, stop(){stopped++;}}, refreshHint(){},
     video: {readyState: 4, currentTime: 0, videoWidth: 1280}, canvas: {width: 1280, height: 720}, ctx: {drawImage(){}},
     requestAnimationFrame(){return 1;}, cancelAnimationFrame(){}, pickSide(){return null;},
