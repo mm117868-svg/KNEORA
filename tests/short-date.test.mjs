@@ -5,6 +5,7 @@ const options={today:'2026-09-13'};
 test('short dates retain full ISO years for age and surgery calculations',()=>{
   assert.equal(shortDate('1978-12-01'),'01/12/78');
   assert.equal(shortDate('2026-09-05'),'05/09/26');
+  assert.equal(shortDate('2026-09-17',{fullYear:true}),'17/09/2026');
   assert.equal(parseShortDate('01/12/78',{...options,birthDate:true}),'1978-12-01');
   assert.equal(parseShortDate('01/12/01',{...options,birthDate:true}),'2001-12-01');
   assert.equal(parseShortDate('05/09/26',options),'2026-09-05');

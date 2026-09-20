@@ -612,7 +612,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
     <div class="grid2 patient-fields">
       <label class="f">Full name<input id="patientName" autocomplete="name" maxlength="160" placeholder="Enter full name"></label>
       <div class="f"><label for="patientDobShort">Date of birth</label><div class="short-date"><input id="patientDobShort" placeholder="DD/MM/YY" inputmode="numeric" autocomplete="bday" maxlength="10" aria-label="Date of birth, DD/MM/YY"><span class="date-picker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg><input id="patientDob" type="date" aria-label="Choose date of birth from calendar"></span></div></div>
-      <div class="f"><label for="opdateShort">Operation date</label><div class="short-date"><input id="opdateShort" placeholder="DD/MM/YY" inputmode="numeric" maxlength="10" aria-label="Operation date, DD/MM/YY"><span class="date-picker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg><input id="opdate" type="date" aria-label="Choose operation date from calendar"></span></div></div>
+      <div class="f"><label for="opdateShort">Operation date</label><div class="short-date"><input id="opdateShort" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" aria-label="Operation date, DD/MM/YYYY"><span class="date-picker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg><input id="opdate" type="date" aria-label="Choose operation date from calendar"></span></div></div>
       <label class="f">Patient ID (MRN, hospital or NHS number)<input id="patient" value="P001" autocomplete="off"></label>
     </div>
     <div class="patient-facts" aria-live="polite"><div><span>Age</span><strong id="patientAge">Enter date of birth</strong></div><div><span id="postopLabel">Days after surgery</span><strong id="patientPostop">Enter operation date</strong></div></div>
@@ -766,7 +766,7 @@ import { SOFTWARE, pickSide, kneeFlexionDeg, AngleTrace, JointFilter, summarise,
 import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./video-analysis/live.mjs?v=full-breakdown-1";
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js?v=wide-smooth-1";
 import { ageYears, loadProfile, saveProfile } from "./patient-profile.mjs";
-import { bindShortDate } from "./short-date.mjs";
+import { bindShortDate } from "./short-date.mjs?v=operation-year-1";
 import { AppVoice, completionNotice, voiceEnabled, setVoiceEnabled } from "./app-voice.mjs";
 import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=cards-1";
 import { mountExerciseContext } from "./exercise-context.mjs?v=pubmed-1";
@@ -939,7 +939,7 @@ window.addEventListener("hashchange",openHomeSection);
 
 function todayKey() {const now=new Date();return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;}
 const syncBirthDate=bindShortDate($("patientDob"),$("patientDobShort"),()=>({today:todayKey(),birthDate:true}));
-bindShortDate($("opdate"),$("opdateShort"),()=>({today:todayKey()}));
+bindShortDate($("opdate"),$("opdateShort"),()=>({today:todayKey(),fullYear:true}));
 function restorePatientProfile() {
   $("patientName").value="";$("patientDob").value="";$("profileMessage").textContent="";
   try{const record=loadProfile($("patient").value);$("patientName").value=record.full_name||"";$("patientDob").value=record.birth_date||"";}catch(e){$("profileMessage").textContent=e.message;}

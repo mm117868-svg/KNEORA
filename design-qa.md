@@ -24,4 +24,15 @@
 - Targeted automated tests passed for the feedback page, report logic, progress data and exercise summary.
 - Source formatting check passed.
 
+Feedback page result: passed
+
+## Operation date display update
+
+- Source screenshot: `/var/folders/np/lnr7x4kn1gzds1mxgfznnmfm0000gn/T/codex-clipboard-4cad72c7-d5a4-46ad-8850-4b5e0d09a244.png`
+- The operation-date field preserves the existing dimensions, border, focus treatment and calendar control.
+- Its prompt and accessible label now specify `DD/MM/YYYY`.
+- A selected date is shown with the complete year, for example `17/09/2026`.
+- The hidden native date remains ISO formatted, so recovery-day calculations are unchanged.
+- The updated field was visually checked in the Patient details layout and produced no browser warnings or errors.
+
 final result: passed

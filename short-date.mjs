@@ -1,7 +1,7 @@
 // Display a short year without changing the ISO dates used by recovery calculations.
-export function shortDate(iso) {
+export function shortDate(iso, {fullYear = false} = {}) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
-  return match ? `${match[3]}/${match[2]}/${match[1].slice(-2)}` : '';
+  return match ? `${match[3]}/${match[2]}/${fullYear ? match[1] : match[1].slice(-2)}` : '';
 }
 
 export function parseShortDate(text, {today, previous = '', birthDate = false}) {
@@ -31,7 +31,7 @@ export function parseShortDate(text, {today, previous = '', birthDate = false}) 
 }
 
 export function bindShortDate(native, text, options) {
-  const sync = () => {text.value = shortDate(native.value); text.setCustomValidity('');};
+  const sync = () => {text.value = shortDate(native.value, {fullYear: Boolean(options().fullYear)}); text.setCustomValidity('');};
   native.addEventListener('change', sync);
   text.addEventListener('input', event => {
     text.setCustomValidity('');
