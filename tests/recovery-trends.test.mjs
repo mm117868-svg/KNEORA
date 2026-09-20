@@ -32,6 +32,13 @@ test('both movements share one set of axes and retain distinct labels and shapes
  assert.equal((svg.match(/<svg/g)||[]).length,1);assert.equal((svg.match(/Days after surgery · surgery = day 0/g)||[]).length,1);
  assert.match(svg,/data-graph-series="bend"/);assert.match(svg,/data-graph-series="straighten"/);assert.match(svg,/Straightening · Day 12/);assert.match(svg,/Bending · Day 12/);assert.match(svg,/0° bend remaining/);assert.doesNotMatch(svg,/NaN/);
 });
+test('exercise results form a labelled scatter series and repeated sessions stay as separate points',()=>{
+ const sessions={bend:[{day:12,date:'2026-09-13',value:90,label:'Heel slides: furthest bend'},{day:12,date:'2026-09-13',value:95,label:'Heel slides: furthest bend'}],straighten:[{day:12,date:'2026-09-13',value:8,label:'Straight leg raise: straightest knee observed'}]};
+ const svg=combinedMovementChart({bend:[],straighten:[]},12,sessions);
+ assert.match(svg,/Scatter graph/);assert.match(svg,/data-graph-series="exercise-scatter"/);
+ assert.equal((svg.match(/Heel slides: furthest bend/g)||[]).length,2);assert.match(svg,/Straight leg raise: straightest knee observed/);
+ const centres=[...svg.matchAll(/<circle cx="([\d.]+)"[^>]*><title>Heel slides/g)].map(m=>m[1]);assert.equal(centres.length,2);assert.notEqual(centres[0],centres[1]);
+});
 test('the vertical axis shows 0 to 150 degrees even with no data or a small early range',()=>{
  for(const bend of [[],[{day:1,date:'2026-09-02',value:30}]]){
   const svg=combinedMovementChart({bend,straighten:[]},1);

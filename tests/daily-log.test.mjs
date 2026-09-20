@@ -22,9 +22,11 @@ test('each exercise logs its own key figure, newest day first, for the chosen kn
   assert.deepEqual(log[0].exercises.map(e => [e.exercise, e.key.label, e.key.value]), [['straight_leg_raise', 'Knee kept straight', 14]]);
   assert.equal(log[1].exercises.find(e => e.exercise === 'seated_extension').key.label, 'Straightest knee');
 });
-test('the recovery graph gets one exercise estimate a day: the furthest heel-slide bend and the straightest seated knee', () => {
+test('the recovery scatter keeps every usable exercise session and adds straightening from a straight leg raise', () => {
   const s = exerciseRangeSeries(records, scope);
-  assert.deepEqual(s.bend.map(p => [p.day, p.value]), [[13, 90]]); assert.deepEqual(s.straighten.map(p => [p.day, p.value]), [[13, 8]]);
+  assert.deepEqual(s.bend.map(p => [p.day, p.value]), [[13, 80], [13, 90]]);
+  assert.deepEqual(s.straighten.map(p => [p.day, p.value, p.exercise]), [[13, 8, 'seated_extension'], [14, 14, 'straight_leg_raise']]);
+  assert.match(s.straighten[1].label,/Straight leg raise/);
 });
 test('the log reads plainly and says when there is nothing yet', () => {
   const html = renderDailyLog(dailyLog(records, scope));

@@ -5,7 +5,7 @@
    figure (exercise-evidence.mjs keyOutcome): heel slides the furthest bend, seated knee extension the straightest
    knee, straight leg raise how straight the knee stayed. All are camera estimates from the exercise sessions, which
    is why the recovery graph draws them hollow, apart from the dedicated recovery checks. */
-import {keyOutcome, EXERCISE_EVIDENCE} from './exercise-evidence.mjs?v=cards-1';
+import {keyOutcome, exercisePerformanceMetrics, EXERCISE_EVIDENCE} from './exercise-evidence.mjs?v=cards-1';
 import {recordedCount} from './patient-progress.js?v=cards-1';
 import {postOpDay, dayNumber} from './progress-data.mjs';
 import {esc, shortDate, dayLabel} from './progress-shared.mjs';
@@ -25,13 +25,31 @@ export function dailyLog(records, scope) {
   })}));
 }
 
-/* What the exercise sessions say about bending and straightening, one value a day, for the recovery graph. */
+/* What every usable exercise session says about bending and straightening for the recovery scatter graph.
+   These are task observations, not dedicated range-of-motion checks. Heel slides contribute their deepest bend.
+   Straightening can come from seated extensions, straight leg raises, or the return phase of heel slides. */
 export function exerciseRangeSeries(records, scope) {
-  const best = (exercise, pick, better) => { const byDay = new Map();
-    for (const r of kept(records, scope)) { if (r.exercise !== exercise) continue; const value = pick(r), date = r.started_at.slice(0, 10), day = postOpDay(date, scope.operationDate);
-      if (typeof value !== 'number' || !Number.isFinite(value) || day === null) continue; const had = byDay.get(date); if (!had || better(value, had.value)) byDay.set(date, {date, day, value, exercise}); }
-    return [...byDay.values()].sort((a, b) => a.day - b.day); };
-  return {bend: best('heel_slide', r => r.measurement?.p95_flexion_deg, (a, b) => a > b), straighten: best('seated_extension', r => r.measurement?.p05_extension_deg, (a, b) => a < b)};
+  const series = {bend: [], straighten: []}, number = (...values) => values.find(v => typeof v === 'number' && Number.isFinite(v)) ?? null;
+  for (const r of kept(records, scope)) {
+    const date = r.started_at.slice(0, 10), day = postOpDay(date, scope.operationDate), analysed = r.exercise_analysis?.exercise === r.exercise ? r.exercise_analysis.metrics : null;
+    if (day === null) continue;
+    if (r.exercise === 'heel_slide') {
+      const bend = number(analysed?.maximumObservedBend, r.measurement?.p95_flexion_deg, r.measurement?.peak_flexion_deg);
+      const performance = exercisePerformanceMetrics(r), straighten = number(performance.returnBend?.median, analysed?.bestObservedStraightening);
+      if (bend !== null) series.bend.push({date, day, value:bend, exercise:r.exercise, label:'Heel slides: furthest bend'});
+      if (straighten !== null) series.straighten.push({date, day, value:straighten, exercise:r.exercise, label:performance.returnBend?'Heel slides: straightening on return':'Heel slides: straightest knee observed'});
+    }
+    if (r.exercise === 'seated_extension') {
+      const value = number(analysed?.bestObservedStraightening, r.measurement?.p05_extension_deg, r.measurement?.min_extension_deg);
+      if (value !== null) series.straighten.push({date, day, value, exercise:r.exercise, label:'Seated knee extension: straightest knee'});
+    }
+    if (r.exercise === 'straight_leg_raise') {
+      const value = number(analysed?.bestObservedStraightening, r.measurement?.median_flexion_deg);
+      if (value !== null) series.straighten.push({date, day, value, exercise:r.exercise, label:'Straight leg raise: straightest knee observed'});
+    }
+  }
+  for (const points of Object.values(series)) points.sort((a,b)=>a.day-b.day||a.date.localeCompare(b.date));
+  return series;
 }
 
 const round = n => n === null ? null : Math.round(n * 10) / 10;

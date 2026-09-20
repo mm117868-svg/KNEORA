@@ -56,8 +56,8 @@ export function publishedContext(x, y, minDay, maxDay) {
   return band || line ? `<g data-graph-reference="published">${band}${line}</g>` : '';
 }
 
-/* sessions: what the exercise sessions say, one value a day ({bend, straighten} of {day, date, value}). Drawn hollow and
-   smaller, so a dedicated recovery check is never mistaken for an exercise estimate or the other way round. */
+/* sessions: every usable exercise observation ({bend, straighten} of {day, date, value, label}). Drawn hollow and
+   smaller as a scatter series, so a dedicated recovery check is never mistaken for an exercise estimate. */
 export function combinedMovementChart(trends, elapsed, sessions = {bend: [], straighten: []}) {
   const fromSessions = [...(sessions.bend || []), ...(sessions.straighten || [])];
   const all = [...trends.bend, ...trends.straighten, ...fromSessions];
@@ -73,12 +73,13 @@ export function combinedMovementChart(trends, elapsed, sessions = {bend: [], str
   for (let day = Math.ceil(minDay / dayStep) * dayStep; day <= maxDay; day += dayStep) dayLines.push(day);
   const minorDegrees = Array.from({length: high / 10 + 1}, (_, i) => i * 10).filter(value => value % 30);
   const interval = p => Number.isFinite(p.summary?.ci95?.low) && Number.isFinite(p.summary?.ci95?.high) ? p.summary.ci95 : null;
+  const scatterX = (points, point) => { const same = points.filter(p=>p.day===point.day), index=same.indexOf(point); return x(point.day)+(index-(same.length-1)/2)*Math.min(7,28/Math.max(1,same.length)); };
   const title = (p, motion) => `${motion === 'bend' ? 'Bending' : 'Straightening'} · Day ${p.day} · ${esc(shortDate(p.date))}: ${Math.round(p.value*10)/10}°${motion === 'straighten' ? ' bend remaining' : ''}${interval(p) ? ` · 95% confidence interval ${intervalText(interval(p))}` : ''}`;
   /* A whisker through each camera or depth result: the 95% confidence interval of that day's average, kept inside
      the axes. It shows how steady the pictures behind the point were, not how accurate the camera is. A clinical
      entry is a single reading and has none. */
   const whisker = (p, colour) => { const ci = interval(p); if (!ci) return ''; const top = y(Math.min(high, Math.max(0, ci.high))), bottom = y(Math.min(high, Math.max(0, ci.low))); return `<path data-graph-interval d="M${x(p.day)} ${top}V${bottom}M${x(p.day)-4} ${top}h8M${x(p.day)-4} ${bottom}h8" fill="none" stroke="${colour}" stroke-width="1.5" stroke-opacity=".8"/>`; };
-  return `<svg class="rs-movement-chart" viewBox="0 0 500 330" role="img" aria-label="Knee bending and straightening by days after surgery. ${trends.bend.length} bending and ${trends.straighten.length} straightening measurements. Both use degrees of knee bend; 0 degrees means straight. A faint band and a dashed line show published figures from other patients for context.">
+  return `<svg class="rs-movement-chart" viewBox="0 0 500 330" role="img" aria-label="Scatter graph of knee bending and straightening by days after surgery. ${trends.bend.length+trends.straighten.length} dedicated recovery measurements and ${fromSessions.length} exercise observations. Both use degrees of knee bend; 0 degrees means straight. A faint band and a dashed line show published figures from other patients for context.">
     <text x="58" y="20" class="chart-axis-title">Y · Knee bend (degrees)</text>
     ${publishedContext(x, y, minDay, maxDay)}
     ${minorDegrees.map(value => `<line x1="58" x2="474" y1="${y(value)}" y2="${y(value)}" stroke="var(--line)" stroke-opacity=".38"/>`).join('')}
@@ -88,7 +89,7 @@ export function combinedMovementChart(trends, elapsed, sessions = {bend: [], str
     ${ticks.map(day => `<text x="${x(day)}" y="290" text-anchor="middle">${day}</text>`).join('')}
     <g data-graph-series="straighten">${trends.straighten.map(p => `${whisker(p, '#23734f')}<path d="M${x(p.day)} ${y(p.value)-7}l7 7-7 7-7-7Z" fill="none" stroke="#23734f" stroke-width="2.5"><title>${title(p,'straighten')}</title></path>`).join('')}</g>
     <g data-graph-series="bend">${trends.bend.map(p => `${whisker(p, 'var(--brand)')}<circle cx="${x(p.day)}" cy="${y(p.value)}" r="4.5" fill="var(--brand)"><title>${title(p,'bend')}</title></circle>`).join('')}</g>
-    <g data-graph-series="sessions">${(sessions.bend || []).map(p => `<circle cx="${x(p.day)}" cy="${y(p.value)}" r="3.5" fill="var(--bone)" stroke="var(--brand)" stroke-width="1.8"><title>From your heel slides · Day ${p.day} · ${esc(shortDate(p.date))}: about ${Math.round(p.value)}° (exercise estimate)</title></circle>`).join('')}${(sessions.straighten || []).map(p => `<path d="M${x(p.day)} ${y(p.value)-5}l5 5-5 5-5-5Z" fill="var(--bone)" stroke="#23734f" stroke-width="1.6"><title>From your seated knee extensions · Day ${p.day} · ${esc(shortDate(p.date))}: about ${Math.round(p.value)}° bend remaining (exercise estimate)</title></path>`).join('')}</g>
+    <g data-graph-series="exercise-scatter">${(sessions.bend || []).map(p => `<circle cx="${scatterX(sessions.bend,p)}" cy="${y(p.value)}" r="3.5" fill="var(--bone)" stroke="var(--brand)" stroke-width="1.8"><title>${esc(p.label||'Exercise bend observation')} · Day ${p.day} · ${esc(shortDate(p.date))}: about ${Math.round(p.value)}° (exercise estimate)</title></circle>`).join('')}${(sessions.straighten || []).map(p => {const px=scatterX(sessions.straighten,p);return `<path d="M${px} ${y(p.value)-5}l5 5-5 5-5-5Z" fill="var(--bone)" stroke="#23734f" stroke-width="1.6"><title>${esc(p.label||'Exercise straightening observation')} · Day ${p.day} · ${esc(shortDate(p.date))}: about ${Math.round(p.value)}° bend remaining (exercise estimate)</title></path>`;}).join('')}</g>
     ${all.length?'':'<text x="266" y="162" text-anchor="middle">No measurements yet</text>'}
     <text x="266" y="319" text-anchor="middle" class="chart-axis-title">X · Days after surgery · surgery = day 0</text>
   </svg>`;
