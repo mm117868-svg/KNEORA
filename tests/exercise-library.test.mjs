@@ -43,9 +43,15 @@ test('every exercise with a video has a Watch demonstration link, including acti
   }
 });
 
-test('every approved exercise has a position image and a short two-step explanation',()=>{
+test('every exercise has position guidance and a short two-step explanation',()=>{
   assert.match(html,/class="exercise-how"/);assert.match(html,/ex\.steps\.slice\(0,2\)\.join/);
-  for(const ex of all){const figure=exercisePosition(ex);if(ex.guide===false)assert.match(figure,/Position diagram pending/);else{assert.match(figure,new RegExp(`${ex.id}\\.jpg`));assert.ok(fs.existsSync(new URL(`../exercise-guides/videos/${ex.id}.jpg`,import.meta.url)),`${ex.id}: no position image`);}}
+  for(const ex of all){
+    const figure=exercisePosition(ex);
+    assert.doesNotMatch(figure,/Position diagram pending/);
+    if(ex.id==='forward_step_up')assert.match(figure,/standing in front of a low step/);
+    else if(ex.id==='functional_bend')assert.match(figure,/heel_slide\.jpg/);
+    else{assert.match(figure,new RegExp(`${ex.id}\\.jpg`));assert.ok(fs.existsSync(new URL(`../exercise-guides/videos/${ex.id}.jpg`,import.meta.url)),`${ex.id}: no position image`);}
+  }
 });
 
 test('adding exercises did not move the ones already there', () => {

@@ -76,7 +76,7 @@ details.more summary{cursor:pointer;font-weight:600}
 .ex-card h3{margin:0 0 2px;font-size:16px;font-weight:650}
 .ex-card p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.35}
 .ex-card .meta{margin:4px 0 0;font-size:12px;color:var(--brand-deep);font-weight:600}
-.exercise-position{width:156px;height:100px;flex:0 0 auto;margin:0;border:1px solid var(--line);background:var(--paper2);overflow:hidden;display:grid;place-items:center}.exercise-position img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 48%}.exercise-position.pending svg{width:54px;height:54px;fill:none;stroke:var(--muted);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}.exercise-how{max-width:68ch;margin-top:9px!important;font-size:12px!important;line-height:1.55!important}.exercise-how strong{color:var(--ink)}
+.exercise-position{width:156px;height:100px;flex:0 0 auto;margin:0;border:1px solid var(--line);background:var(--paper2);overflow:hidden;display:grid;place-items:center}.exercise-position img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 48%}.exercise-position.diagram svg{display:block;width:100%;height:100%;fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.exercise-position.diagram .position-surface{stroke:var(--muted);stroke-width:2}.exercise-position.diagram .position-joint{fill:var(--brand);stroke:none}.exercise-how{max-width:68ch;margin-top:9px!important;font-size:12px!important;line-height:1.55!important}.exercise-how strong{color:var(--ink)}
 .ex-card .tag{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--brand-deep);background:var(--brand-soft);padding:5px 8px;border-radius:7px;white-space:nowrap;align-self:flex-start}
 .progress{margin-top:26px}
 .progress h2{font-size:13px;margin:0 0 6px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
@@ -942,7 +942,8 @@ function exerciseDemoLink(ex) {
   return `<a class="exercise-demo" href="./exercise-guides/magnific/#${encodeURIComponent(ex.id)}" target="_blank" rel="noopener" aria-label="Watch demonstration: ${esc(ex.title)} (opens in a new tab)">Watch demonstration ↗</a>`;
 }
 function exercisePosition(ex){
-  if(ex.guide===false)return `<figure class="exercise-position pending" aria-label="Position diagram pending"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[ex.icon]}</svg></figure>`;
+  if(ex.id==='forward_step_up')return `<figure class="exercise-position diagram" role="img" aria-label="Forward step-up starting position, standing in front of a low step"><svg viewBox="0 0 156 100" aria-hidden="true"><path class="position-surface" d="M8 86h140M105 86V67h43"/><circle cx="67" cy="18" r="8"/><path d="M67 27v27M67 35l-17 16M67 36l16 14M67 54L52 84M67 54l24 15 18-2"/><circle class="position-joint" cx="67" cy="54" r="4"/><circle class="position-joint" cx="91" cy="69" r="4"/></svg></figure>`;
+  if(ex.id==='functional_bend')return `<figure class="exercise-position"><img src="./exercise-guides/videos/heel_slide.jpg" alt="Functional bend starting position, lying down with the knee ready to bend" loading="lazy"></figure>`;
   return `<figure class="exercise-position"><img src="./exercise-guides/videos/${encodeURIComponent(ex.id)}.jpg" alt="${esc(ex.title)} starting position" loading="lazy"></figure>`;
 }
 
