@@ -604,7 +604,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
         <label class="setting-check"><input type="checkbox" id="savefiles" checked><span>Save session files to Downloads<small>Download the session files when you finish. Your browser controls where downloads are saved.</small></span></label>
       </fieldset>
       <fieldset class="setting-box session-settings"><legend>Start and finish sessions</legend>
-        <p class="small-note"><b>Start from your exercise position.</b> Wave a hand above your shoulder, or hold one up high for two seconds, or press Start (or the space bar). A five-second Marin countdown gives you time to lower your hand and settle before recording starts. Your shoulder and hand need to be in the picture for the raised hand to be seen; the Start button works without.</p>
+        <p class="small-note"><b>Start from your exercise position.</b> Show an open palm towards the camera and hold it for two seconds, or press Start (or the space bar). A five-second Marin countdown gives you time to lower your hand and settle before recording starts. Your palm can be anywhere in the picture and your face does not need to be visible; the Start button works without hand recognition.</p>
         <p class="small-note">To finish, wave again, hold a hand up for three seconds, or select Finish. The app confirms when recording has stopped and you can move from your exercise position.</p>
         <p class="small-note">Spoken guidance uses Marin, an AI-generated voice with a soft, warm British female delivery. The countdown stays visible if audio is unavailable.</p>
         <p class="small-note">MediaPipe detects the hand gesture on this device. Camera access is needed; the microphone is not used.</p>
@@ -690,6 +690,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       <div class="hands" id="hands"><span id="handtext" role="status"></span><div class="bar" aria-hidden="true"><div class="fill" id="handfill"></div></div></div>
       <button type="button" class="gesture-retry" id="watchGuide">Watch the demonstration again</button>
       <button type="button" class="gesture-retry" id="poseRetry" hidden>Retry leg tracking</button>
+      <button type="button" class="gesture-retry" id="handRetry" hidden>Retry hand recognition</button>
       <button type="button" class="start-now" id="startNow">Start · 5 second countdown</button>
       <details class="sound-help"><summary>Check the countdown sound</summary><button type="button" class="gesture-retry" id="voiceTest">Test Marin voice</button><p id="voiceStatus" class="small-note" role="status"></p></details>
     </div>
@@ -724,6 +725,7 @@ import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
 import { patientRecords, completedExercisesForDay, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=cards-1";
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-1";
 import {raisedHandState, drawRaisedHand, RAISED_HAND, WaveDetector} from "./raised-hand.mjs?v=wave-1";
+import {loadHighFive, highFiveState, HIGH_FIVE_SETTINGS} from "./high-five.mjs?v=open-palm-2";
 import {FluidOutline, PictureClock, drawOutline} from "./fluid-outline.mjs?v=fluid-1";
 import {trendCI95} from "./confidence.mjs?v=1";
 import {slrView} from "./slr-view.mjs?v=1";
@@ -806,7 +808,7 @@ const ICONS = {
 const PHASES = { 1: "Week 0–1", 2: "Week 1–4", 3: "Week 4–8", 4: "Week 8+" };
 const PHASE_DAYS = { 1: "days 0 to 6 after the operation", 2: "days 7 to 27", 3: "days 28 to 55", 4: "day 56 onwards" };
 const phaseForDay = d => d === null ? null : d < 7 ? 1 : d < 28 ? 2 : d < 56 ? 3 : 4;
-const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. To start, wave a hand above your shoulder, or press Start. Shorts or bare legs help. Hold briefly at the starting position while the counting box is placed around your selected leg. Include the complete leg movement in the picture.";
+const SETUP = "Camera side-on to the operated leg, about 2 m away, level with the knee, with the whole leg in the picture. To start, show an open palm towards the camera for two seconds, or press Start. Shorts or bare legs help. Hold briefly at the starting position while the counting box is placed around your selected leg. Include the complete leg movement in the picture.";
 
 
 const $ = id => document.getElementById(id);
@@ -973,8 +975,17 @@ else loadExercisePose();
 $("poseRetry").onclick = () => { loadExercisePose(); refreshHint(); };
 
 
-/* No hand model. A raised hand is read from the pose result the page already has (raised-hand.mjs), and the Start
-   button and the space bar start the same countdown with no model at all. */
+let handRecognizer = null, handModelState = "idle", handModelLoading = false;
+async function loadHandModel() {
+  if (handModelLoading || handRecognizer) return;
+  handModelLoading = true; handModelState = "loading"; refreshHint();
+  try { handRecognizer = await loadHighFive(); handModelState = "ready"; }
+  catch (e) { handModelState = "failed"; console.warn("Hand model: " + e.message); }
+  finally { handModelLoading = false; refreshHint(); }
+}
+$("handRetry").onclick = () => loadHandModel();
+
+/* The Start button and space bar remain available if the hand model cannot load. */
 $("startNow").onclick = () => beginCountdown();
 $("watchGuide").onclick = () => { if (current && !running && countdownStart === null) showExerciseGuide(current); };
 addEventListener("keydown", e => { if (e.code === "Space" && stream && !running && countdownStart === null && !/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(document.activeElement?.tagName || "")) { e.preventDefault(); beginCountdown(); } });
@@ -1112,6 +1123,7 @@ async function openExercise(ex) {
   if (!seen && ex.guide !== false) { if (!await showExerciseGuide(ex)) return; try { localStorage.setItem(seenKey, "1"); } catch (e) { } }
   current = ex; prescribedDone = false; hold = null; boxMode = false; dragging = null; resetHand(); handArmed = false; handReleasedAt = null; handReleaseSample = null; statusBefore = null; lastHandAt = -Infinity; lastHandResult = null;
   $("voiceStatus").textContent = "";
+  loadHandModel();
   appVoice.prepare();
   appVoice.prepare("repetitions_complete"); appVoice.prepare("session_ended");
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
@@ -1124,7 +1136,7 @@ async function openExercise(ex) {
   const z = $("zone"); if (ex.aim.kind === "bend") { z.style.left = pct(ex.aim.deg) + "%"; z.style.right = "0"; z.style.borderLeft = "2px solid var(--green)"; z.style.borderRight = "none"; $("angleSub").innerHTML = `bend towards <b>${ex.aim.deg}°</b> · 0° is straight`; }
   else { z.style.left = "0"; z.style.right = (100 - pct(ex.aim.deg)) + "%"; z.style.borderLeft = "none"; z.style.borderRight = "2px solid var(--green)"; $("angleSub").innerHTML = `straight is <b>0°</b>`; }
   $("angleTile").style.display = $("showangle").checked && poseState !== "off" && poseState !== "failed" ? "block" : "none";
-  $("status").textContent = "Get into position, then wave a hand above your shoulder, or press Start."; $("status").className = "status";
+  $("status").textContent = "Get into position, then hold an open palm towards the camera, or press Start."; $("status").className = "status";
   $("finish").disabled = true; $("reset").disabled = true; $("boxbtn").disabled = true; $("clock").textContent = "00:00";
   $("track").textContent = "camera starting"; $("track").className = "track off";
   $("done").className = "done"; $("done").innerHTML = ""; $("handring").hidden = true; $("countdown").hidden = true; $("countdown").innerHTML = "";
@@ -1189,27 +1201,39 @@ function showCounts() {
 function refreshHint() {
   if (!stream || running) return;
   $("poseRetry").hidden = poseState !== "failed" && poseState !== "off";
+  $("handRetry").hidden = handModelState !== "failed";
   let text;
-  if (landmarker) {
-    text = "When ready, put one arm straight up, well above your head, and keep it there for 2 seconds, or press Start (or the space bar). Lower your hand during the countdown, then begin your exercise.";
-    $("status").textContent = "Wave a hand above your shoulder, or press Start, to begin recording.";
-  } else {
-    text = "Press Start (or the space bar) when you are ready. You will have a countdown to get into position.";
+  if (handRecognizer) {
+    text = "When ready, face an open palm towards the camera and hold it still for 2 seconds, or press Start (or the space bar). Your palm can be anywhere in the picture. Lower it during the countdown, then begin your exercise.";
+    $("status").textContent = "Hold an open palm towards the camera for 2 seconds, or press Start.";
+  } else if (handModelState === "failed") {
+    text = "Hand recognition could not load. Press Start (or the space bar), or select Retry hand recognition.";
     $("status").textContent = "Press Start to begin recording.";
+  } else {
+    text = "Preparing open-palm recognition. You can still press Start (or the space bar).";
+    $("status").textContent = "Loading hand recognition. Recording has not started.";
   }
   text += "";
   if(appVoice.state !== "ready") text += " Watch the countdown on screen if audio is unavailable.";
   $("handtext").textContent = text;
 }
 
-/* ---------------- raised-hand start and finish ----------------
-   A hand raised above its shoulder, anywhere across the picture, read from the pose result (raised-hand.mjs). */
+/* ---------------- open-palm start and raised-hand finish ----------------
+   Start uses the separate gesture model, so it needs no face, shoulder or body pose. Finish retains the established
+   raised-hand or wave control and the Finish button. The hand model is not run during exercise measurement. */
 const HAND_HOLD_START_S = 2, HAND_HOLD_FINISH_S = 3, COUNTDOWN_S = 5;
 const HAND_SAMPLE_MAX_GAP_MS = 500;
 const wave = new WaveDetector(); let waving = false;   // a wave starts and finishes too: quicker than a held hand, and the hand need only be a little above the shoulder
-let startLowSince = null, startArmed = false;   // a raise only counts after the hand has been seen down for a second
 let handSince = null, handLastSample = null, countdownStart = null, previewN = 0, handArmed = false, statusBefore = null;
 let lastHandAt = -Infinity, lastHandResult = null, handReleasedAt = null, handReleaseSample = null;
+let lastPalmAt = -Infinity, lastPalmResult = null;
+function sampleOpenPalm(now) {
+  if (!handRecognizer || now-lastPalmAt < HIGH_FIVE_SETTINGS.sampleMs) return null;
+  lastPalmAt = now;
+  try { lastPalmResult = handRecognizer.recognizeForVideo(video, Math.round(now)); }
+  catch { lastPalmResult = null; }
+  return highFiveState(lastPalmResult);
+}
 /* body: the whole-body pose result made from this very frame (null when nobody was found); undefined when the pose
    did not run on this frame, and then there is nothing new to look at. */
 function sampleHand(now, body) {
@@ -1245,7 +1269,7 @@ function showHand(f, finishing) {
   if (el.hidden) { el.hidden = false; el.className = "handring" + (finishing ? " finish" : ""); }
   $("hfill").style.width = (f * 100) + "%";
   const left = Math.ceil((finishing ? HAND_HOLD_FINISH_S : HAND_HOLD_START_S) * (1 - f));
-  $("htext").textContent = waving ? (finishing ? "Wave seen. Keep waving to finish…" : "Wave seen. Keep waving…") : finishing ? `Keep your hand up to finish… ${left}` : `Hand seen. Keep it up… ${left}`;
+  $("htext").textContent = waving ? "Wave seen. Keep waving to finish…" : finishing ? `Keep your hand up to finish… ${left}` : `Open palm seen. Hold it still… ${left}`;
   if (finishing) { if (statusBefore === null) statusBefore = $("status").textContent; $("status").textContent = `Hand raised: keep it up to finish… ${left}`; }
 }
 function restoreStatus() { if (statusBefore !== null) { $("status").textContent = statusBefore; statusBefore = null; } }
@@ -1290,9 +1314,9 @@ function cameraFailed(e) {
   };
 }
 /* Live picture beside optional instructions while the patient gets into position; no session is recorded yet.
-   Body overlays are display only. A raised hand is read from the same pose result. */
+   Body overlays are display only. The separate gesture model watches for an open palm at a limited rate. */
 let previewId = 0, previewLastVideoTime = -1, previewLastFrameAt = null, previewAll = null, previewLeg = null, previewPoseAt = -Infinity, previewJoints = null, previewPoseMs = 0, previewPoseSkip = 1;
-function preview() { startLowSince = null; startArmed = false; previewJoints = null; previewLeg = null; previewPoseMs = 0; previewPoseSkip = 2; outline = newOutline(); cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; previewStep(); }
+function preview() { previewJoints = null; previewLeg = null; previewPoseMs = 0; previewPoseSkip = 2; outline = newOutline(); cancelAnimationFrame(previewId); resetHand(); previewN = 0; previewLastVideoTime = -1; previewLastFrameAt = null; previewAll = null; previewPoseAt = -Infinity; lastHandAt = -Infinity; lastHandResult = null; lastPalmAt = -Infinity; lastPalmResult = null; previewStep(); }
 
 function previewStep() {
   if (running || !stream) return;
@@ -1329,17 +1353,13 @@ function previewStep() {
       $("fill").style.width = Number.isFinite(shown) ? pct(shown)+"%" : "0";
     }
   }
-  const gesture = newFrame && countdownStart === null ? sampleHand(now, bodyNow) : null;
+  const gesture = newFrame && countdownStart === null ? sampleOpenPalm(now) : null;
   paintOverlay(performance.now());   // every screen refresh, whether or not a new camera frame has arrived; the clock is read again because the pose may just have taken a while
   // A frozen image cannot complete a gesture or finish the countdown.
   if (!newFrame) return;
   if (countdownStart !== null) { if (tickCountdown(now)) startSession(); return; }
   if (gesture !== null) {
-    /* A deliberate signal only: the hand has to be seen down for a second before a raise can start anything, so walking
-       into the picture with an arm up, or reaching to adjust the screen, starts nothing. */
-    if (gesture === "other" && !wave.hand(lastHandResult, canvas.width, canvas.height)) { startLowSince ??= now;   // down means below the shoulder: a hand already waving has not been seen down
-      if (now - startLowSince >= 1000) startArmed = true; } else if (gesture !== "open") startLowSince = null;
-    const held = handHold(startArmed && gesture === "open", HAND_HOLD_START_S, now), waved = startArmed ? wave.update(lastHandResult, canvas.width, canvas.height, now) : 0, f = Math.max(held, waved); waving = waved > held;
+    const f = handHold(gesture === "open", HAND_HOLD_START_S, now); waving = false;
     $("handfill").style.width = (f * 100) + "%"; showHand(f, false);
     if (f >= 1) beginCountdown();
   }

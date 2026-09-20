@@ -11,6 +11,7 @@ import {FluidOutline, PictureClock, drawOutline} from '../fluid-outline.mjs';
 import {trendCI95} from '../confidence.mjs';
 import {inspectExerciseLeg} from '../pose-gate.js';
 import {raisedHandState, RAISED_HAND, WaveDetector} from '../raised-hand.mjs';
+import {highFiveState,HIGH_FIVE_SETTINGS} from '../high-five.mjs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const between = (from, to) => { const a = html.indexOf(from), b = html.indexOf(to, a); assert.ok(a >= 0 && b > a, `${from} … ${to}`); return html.slice(a, b); };
@@ -32,10 +33,13 @@ function run(side, {found = true, palm = false, frames = 6} = {}) {
     fillText(text, x, y) { marks.push([x, y]); }, moveTo(x, y) { marks.push([x, y]); }, lineTo(x, y) { marks.push([x, y]); }, arc(x, y) { marks.push([x, y]); }};
   const $ = id => { if (!elements.has(id)) elements.set(id, {hidden: true, style: {}, textContent: '', innerHTML: '', className: '', value: id === 'side' ? side : '', checked: id === 'showangle', classList: {add() {}, remove() {}, toggle() {}}, addEventListener() {}}); return elements.get(id); };
   let now = 1000, handUp = false;
+  const openPalm={gestures:[[{categoryName:'Open_Palm',score:.9}]],landmarks:[Array.from({length:21},()=>({x:.5,y:.5}))]};
+  const noPalm={gestures:[],landmarks:[]};
   const context = vm.createContext({$, ctx, canvas: {width: W, height: H}, video: {readyState: 4, currentTime: 0, videoWidth: W}, stream: {}, running: false, current: {kind: 'reps'},
-    pickSide, JointFilter, FluidOutline, PictureClock, drawOutline, trendCI95, kneeFlexionDeg, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, drawRaisedHand() {}, pct: d => d, performance: {now: () => now},
+    pickSide, JointFilter, FluidOutline, PictureClock, drawOutline, trendCI95, kneeFlexionDeg, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, highFiveState, HIGH_FIVE_SETTINGS, drawRaisedHand() {}, pct: d => d, performance: {now: () => now},
     angleDisplay: {shown: NaN, sample: [], sampleTimes: [], update(a) { this.shown = a; this.sample = [a - 1, a + 1, a - 1, a + 1]; this.sampleTimes = [0, 33, 66, 100]; return a; }}, appVoice: {play() { return true; }, stop() {}}, refreshHint() {}, setExerciseSidebar() {}, startSession() {},
     requestAnimationFrame() { return 1; }, cancelAnimationFrame() {}, landmarker: {detectForVideo: () => ({landmarks: found ? [handUp ? raised : body] : []})},
+    handRecognizer: {recognizeForVideo: () => palm ? openPalm : noPalm},
     requestAnimationFrameUnused: null});
   vm.runInContext(source, context);
   for (let i = 0; i < frames + (palm ? 30 : 0); i++) { now += 40; context.video.currentTime += .04; handUp = palm && i >= 30; context.previewStep(); }   // with a signal: a second with the hand down, then the hand up   // the pose runs on every third frame
@@ -79,7 +83,7 @@ test('with nobody in view nothing throws, nothing is drawn and no countdown star
   const result = run('left', {found: false, frames: 60});
   assert.equal(result.counting, false); assert.equal(result.marks.length, 0);
 });
-test('a hand held above the shoulder for two seconds starts the countdown, from the pose result alone', () => {
+test('a separately recognised open palm starts the countdown without drawing the hand', () => {
   assert.equal(run('right', {palm: true, frames: 60}).counting, true);
   assert.equal(run('right', {palm: false, frames: 60}).counting, false);
 });
