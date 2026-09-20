@@ -10,6 +10,12 @@ test('knee, hip and toe explanations each include a labelled angle diagram',()=>
   }
 });
 
+test('each angle explanation includes a modern human figure as well as the measurement',()=>{
+  for(const svg of Object.values(METRIC_ANGLE_DIAGRAMS)){
+    assert.match(svg,/human-head/);assert.match(svg,/human-body/);assert.match(svg,/measurement/);assert.match(svg,/reference/);
+  }
+});
+
 test('Patient details leaves the recovery calendar visible in its right-hand column',()=>{
   const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const rule=html.match(/\.details-view #recoveryHome[^\n]+/)[0];
