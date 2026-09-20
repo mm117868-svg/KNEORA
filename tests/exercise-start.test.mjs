@@ -1,3 +1,4 @@
+import {TrackingQuality} from '../tracking-quality.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -26,7 +27,7 @@ function previewHarness() {
     return elements.get(id);
   };
   let now = 0, starts = 0, spoken = 0, stopped = 0, detects = 0, handDetects = 0, landmarks = pose(), handResult = palm();
-  const context = vm.createContext({setExerciseSidebar(){},$, stream: {}, running: false, current:{kind:'reps'}, JointFilter, outline:{target(){},lose(){},at(){return [];}}, aimOutline(){}, paintOverlay(){}, showSlr(){}, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, highFiveState, HIGH_FIVE_SETTINGS, drawRaisedHand(){}, performance: {now: () => now},
+  const context = vm.createContext({trackingQuality:new TrackingQuality(),setExerciseSidebar(){},$, stream: {}, running: false, current:{kind:'reps'}, JointFilter, outline:{target(){},lose(){},at(){return [];}}, aimOutline(){}, paintOverlay(){}, showSlr(){}, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, highFiveState, HIGH_FIVE_SETTINGS, drawRaisedHand(){}, performance: {now: () => now},
     appVoice: {play(){spoken++; return true;}, stop(){stopped++;}}, refreshHint(){},
     video: {readyState: 4, currentTime: 0, videoWidth: 1280}, canvas: {width: 1280, height: 720}, ctx: {drawImage(){}},
     requestAnimationFrame(){return 1;}, cancelAnimationFrame(){}, pickSide(){return null;},
@@ -135,10 +136,10 @@ function finishHarness(count = 10) {
   const recorder = new Recorder();
   const elements = new Map();
   const $ = id => {if (!elements.has(id)) elements.set(id, {textContent: '', classList: {remove(){}}}); return elements.get(id);};
-  const context = vm.createContext({setExerciseSidebar(){},$, running: true, rafId: 0, t0: 0, openGen: 1, recorder, chunks: [],
+  const context = vm.createContext({trackingQuality:new TrackingQuality(),setExerciseSidebar(){},$, hold:null, running: true, rafId: 0, t0: 0, openGen: 1, recorder, chunks: [],
     performance: {now: () => 10000}, cancelAnimationFrame(){}, finishRecording, console,
     stopCamera(){events.push('camera stopped');}, current: {kind: 'reps', count: 10},
-    monitor: {summary: () => ({repetitions: count})}, positionCounter: {summary: () => ({repetitions: count})}, repCounter: {summary: () => ({repetitions: count})}, legGate: {finish: () => ({repetitions: count})}, trackWanted: () => false,
+    monitor: {summary: () => ({repetitions: count})}, positionCounter: {summary: () => ({repetitions: count})}, repCounter: {summary: () => ({repetitions: count,events:[]})}, legGate: {finish: () => ({repetitions: count})}, trackWanted: () => false,
     completionNotice, appVoice: {play(key){events.push(key); return true;}}});
   // Exercise the actual finish sequence through the confirmation, without saving any patient record.
   const start = html.indexOf('async function finish(abandon');

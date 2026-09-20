@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {METRIC_ANGLE_DIAGRAMS} from '../metric-angle-guide.mjs';
+import {METRIC_ANGLE_DIAGRAMS,METRIC_HUMAN_DIAGRAMS} from '../metric-angle-guide.mjs';
 
 test('knee, hip and toe explanations each include a labelled angle diagram',()=>{
   assert.deepEqual(Object.keys(METRIC_ANGLE_DIAGRAMS),['knee','hip','toe']);
@@ -11,7 +11,7 @@ test('knee, hip and toe explanations each include a labelled angle diagram',()=>
 });
 
 test('each angle explanation includes a modern human figure as well as the measurement',()=>{
-  for(const svg of Object.values(METRIC_ANGLE_DIAGRAMS)){
+  for(const svg of Object.values(METRIC_HUMAN_DIAGRAMS)){
     assert.match(svg,/human-head/);assert.match(svg,/human-body/);assert.match(svg,/measurement/);assert.match(svg,/reference/);
   }
 });

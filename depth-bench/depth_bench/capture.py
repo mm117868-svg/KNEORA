@@ -67,10 +67,11 @@ def landmarker(model_path):
     return vision.PoseLandmarker.create_from_options(options)
 
 
-def read_frame(pipeline, align, scale, detector, side, timestamp_ms, radii=(0.0, 0.0, 0.0)):
+def read_frame(pipeline, align, scale, detector, side, timestamp_ms, radii=(0.0, 0.0, 0.0), on_frame=None):
     """One frame pair to one frame record. Returns None when no pose is found."""
     import numpy as np
     import mediapipe as mp
+    import pyrealsense2 as rs
 
     frames = align.process(pipeline.wait_for_frames())
     colour_frame = frames.get_color_frame()
@@ -86,6 +87,7 @@ def read_frame(pipeline, align, scale, detector, side, timestamp_ms, radii=(0.0,
     image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
     result = detector.detect_for_video(image, int(timestamp_ms))
     if not result.pose_landmarks:
+        if on_frame: on_frame(colour, None)
         return None
     marks = result.pose_landmarks[0]
 
@@ -114,7 +116,11 @@ def read_frame(pipeline, align, scale, detector, side, timestamp_ms, radii=(0.0,
         "points_3d": points_3d, "points_px": points_px,
         "colour_ts": colour_frame.get_timestamp(), "depth_ts": depth_frame.get_timestamp(),
         "intrinsics": intrinsics,
+        "surface_points_3d": [rs.rs2_deproject_pixel_to_point(intr, p, patch["z"]) if patch["z"] and not patch["reason"] else None for p, patch in zip(points_px, patches)],
+        "image_rays": [rs.rs2_deproject_pixel_to_point(intr, p, 1.0) for p in points_px],
+        "image_size": [width, height],
     })
+    if on_frame: on_frame(colour, record)
     return record
 
 

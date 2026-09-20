@@ -83,6 +83,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--prompt-key", action="store_true")
+    parser.add_argument("--only-new", action="store_true", help="Keep installed prompts and generate only new or changed scripts")
     args = parser.parse_args()
     profile = json.loads((ROOT / "voice-profile.json").read_text())
     if profile["voice"] != "marin":
@@ -99,23 +100,33 @@ def main():
         raise RuntimeError("No OpenAI API key is configured. Double-click Generate Marin app audio.command.")
     cache = ROOT / "tools" / ".countdown-cache"
     cache.mkdir(parents=True, exist_ok=True)
-    clips = []
-    for word in WORDS:
-        for speed in (1.0, 1.12):
-            clip = generate(request_payload(profile, word, speed, countdown=True), api_key, cache)
-            if len(clip) <= round(.9 * RATE):
-                break
-        else:
-            raise RuntimeError(f"{word} did not fit its countdown slot. No final audio was replaced.")
-        clips.append(clip)
-        print(f"{word} ready", flush=True)
-    recordings = {"countdown": assemble(clips)}
+    output = ROOT / "audio" / "marin"
+    existing = {}
+    if args.only_new and (output / "manifest.json").exists():
+        manifest = json.loads((output / "manifest.json").read_text())
+        if manifest.get("voice") != "marin":
+            raise RuntimeError("Existing audio uses a different voice.")
+        existing = manifest.get("prompts", {})
+    recordings = {}
+    if not args.only_new or "countdown" not in existing:
+        clips = []
+        for word in WORDS:
+            for speed in (1.0, 1.12):
+                clip = generate(request_payload(profile, word, speed, countdown=True), api_key, cache)
+                if len(clip) <= round(.9 * RATE):
+                    break
+            else:
+                raise RuntimeError(f"{word} did not fit its countdown slot.")
+            clips.append(clip)
+        recordings["countdown"] = assemble(clips)
     for name, text in profile["prompts"].items():
+        if args.only_new and existing.get(name, {}).get("text") == text and (output / existing[name]["file"]).exists():
+            continue
         recordings[name] = generate(request_payload(profile, text), api_key, cache)
         print(f"{name} ready", flush=True)
     output = ROOT / "audio" / "marin"
     output.mkdir(parents=True, exist_ok=True)
-    prompts = {}
+    prompts = dict(existing) if args.only_new else {}
     for name, samples in recordings.items():
         duration = len(samples) / RATE
         if sys.byteorder != "little":

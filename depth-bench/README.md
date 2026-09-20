@@ -143,3 +143,9 @@ The 8 degree spread limit in the app's importer is stricter than anything the
 live camera path applies, and real depth jitter across a hold may exceed it.
 The tool tells you the spread it achieved, so set that rule from measurement
 rather than from the placeholder it currently is.
+
+## Live depth versus height comparison
+
+After installing the dependencies above, double-click `../Open Intel comparison.command`. This opens a local page with automatic image correction, the complete RGB field, knee surface distance, a separate height-based planar estimate, differences and JSON export. See `../CAMERA_COMPARISON.md`. The ordinary static server does not provide this depth connection. Close other apps using the RealSense before starting.
+
+This mode is experimental and has software tests only until the actual camera is checked. Height supplies body-proportion priors; weight is context, not a joint-position correction.

@@ -47,7 +47,7 @@ test('it is shown for the straight leg raise only, and the other-knee advice onl
 });
 test('repetitions come from the joint angle: the knee, or the hip for a straight leg raise', () => {
   const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  assert.match(html, /repCounter\.update\(repSignal\.read\(lastAll, canvas\.width, canvas\.height\), t\)/); assert.match(html, /"angle_hysteresis"/);
+  assert.match(html, /repCounter\.update\(repSignal\.read\(lastAll, canvas\.width, canvas\.height\),t,knee\)/); assert.match(html, /"angle_hysteresis"/);
   assert.doesNotMatch(html, /positionCounter\.update|readPositionFrame\(video|monitor\.update\(video/);
 });
 

@@ -1,3 +1,4 @@
+import {voiceEnabled} from "../app-voice.mjs";
 const root=new URL('./',import.meta.url);
 let dialog=null,finish=null,previousFocus=null;
 function initialise(){
@@ -11,6 +12,7 @@ function initialise(){
  @media(max-width:480px){.exercise-guide-dialog{padding:19px 14px}.exercise-guide-dialog .guide-actions button{flex:1 1 100%}}`;
  document.head.append(style);dialog=document.createElement('dialog');dialog.className='exercise-guide-dialog';dialog.setAttribute('aria-labelledby','exerciseGuideTitle');dialog.setAttribute('aria-describedby','exerciseGuideDescription');dialog.innerHTML=`<button type="button" class="guide-close" aria-label="Back to exercises">×</button><div class="guide-kicker">Exercise demonstration</div><h2 id="exerciseGuideTitle"></h2><p id="exerciseGuideDescription">Watch the demonstration, then continue to your exercise.</p><video controls playsinline preload="none" aria-label="Exercise demonstration"><track kind="captions" srclang="en" label="English"></video><p class="guide-error" hidden>The video could not load. You can still start the exercise and read the written instructions.</p><div class="guide-actions"><button type="button" class="guide-watch guide-primary">Watch how to do it</button><button type="button" class="guide-skip">Start exercise</button></div><p class="guide-note">Follow your own prescribed range, hold time and repetitions.</p>`;
  document.body.append(dialog);
+ globalThis.addEventListener('kneora-voice-change',()=>{dialog.querySelector('video').muted=!voiceEnabled();});
  const video=dialog.querySelector('video'),watch=dialog.querySelector('.guide-watch');
  watch.onclick=()=>{if(video.ended)video.currentTime=0;video.play().catch(()=>{dialog.querySelector('.guide-error').hidden=false});};
  video.addEventListener('play',()=>{watch.textContent='Restart video';watch.onclick=()=>{video.currentTime=0;video.play().catch(()=>{})};});
@@ -23,7 +25,23 @@ function initialise(){
  dialog.addEventListener('keydown',e=>{if(e.key==='Escape')e.stopPropagation()});
 }
 export function showExerciseGuide(exercise){
- initialise();if(finish)finish(false);const video=dialog.querySelector('video');previousFocus=document.activeElement;
+ initialise();if(finish)finish(false);
+ const oldExternal=dialog.querySelector('.guide-external');if(oldExternal)oldExternal.remove();
+ const video=dialog.querySelector('video');video.style.display='';dialog.querySelector('.guide-watch').hidden=false;
+ if(exercise.guideUrl){
+  previousFocus=document.activeElement;
+  dialog.querySelector('h2').textContent=exercise.title;
+  video.style.display='none';dialog.querySelector('.guide-watch').hidden=true;
+  dialog.querySelector('.guide-error').hidden=true;
+  const external=document.createElement('p');external.className='guide-external';
+  const link=document.createElement('a');link.href=exercise.guideUrl;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Watch NHS Ayrshire & Arran demonstration on YouTube ↗';external.append(link);
+  dialog.querySelector('.guide-actions').before(external);
+  dialog.querySelector('.guide-note').textContent='The video opens in a new tab with its own sound controls. Follow your own prescribed range and repetitions, then return here to start.';
+  dialog.querySelector('.guide-skip').textContent='Start exercise';dialog.querySelector('.guide-skip').disabled=false;
+  dialog.showModal();link.focus();
+  return new Promise(resolve=>{finish=proceed=>{finish=null;dialog.close();external.remove();previousFocus?.focus();resolve(proceed);};});
+ }
+video.muted=!voiceEnabled();previousFocus=document.activeElement;
  dialog.querySelector('h2').textContent=exercise.title;dialog.querySelector('.guide-watch').textContent='Watch how to do it';dialog.querySelector('.guide-skip').textContent='Skip and start exercise';dialog.querySelector('.guide-error').hidden=true;dialog.querySelector('.guide-skip').disabled=false;
  video.poster=new URL('videos/'+exercise.id+'.jpg?v=magnific-1',root);video.src=new URL('magnific/'+exercise.id+'.mp4?v=magnific-1',root);video.querySelector('track').src=new URL('videos/'+exercise.id+'.vtt',root);video.load();
  dialog.querySelector('.guide-note').textContent=exercise.id==='standing_flexion'?'Review draft: the video shows a support frame; narration refers to a worktop. Follow your prescribed range, hold time and repetitions.':'Follow your own prescribed range, hold time and repetitions.';

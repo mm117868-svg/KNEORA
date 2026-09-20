@@ -7,3 +7,5 @@ numpy>=1.26,<2.2
 #   build librealsense from source
 # On Linux: pip install pyrealsense2
 # realsense-applesilicon installs a different module and will not work here.
+
+pillow>=10

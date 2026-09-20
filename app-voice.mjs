@@ -1,3 +1,7 @@
+export const VOICE_PREFERENCE_KEY='kr_marin_voice_enabled';
+let voicePreference=true;
+export function voiceEnabled(){try{const saved=globalThis.localStorage?.getItem(VOICE_PREFERENCE_KEY);return saved===null||saved===undefined?voicePreference:saved!=='0';}catch{return voicePreference;}}
+export function setVoiceEnabled(enabled){voicePreference=Boolean(enabled);try{globalThis.localStorage?.setItem(VOICE_PREFERENCE_KEY,enabled?'1':'0');}catch{}globalThis.dispatchEvent?.(new Event('kneora-voice-change'));}
 // Shared playback for generated Marin prompts. No microphone, browser TTS or API key.
 export function completionNotice(count, prescribed) {
   const complete = Number.isFinite(count) && Number.isFinite(prescribed) && prescribed > 0 && count >= prescribed;
@@ -8,6 +12,7 @@ export function completionNotice(count, prescribed) {
 export class AppVoice {
   constructor({onState = () => {}, fetcher = (...args) => fetch(...args), AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext} = {}) {
     this.onState = onState; this.fetcher = fetcher; this.AudioContextClass = AudioContextClass;
+    globalThis.addEventListener?.('kneora-voice-change',()=>{if(!voiceEnabled())this.stop();});
     this.context = null; this.source = null; this.buffers = new Map(); this.states = new Map(); this.pending = new Map();
   }
   get state() { return this.states.get("countdown") || "idle"; }
@@ -46,6 +51,7 @@ export class AppVoice {
   }
   play(prompt = "countdown") {
     this.stop();
+    if(!voiceEnabled()) return false;
     const buffer = this.buffers.get(prompt);
     if (!buffer || this.context?.state !== "running") return false;
     try {

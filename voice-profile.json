@@ -9,7 +9,19 @@
     "session_ended": "Your exercise session has ended. The recording has stopped. You may now move from your exercise position when you are ready.",
     "recovery_bend": "First, we will measure bending of your operated knee. Move only as far as feels comfortable. Wave a hand above your shoulder when you are ready, or use the capture button. After the countdown, stay as still as comfortable. Small movements are fine. Relax if you need to.",
     "recovery_straighten": "Relax your operated leg and take your time. Next, we will measure straightening. Straighten your operated knee only as far as feels comfortable. Wave a hand above your shoulder when you are ready, or use the capture button. After the countdown, stay as still as comfortable. Small movements are fine.",
-    "recovery_complete": "Recording has finished. You can relax your operated leg now. Your measurements are ready to review."
+    "recovery_complete": "Recording has finished. You can relax your operated leg now. Your measurements are ready to review.",
+    "rehab_slr_setup": "Support yourself lying down. Bend your other knee and keep your operated leg straight.",
+    "rehab_slr_move": "Tighten your thigh, then lift your operated leg while keeping the knee straight.",
+    "rehab_slr_return": "Bring your operated leg down slowly, keeping control of the movement.",
+    "rehab_slr_bend": "Try to keep your operated knee as straight as it was at the start. Do not force it.",
+    "rehab_slide_setup": "Rest on your back with your operated leg extended.",
+    "rehab_slide_move": "Draw your heel towards you, stopping at a comfortable bend.",
+    "rehab_slide_return": "Ease your heel away again to return to your starting position.",
+    "rehab_extension_setup": "Sit with your thigh supported and your operated knee bent.",
+    "rehab_extension_move": "Raise your foot to straighten your operated knee within your comfortable range.",
+    "rehab_extension_return": "Bring your foot back down gently. Keep the movement controlled.",
+    "rehab_view": "Keep your operated hip, knee and ankle in the camera picture.",
+    "rehab_hold": "Hold for the time in your exercise plan, then return slowly."
   },
   "wording_policy": "When a script refers to the treated knee or leg, say \"your operated knee\" or \"your operated leg\". \"Your replaced knee\" may be used when knee replacement is established. Do not call the treated limb \"the exercise leg\". Keep references to the other leg and to both knees explicit and correct. Use left or right only from the saved operated-leg setting. Apply this wording when writing the script; the speech model must read the approved script exactly."
 }

@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#efeee9">
-<title>Knee Recovery · Cambridge Kinematics</title>
+<title>Kneora · Cambridge Kinematics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="progress-to-date.css?v=1">
@@ -533,7 +533,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 #ex.camera-expanded>.panel{display:none}
 .camera-view{position:relative;flex:none;max-width:100%;max-height:100%}
 .stage .camera-view video,.stage .camera-view canvas{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;max-height:none}
-.stage .camera-view video{object-fit:fill;background:#050a14}
+.stage .camera-view video{object-fit:contain;background:#050a14;opacity:0}
 .stage .camera-view canvas{pointer-events:auto}
 .video-metrics{position:absolute;right:12px;top:72px;pointer-events:none;display:flex;flex-direction:column;gap:8px;max-width:calc(100% - 24px)}
 .video-metrics .two{gap:8px}.video-metrics .tile{padding:10px 12px;background:rgba(5,10,20,.8);border-color:rgba(255,255,255,.3);border-radius:8px;min-width:105px}
@@ -561,13 +561,23 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 .knee-guide-picture{min-height:430px;overflow:hidden}.knee-guide-picture svg{max-height:520px}.guide-femur{fill:#f4f1ea;stroke:var(--ink);stroke-width:2.5}.guide-leg-outline{fill:#ded9cf;stroke:var(--ink);stroke-width:3.5}.guide-cartilage{fill:none;stroke:#aaa7a0;stroke-width:8;stroke-linecap:round}.guide-tibia{fill:none;stroke:var(--ink);stroke-width:5;stroke-linecap:round}.guide-fibula{fill:none;stroke:#77736d;stroke-width:3;stroke-linecap:round}.guide-ligament{fill:none;stroke-width:5;stroke-linecap:round}.guide-acl{stroke:var(--brand)}.guide-pcl{stroke:#477f90}.guide-patella{fill:var(--brand);stroke:var(--ink);stroke-width:2}.guide-anatomy-labels text{font:700 10px Archivo,Arial,sans-serif;letter-spacing:.12em;fill:#77736d}.guide-anatomy-labels path{fill:none;stroke:#77736d;stroke-width:1.25}.metric-angle-diagram{display:block;width:100%;height:150px;margin:8px 0 16px;background:#f7f5ef;border:1px solid var(--line)}.metric-angle-diagram .human-head,.metric-angle-diagram .human-body{fill:#e2dfd8;stroke:var(--ink);stroke-width:2}.metric-angle-diagram .human-limb,.metric-angle-diagram .human-support{fill:none;stroke:#77736d;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}.metric-angle-diagram .human-support{stroke:#aaa7a0}.metric-angle-diagram .measurement{fill:none;stroke:var(--ink);stroke-width:9;stroke-linecap:round;stroke-linejoin:round}.metric-angle-diagram .foot{stroke-width:12}.metric-angle-diagram .reference{fill:none;stroke:#aaa7a0;stroke-width:1.5;stroke-dasharray:5 5}.metric-angle-diagram .angle{fill:none;stroke:var(--brand);stroke-width:4;stroke-linecap:round}.metric-angle-diagram .joint{fill:var(--brand)}.metric-angle-diagram text{font:800 13px Archivo,Arial,sans-serif;fill:var(--brand)}.metric-angle-diagram .caption{font-size:8px;letter-spacing:.12em;fill:#77736d}
 .session-import{grid-column:1/-1;margin:0 0 24px;padding:22px;border:1px solid var(--line);background:var(--bone)}.session-import h2{margin:0 0 8px;font-size:20px}.session-import p{color:var(--muted);font-size:13px}.session-import label{display:inline-block;padding:12px 16px;background:var(--ink);color:var(--bone);font-weight:700;cursor:pointer}.session-import input{position:absolute;opacity:0;pointer-events:none}.session-import [role=status]{display:block;margin-top:10px;font-size:12px}
 .landing-view #patientDetails,.landing-view #progress,.landing-view #cameraOptions,.landing-view #todayExercises,.landing-view .phasepick,.landing-view #weeks,.landing-view>.safety,.landing-view>.foot,.landing-view #sessionImport{display:none}
-.details-view #recoveryHome,.details-view #cameraOptions,.details-view #todayExercises,.details-view .phasepick,.details-view #weeks,.details-view>.safety,.details-view>.foot{display:none}
-.exercises-view #recoveryHome,.exercises-view #patientDetails,.exercises-view #progress,.exercises-view #sessionImport{display:none}
+.details-view #recoveryHome,.details-view #todayExercises,.details-view .phasepick,.details-view #weeks,.details-view>.safety,.details-view>.foot{display:none}
+.exercises-view #cameraOptions,.exercises-view #recoveryHome,.exercises-view #patientDetails,.exercises-view #progress,.exercises-view #sessionImport{display:none}
 .phone-intro{display:none}.phone-mode .phone-intro{display:block;grid-column:1/-1;padding:20px;background:var(--ink);color:var(--bone);margin-bottom:18px}.phone-mode .phone-intro h1{margin:5px 0 8px;font-size:27px}.phone-mode .phone-intro p{margin:0;color:#d3d0ca;line-height:1.55}.phone-setup{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.phone-setup label{font-size:11px;color:#d3d0ca}.phone-setup input,.phone-setup select{display:block;width:100%;margin-top:5px;min-height:46px;padding:9px;background:#fff;border:0;color:var(--ink);font:inherit}.phone-setup label:first-child{grid-column:1/-1}.phone-mode .patient-header-nav{display:none}.phone-mode .brandbar{margin-bottom:20px}.phone-mode #home{max-width:680px}.phone-mode .app-footer{display:none}
 @media(max-width:440px){.phone-setup{grid-template-columns:1fr}.phone-setup label:first-child{grid-column:auto}}
 @media(max-width:759px){.recovery-home-hero,.knee-angle-guide{grid-template-columns:1fr;gap:24px;padding:30px 0}.recovery-home h1{font-size:44px}.recovery-home-summary{padding:20px}.plan-grid{grid-template-columns:1fr 1fr}.plan-step:nth-child(2){border-right:0}.plan-step:nth-child(-n+2){border-bottom:1px solid var(--line)}.metric-plain-grid{grid-template-columns:1fr}.knee-guide-picture{min-height:260px}.knee-guide-buttons{grid-template-columns:repeat(3,1fr)}.knee-guide-buttons button{border-right:1px solid var(--line)}.knee-guide-buttons button:nth-child(n+4){border-top:0}}
 @media(max-width:620px){.ex-card{flex-wrap:wrap}.exercise-position{width:100%;height:150px}.ex-card .tag{position:absolute;right:12px;top:12px}.exercise-position img{object-position:center 46%}}
 
+
+.rehab-coaching{position:absolute;left:12px;bottom:12px;width:min(530px,calc(100% - 24px));padding:12px 16px;background:rgba(5,10,20,.92);color:#fff;border:1px solid #ffffff50;border-radius:8px;z-index:3}.rehab-heading,.rehab-foot{display:flex;justify-content:space-between;gap:12px;align-items:center}.rehab-heading{font-size:12px}.rehab-heading button{font:inherit;padding:6px;background:transparent;border:1px solid #aaa;color:white;border-radius:4px;cursor:pointer}.rehab-coaching p{font-size:clamp(16px,1.8vw,23px);line-height:1.35;margin:8px 0}.rehab-foot,.rehab-coaching small{font-size:11px;line-height:1.4;color:#ddd}.rehab-foot a{color:#b8e6ff;white-space:nowrap}#distanceTile .val{font-size:clamp(20px,3vw,32px)}@media(max-width:600px){.rehab-coaching{padding:8px 10px}.rehab-foot span{max-width:65%}.rehab-heading button{min-height:32px}}
+
+.exercise-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}.rehab-coaching{position:static;width:100%;grid-column:1;grid-row:1;pointer-events:auto}.exercise-toolbar .status{grid-column:1;grid-row:2;max-width:none;padding:6px 10px}.exercise-toolbar .actions{grid-column:2;grid-row:1/3}.stage .track{bottom:calc(var(--exercise-footer-height,180px) + 20px)}
+@media(max-width:600px){.exercise-toolbar{grid-template-columns:1fr}.exercise-toolbar .actions{grid-column:1;grid-row:3}.rehab-coaching p{font-size:16px}.rehab-foot{font-size:10px}}
+.metric-diagram-pair{display:grid;gap:12px;margin:8px 0 16px}.metric-diagram-pair figure{margin:0;min-width:0}.metric-diagram-pair figcaption{font-size:12px;color:var(--muted);margin-bottom:6px}.metric-diagram-pair .metric-angle-diagram{margin:0}.metric-original .metric-angle-diagram{height:112px}.metric-angle-diagram .limb{fill:none;stroke:var(--ink);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+.ex-card .tag.status-wip,.ex-card .tag.status-prototype{color:#fff;font-size:11px;font-weight:800;padding:8px 10px;line-height:1.35;letter-spacing:.035em;box-shadow:0 1px 4px #0003;max-width:calc(100% - 48px);white-space:normal;text-align:center}
+.ex-card .tag.status-wip{background:#202624}.ex-card .tag.status-prototype{background:#17613e}
+#trackingQuality{display:block;font-weight:700;color:#98401b}#trackingQuality[data-usable="true"]{color:#17613e}
+.phone-qr-card{display:flex;align-items:center;gap:28px;padding:24px;border:1px solid var(--line);background:var(--bone);margin:24px 0;grid-column:1/-1}.phone-qr-card img{display:block;width:224px;height:224px;background:white;max-width:none}.phone-qr-card h2{margin:8px 0}.phone-qr-card p{line-height:1.6}.phone-mode .phone-qr-card,.progress-view .phone-qr-card{display:none}@media(max-width:600px){.phone-qr-card{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -588,7 +598,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
   <section class="rs-page" id="recoverySummary" aria-label="Recovery summary" hidden></section>
 
   <section class="recovery-home" id="recoveryHome" aria-labelledby="recoveryHomeTitle">
-    <div class="recovery-home-hero"><div><span class="eyebrow">Knee Recovery prototype</span><h1 id="recoveryHomeTitle">Your recovery, made easier to understand.</h1><p class="lead">Total knee replacement recovery is gradual and different for each person. This guide explains the broad plan and the camera measurements you will see. Your own hospital and physiotherapist’s advice comes first.</p><div class="recovery-home-actions"><a href="?view=exercises-today">See today’s exercises</a><a href="?view=patient-details">Set up patient details</a></div></div><aside class="recovery-home-summary"><h2>The overall picture</h2><p>Pain, swelling, movement, strength and confidence can improve at different speeds. Large studies show that pain and function often improve quickly at first, then continue more gradually through the first year. An individual camera number does not describe the whole recovery.</p><p><a href="https://pubmed.ncbi.nlm.nih.gov/34275710/">Systematic review of 191 studies and 59,667 patients ↗</a></p></aside></div>
+    <div class="recovery-home-hero"><div><span class="eyebrow">Kneora prototype</span><h1 id="recoveryHomeTitle">Your recovery, made easier to understand.</h1><p class="lead">Total knee replacement recovery is gradual and different for each person. This guide explains the broad plan and the camera measurements you will see. Your own hospital and physiotherapist’s advice comes first.</p><div class="recovery-home-actions"><a href="?view=exercises-today">See today’s exercises</a><a href="?view=patient-details">Set up patient details</a></div></div><aside class="recovery-home-summary"><h2>The overall picture</h2><p>Pain, swelling, movement, strength and confidence can improve at different speeds. Large studies show that pain and function often improve quickly at first, then continue more gradually through the first year. An individual camera number does not describe the whole recovery.</p><p><a href="https://pubmed.ncbi.nlm.nih.gov/34275710/">Systematic review of 191 studies and 59,667 patients ↗</a></p></aside></div>
     <section class="recovery-plan" aria-labelledby="planTitle"><span class="eyebrow">Outline of the plan</span><h2 id="planTitle">Your programme, stage by stage</h2><p class="small-note">These stages organise the prototype. They do not replace your individual rehabilitation plan, and the exercises you have actually been prescribed always take priority.</p><div class="plan-grid"><article class="plan-step"><span>WEEK 0–1</span><h3>Settle and activate</h3><p>Manage swelling, move safely, practise straightening and bending, and wake up the thigh muscles.</p></article><article class="plan-step"><span>WEEK 1–4</span><h3>Restore movement</h3><p>Continue range-of-motion work and begin controlled strengthening within the plan given to you.</p></article><article class="plan-step"><span>WEEK 4–8</span><h3>Build control</h3><p>Progress strength, balance and everyday movement when your clinical team says it is appropriate.</p></article><article class="plan-step"><span>WEEK 8+</span><h3>Return to function</h3><p>Continue building capacity for your own daily activities. Recovery commonly continues for several months.</p></article></div></section>
     <section class="knee-angle-guide" id="kneeAngleGuide" aria-label="Interactive guide to knee bend degrees"></section>
     <section class="metrics-explained" aria-labelledby="metricsPlainTitle"><span class="eyebrow">Measurements in everyday language</span><h2 id="metricsPlainTitle">What the app’s numbers mean</h2><div class="metric-plain-grid"><article class="metric-plain" data-angle-explainer="knee"><h3>Knee bend</h3><p>0° means straight. A larger number means more bend. The app estimates the angle formed by the hip, knee and ankle in a side-on picture.</p></article><article class="metric-plain" data-angle-explainer="hip"><h3>Hip raise</h3><p>For a straight leg raise, this estimates how far the whole thigh lifts away from the line of the body.</p></article><article class="metric-plain" data-angle-explainer="toe"><h3>Toe direction</h3><p>For a straight leg raise, 0° means the heel-to-toe line points towards the top of a level camera picture. It is a positioning cue, not an ankle assessment.</p></article><article class="metric-plain"><h3>Repetitions</h3><p>A repetition is one complete movement away from the resting position and back. An incomplete movement is not counted as zero ability.</p></article><article class="metric-plain"><h3>Time, pace and hold</h3><p>These describe how long the session lasted, how quickly complete movements were performed, and how long the leg stayed near the end of a movement.</p></article><article class="metric-plain"><h3>Tracking quality</h3><p>This reports how often the camera could see the required landmarks. High visibility is not the same as clinical accuracy.</p></article></div><div class="evidence-note"><b>What recovery usually involves.</b> NHS guidance says full recovery may take several months or longer and recommends following the exercises given by the hospital. Rehabilitation commonly addresses movement, strength and everyday function, but a systematic review found that evidence does not support one universal programme for everyone. <a href="https://www.nhs.uk/tests-and-treatments/knee-replacement/recovery/">NHS recovery guidance ↗</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9464796/">Systematic review of TKA rehabilitation ↗</a><br><br><b>Seek help.</b> Use NHS 111 urgently for worsening redness, swelling or pain, wound discharge, fever or throbbing or cramping leg pain after knee replacement. Call 999 for leg pain or swelling with chest pain or difficulty breathing. <a href="https://www.nhs.uk/tests-and-treatments/knee-replacement/complications/">NHS warning signs ↗</a></div></section>
@@ -603,14 +613,15 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       <label class="f">Full name<input id="patientName" autocomplete="name" maxlength="160" placeholder="Enter full name"></label>
       <div class="f"><label for="patientDobShort">Date of birth</label><div class="short-date"><input id="patientDobShort" placeholder="DD/MM/YY" inputmode="numeric" autocomplete="bday" maxlength="10" aria-label="Date of birth, DD/MM/YY"><span class="date-picker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg><input id="patientDob" type="date" aria-label="Choose date of birth from calendar"></span></div></div>
       <div class="f"><label for="opdateShort">Operation date</label><div class="short-date"><input id="opdateShort" placeholder="DD/MM/YY" inputmode="numeric" maxlength="10" aria-label="Operation date, DD/MM/YY"><span class="date-picker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg><input id="opdate" type="date" aria-label="Choose operation date from calendar"></span></div></div>
-      <label class="f">Patient ID<input id="patient" value="P001" autocomplete="off"></label>
+      <label class="f">Patient ID (MRN, hospital or NHS number)<input id="patient" value="P001" autocomplete="off"></label>
     </div>
     <div class="patient-facts" aria-live="polite"><div><span>Age</span><strong id="patientAge">Enter date of birth</strong></div><div><span id="postopLabel">Days after surgery</span><strong id="patientPostop">Enter operation date</strong></div></div>
     <div class="dayline" id="dayline"></div>
     <p class="profile-message" id="profileMessage" role="status"></p>
   </section>
 
-  <section class="session-import" id="sessionImport" aria-labelledby="sessionImportTitle"><span class="eyebrow">Join phone and computer</span><h2 id="sessionImportTitle">Import a phone session</h2><p>Select the KNEORA session file shared from the patient’s phone. It is added to this prototype username’s local review history on this computer. The file is read locally and is not uploaded to Cambridge Kinematics.</p><label>Choose session file<input id="sessionImportFile" type="file" accept="application/json,.json"></label><span id="sessionImportStatus" role="status"></span></section>
+  <section class="phone-qr-card" aria-labelledby="phoneQrTitle"><a href="https://mm117868-svg.github.io/KNEORA/phone.html" target="_blank" rel="noopener"><img src="./assets/kneora-phone-qr.svg" width="224" height="224" alt="QR code to open Kneora on your phone"></a><div><span class="eyebrow">Use your phone</span><h2 id="phoneQrTitle">Scan to open Kneora</h2><p>Open your phone’s camera, point it at this code and tap the link. Allow camera access when you start an exercise.</p><p><a href="https://mm117868-svg.github.io/KNEORA/phone.html" target="_blank" rel="noopener">Open the phone exercise page ↗</a></p><p class="small-note">Opens the published phone version. This code does not pair devices or transfer patient details. Share a completed session file from your phone to review it on the computer.</p></div></section>
+  <section class="session-import" id="sessionImport" aria-labelledby="sessionImportTitle"><span class="eyebrow">Join phone and computer</span><h2 id="sessionImportTitle">Import a phone session</h2><p>Select the Kneora session file shared from the patient’s phone. It is added to this prototype username’s local review history on this computer. The file is read locally and is not uploaded to Cambridge Kinematics.</p><label>Choose session file<input id="sessionImportFile" type="file" accept="application/json,.json"></label><span id="sessionImportStatus" role="status"></span></section>
 
   <section class="progress patient-progress" id="progress" aria-label="Your recovery progress"></section>
 
@@ -624,10 +635,14 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
         <p class="small-note">Choose the leg that was operated on before opening an exercise.</p>
       </fieldset>
       <fieldset class="setting-box"><legend>Live camera display</legend>
-        <label class="f">Hold at the far end of each movement<select id="holdtarget"><option value="0">No hold timer</option><option value="3">3 seconds</option><option value="5" selected>5 seconds</option><option value="10">10 seconds</option></select><small class="small-note">A timer on the picture counts your hold and then says when to return. Use the hold your physiotherapist gave you. 5 seconds is common in hospital exercise sheets; the research reviewed for this app sets no single correct hold.</small></label>
+        <p class="small-note">Brightness and contrast adjust automatically. The complete camera frame stays visible. <a href="intel-comparison.html">Compare Intel depth with a height-based estimate</a>.</p>
+        <label class="f">Hold at the far end of each movement<select id="holdtarget"><option value="0">No hold timer</option><option value="3">3 seconds</option><option value="5" selected>5 seconds</option><option value="10">10 seconds</option></select><small class="small-note">The timer starts after your knee settles. An early movement ends the hold and records the time achieved. Use the hold your physiotherapist gave you. 5 seconds is common in hospital exercise sheets; the research reviewed for this app sets no single correct hold.</small></label>
         <label class="setting-check"><input type="checkbox" id="showangle" checked><span>Show my live knee angle<small>Display the MediaPipe knee angle while positioning, during the countdown and throughout the session. The ± beside it and the shaded band at the knee show how steady the reading is (a 95% interval of the last third of a second), not how accurate it is.</small></span></label>
         <p class="small-note">Only the landmarks needed for the exercise are outlined. Heel slides and seated knee extensions show the operated hip, knee and ankle with the live knee angle. Straight leg raises also show the operated-side shoulder, heel and toe, with live hip-raise and toe-direction angles. A toe reading of 0° means the toes point towards the top of a level camera picture. The other leg, face and unrelated upper-body landmarks are never drawn. The outline is steadied for display; measurements use the original positions.</p>
         <p class="small-note">These displays need the pose model and a clear view of your leg. An unavailable angle is shown as a dash.</p>
+      </fieldset>
+      <fieldset class="setting-box"><legend>Marin voice</legend>
+        <label class="setting-check"><input type="checkbox" id="voiceEnabled" checked><span>Spoken guidance on<small>Read exercise cues, countdowns and completion messages in Marin’s AI-generated voice. Turn off for written guidance only.</small></span></label>
       </fieldset>
       <fieldset class="setting-box"><legend>Video and session files</legend>
         <label class="setting-check"><input type="checkbox" id="savevideo" checked><span>Save the video to Downloads<small>A recording is kept temporarily for analysis until you leave the session. Enable this and session file saving to download the video.</small></span></label>
@@ -662,13 +677,13 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
   <footer class="app-footer" aria-label="Company and app information">
     <div class="footer-heading"><div><span class="eyebrow">Cambridge Kinematics<sup class="brand-trademark" aria-hidden="true">™</sup></span><h2>Supporting your recovery,<br>one day at a time.</h2></div><span class="footer-status">In development</span></div>
     <div class="footer-company"><strong>Cambridge Kinematics Limited</strong><p>A private limited company registered in England and Wales.</p><p>Cambridge, England</p></div>
-    <p class="footer-essential">Knee Recovery is a development prototype. Follow your physiotherapist’s or surgeon’s plan. The app does not replace professional medical advice, diagnosis or treatment.</p>
+    <p class="footer-essential">Kneora is a development prototype. Follow your physiotherapist’s or surgeon’s plan. The app does not replace professional medical advice, diagnosis or treatment.</p>
     <div class="footer-notices">
       <details id="app-disclaimer"><summary>About the app and medical disclaimer</summary><div class="footer-detail"><p>This prototype has not been clinically validated for diagnosis or treatment decisions. Camera estimates and repetition counts can be inaccurate or unavailable. They do not confirm that an exercise is safe or correctly performed, and provisional video estimates are not validated clinical scores.</p><p>Only perform exercises your treating clinician has advised. Do not change your rehabilitation plan on the basis of an app result. Stop exercising if you experience sharp pain and seek advice from your clinical team. The app is not an emergency service and sessions are not monitored by a clinician.</p><p>The exercise library and week labels provide a general structure, not an individual prescription. Exercises labelled “Work in progress” are available as previews while their counting and measurement features are developed.</p><span id="engine" hidden></span><nav aria-label="Technical views"><a href="video-analysis/">Analyse a recorded exercise</a><a href="report.html">Physio report</a><a href="bench.html">Technical bench view</a></nav></div></details>
-      <details id="data-notice"><summary>Privacy and your data</summary><div class="footer-detail"><p><strong>Cambridge Kinematics does not collect the patient details or exercise records entered into this prototype.</strong> Patient details, preferences, activity dates, exercise ticks, questionnaire reminders and results, and saved session results stay in this browser on this device. There is no patient account, central patient database or automatic synchronisation between devices. Clearing browser site data can remove these records, and other people using the same browser profile may be able to view them.</p><p>Camera frames are processed on this device. When enabled in Settings, exercise video can be recorded and session files downloaded. Downloaded files are separate from browser storage; keep them securely and share them only with people you choose.</p><p>Spoken prompts use generated Marin audio played by this device. The exercise flow does not request microphone access or listen for voice commands.</p><p>The website is hosted by GitHub Pages and loads fonts and, when needed, model resources from external providers. These services receive normal web-request information such as your IP address. Local processing does not mean that visiting the website makes no network requests.</p><nav aria-label="Privacy information"><a href="?view=exercises-today#cameraOptions">Manage your settings</a><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub privacy information</a></nav></div></details>
+      <details id="data-notice"><summary>Privacy and your data</summary><div class="footer-detail"><p><strong>Cambridge Kinematics does not collect the patient details or exercise records entered into this prototype.</strong> Patient details, preferences, activity dates, exercise ticks, questionnaire reminders and results, and saved session results stay in this browser on this device. There is no patient account, central patient database or automatic synchronisation between devices. Clearing browser site data can remove these records, and other people using the same browser profile may be able to view them.</p><p>Camera frames are processed on this device. When enabled in Settings, exercise video can be recorded and session files downloaded. Downloaded files are separate from browser storage; keep them securely and share them only with people you choose.</p><p>Spoken prompts use generated Marin audio played by this device. The exercise flow does not request microphone access or listen for voice commands.</p><p>The website is hosted by GitHub Pages and loads fonts and, when needed, model resources from external providers. These services receive normal web-request information such as your IP address. Local processing does not mean that visiting the website makes no network requests.</p><nav aria-label="Privacy information"><a href="?view=patient-details#cameraOptions">Manage your settings</a><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub privacy information</a></nav></div></details>
     </div>
     <div class="footer-ip" id="intellectual-property"><p>Cambridge Kinematics is a trade mark of Cambridge Kinematics Limited.</p><p class="trade-mark-reference">UK trade mark application: UK00004438535. Registration pending.</p></div>
-    <div class="footer-bottom"><p>© <span id="copyrightYear">2026</span> Cambridge Kinematics Limited. All rights reserved.</p><nav aria-label="Footer navigation"><a class="measures-link" href="?view=patient-measures">Questionnaires &amp; follow-ups</a><a href="https://cambridgekinematics.co.uk/">Company website ↗</a><a href="?view=recovery-summary">Patient summary</a><a href="?view=exercises-today#cameraOptions">Settings</a></nav></div>
+    <div class="footer-bottom"><p>© <span id="copyrightYear">2026</span> Cambridge Kinematics Limited. All rights reserved.</p><nav aria-label="Footer navigation"><a class="measures-link" href="?view=patient-measures">Questionnaires &amp; follow-ups</a><a href="https://cambridgekinematics.co.uk/">Company website ↗</a><a href="?view=recovery-summary">Patient summary</a><a href="?view=patient-details#cameraOptions">Settings</a></nav></div>
   </footer>
 </main>
 
@@ -682,8 +697,10 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       <div class="tile angle" id="hipTile" hidden><div class="lab">Hip raise</div><div class="val num"><span id="hipAngle">—</span><small>°</small></div><div class="sub" id="hipSub">0° is the leg in line with your body</div></div>
       <div class="tile angle" id="toeTile" hidden><div class="lab">Toe direction</div><div class="val num"><span id="toeAngle">—</span><small>°</small></div><div class="sub">0° points towards the ceiling · camera estimate</div></div>
     </div>
+    <div class="tile" id="distanceTile" hidden><div class="lab">Distance from camera</div><div class="val num" id="kneeDistance">Unavailable</div><div class="sub">Intel depth · operated knee surface</div></div>
     <div class="tile hold" id="holdTile" style="display:none"><div class="lab">Hold timer</div><div class="ring"><div class="cue" id="holdCue">Get ready</div><div class="count num" id="holdCount"></div></div><div class="sub" id="holdSub"></div></div>
     </div></div>
+
     <div class="top">
       <button class="iconbtn" id="back" aria-label="Back">‹</button>
       <div class="title"><span class="eyebrow" id="exPhase"></span><h2 id="exTitle"></h2></div>
@@ -706,6 +723,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
     <div class="countdown" id="countdown" hidden></div>
 
     <div class="exercise-toolbar">
+    <aside class="rehab-coaching" id="rehabCoaching"><div class="rehab-heading"><span id="coachKind">Exercise guidance</span><button id="coachMute" type="button" aria-pressed="false">Mute Marin</button></div><small id="trackingQuality" aria-live="polite"></small><small>Tracking visibility and stability, not clinical accuracy.</small><p id="coachText" role="status" aria-live="polite"></p><div class="rehab-foot"><span>Follow your physiotherapist’s plan. Stop if you get sharp pain.</span><a id="coachSource" target="_blank" rel="noopener">NHS guidance</a></div><small id="coachAudioState"></small></aside>
     <div class="status" id="status">Getting ready…</div>
     <div class="actions">
       <button class="btn small" id="reset" disabled>Reset count</button>
@@ -732,6 +750,9 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 <dialog id="patientReview" class="patient-review" aria-labelledby="patientReviewTitle"><div class="patient-review-header"><span id="patientReviewTitle">Your exercise summary</span><button type="button" id="closePatientReview">Close</button></div><div id="patientReviewContent"></div></dialog>
 
 <script type="module">
+import {createCameraDisplay} from "./camera-display.mjs?v=1";
+import {INTEL_CAMERA_ID,createIntelExerciseCamera,intelAvailable,distanceLabel} from "./intel-exercise-camera.mjs";
+import {RehabCoach,RehabVoice,coachingKeys} from "./rehab-coach.mjs";
 import {showExerciseGuide} from './exercise-guides/guide-player.js?v=magnific-1';
 import {confirmFirstExerciseGuide} from './exercise-guide-state.mjs?v=first-view-1';
 import {LivePositionCounter,readPositionFrame} from './tools/position-recogniser/live.mjs';
@@ -746,7 +767,7 @@ import { finishRecording, mountExerciseAnalysis, savedAnalysisSummary } from "./
 import { KneeTracker, loadTracker, TRACK_VERSION } from "./kneetrack.js?v=wide-smooth-1";
 import { ageYears, loadProfile, saveProfile } from "./patient-profile.mjs";
 import { bindShortDate } from "./short-date.mjs";
-import { AppVoice, completionNotice } from "./app-voice.mjs";
+import { AppVoice, completionNotice, voiceEnabled, setVoiceEnabled } from "./app-voice.mjs";
 import { renderBasicExerciseSummary } from "./exercise-summary.mjs?v=cards-1";
 import { mountExerciseContext } from "./exercise-context.mjs?v=pubmed-1";
 import { renderDetailedExerciseSummary } from "./exercise-details.mjs?v=cards-1";
@@ -767,6 +788,8 @@ import {renderPhysioReport} from "./physio-report.mjs?v=1";
 import {RepSignal} from "./rep-signal.mjs?v=1";
 import {exerciseProfile} from "./exercise-profiles.mjs?v=1";
 import {mountKneeAngleGuide} from "./knee-angle-guide.mjs?v=2";
+import {TrackingQuality} from './tracking-quality.mjs';
+import {StillHold} from './still-hold.mjs';
 import {mountMetricAngleDiagrams} from "./metric-angle-guide.mjs?v=1";
 import {importSessionRecord,shareSessionRecord} from "./session-transfer.mjs?v=1";
 
@@ -811,7 +834,7 @@ const LIB = {
       blurb: "A shallow standing bend, holding a counter.",
       steps: ["Stand side-on to the camera, holding a counter or chair.", "Bend both knees to a shallow squat.", "Stand tall. That is one repetition."] },
     // From Vivek's original page (legacy/vivek-tkr-rehab). Work in progress, with his aim carried over unreviewed. guide: false means no demonstration video exists yet.
-    { id: "forward_step_up", icon: "stand", title: "Forward step-up", tag: "Function", kind: "reps", count: 10, aim: { kind: "bend", deg: 70 }, target: 70, guide: false,
+    { id: "forward_step_up", icon: "stand", title: "Forward step-up", tag: "Function", kind: "reps", count: 10, aim: { kind: "bend", deg: 70 }, target: 70, guideUrl: "https://www.youtube.com/watch?v=xOcpKS8APxo",
       blurb: "Step up onto a low step, leading with the operated leg.",
       steps: ["Stand side-on to the camera, facing a low step, with a rail or counter in reach.", "Step up, leading with the operated leg.", "Step back down slowly. That is one repetition."] },
   ],
@@ -855,7 +878,7 @@ $("copyrightYear").textContent = new Date().getFullYear();
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pageParams=new URLSearchParams(location.search),PHONE_MODE=pageParams.get("mode")==="phone";
 const requestedView = pageParams.get("view");
-const PAGE_VIEW = PHONE_MODE ? "exercises-today" : requestedView === "summary" ? "recovery-summary" : requestedView === "settings" ? "exercises-today" : requestedView || "home";
+const PAGE_VIEW = PHONE_MODE ? "exercises-today" : requestedView === "summary" ? "recovery-summary" : requestedView === "settings" ? "patient-details" : requestedView || "home";
 const PROGRESS_VIEW = ["progress", "progress-to-date", "patient-measures", "recovery-timeline", "recovery-summary"].includes(PAGE_VIEW);
 $("progress").hidden = ["progress-to-date", "patient-measures", "recovery-timeline", "recovery-summary"].includes(PAGE_VIEW);
 $("progressToDate").hidden = PAGE_VIEW !== "progress-to-date";
@@ -903,8 +926,8 @@ function updateSettingsSummary() {
   const controls = "Raised-hand start";
   $("settingsSummary").textContent=[leg?`${leg === "left" ? "Left" : "Right"} leg`:"Choose your operated leg",camera,controls].join(" · ");
 }
-$("cameraOptions").open = false;
-$("settingsDone").onclick = () => { if (!$("side").reportValidity()) return; $("cameraOptions").open=false; location.hash="todayExercises"; $("todayExercises").scrollIntoView({block:"start"}); };
+$("cameraOptions").open = PAGE_VIEW === "patient-details";
+$("settingsDone").onclick = () => { if (!$("side").reportValidity()) return; location.href="?view=exercises-today"; };
 function openHomeSection() {
   if(PROGRESS_VIEW)return;
   const id=location.hash.slice(1),target=id&&(document.getElementById(`${id}Short`)||document.getElementById(id));
@@ -942,7 +965,7 @@ let renderedDay = todayKey();
 function currentPhase() { const d = daysPostOp($("opdate").value, new Date()); return d === null || d < 0 ? null : phaseForDay(d); }
 function exerciseDemoLink(ex) {
   if (ex.guide === false) return "";
-  return `<a class="exercise-demo" href="./exercise-guides/magnific/#${encodeURIComponent(ex.id)}" target="_blank" rel="noopener" aria-label="Watch demonstration: ${esc(ex.title)} (opens in a new tab)">Watch demonstration ↗</a>`;
+  return `<a class="exercise-demo" href="${esc(ex.guideUrl || `./exercise-guides/magnific/#${encodeURIComponent(ex.id)}`)}" target="_blank" rel="noopener" aria-label="Watch demonstration: ${esc(ex.title)} (opens in a new tab)">Watch demonstration ↗</a>`;
 }
 function exercisePosition(ex){
   if(ex.id==='forward_step_up')return `<figure class="exercise-position diagram" role="img" aria-label="Forward step-up starting position, standing in front of a low step"><svg viewBox="0 0 156 100" aria-hidden="true"><path class="position-surface" d="M8 86h140M105 86V67h43"/><circle cx="67" cy="18" r="8"/><path d="M67 27v27M67 35l-17 16M67 36l16 14M67 54L52 84M67 54l24 15 18-2"/><circle class="position-joint" cx="67" cy="54" r="4"/><circle class="position-joint" cx="91" cy="69" r="4"/></svg></figure>`;
@@ -958,7 +981,7 @@ function renderWeeks() {
     <div class="list">${LIB[p].map((ex, i) => `<div class="exercise-row"><button class="ex-card" data-p="${p}" data-i="${i}">
       ${exercisePosition(ex)}
       <div><div class="ex-heading"><h3>${esc(ex.title)}</h3><span class="exercise-completion" hidden><span class="completion-tick" aria-hidden="true">✓</span>Done today</span></div><p>${esc(ex.blurb)}</p><p class="exercise-how"><strong>How to do it.</strong> ${esc(ex.steps.slice(0,2).join(' '))}</p><p class="meta">${ex.kind === "hold" ? `${ex.count} holds of ${ex.hold} s` : `${ex.count} repetitions`}${ex.aim.kind === "bend" ? ` · bend towards ${ex.aim.deg}°` : ""}</p><p class="meta tracks">${isExerciseWorkInProgress(ex) ? "Guided prototype · counting and measurement are still being developed" : esc(exerciseProfile(ex.id).tracks)}</p></div>
-      <div class="tag">${isExerciseWorkInProgress(ex) ? "Work in progress" : esc(ex.tag)}</div></button>${exerciseDemoLink(ex)}</div>`).join("")}</div></section>`).join("");
+      <div class="tag ${isExerciseWorkInProgress(ex) ? "status-wip" : "status-prototype"}">${isExerciseWorkInProgress(ex) ? "Work in progress" : "Ready for trial"}</div></button>${exerciseDemoLink(ex)}</div>`).join("")}</div></section>`).join("");
   $("weeks").querySelectorAll(".ex-card:not(:disabled)").forEach(b => b.onclick = () => { phase = +b.dataset.p; openExercise(LIB[phase][+b.dataset.i]); });
 }
 function renderToday() {
@@ -966,7 +989,7 @@ function renderToday() {
   host.innerHTML='<h2 id="todayTitle">Your exercises today</h2>';
   if(now===null){host.innerHTML+=`<p class="small-note">${days===null?'Enter your operation date to see the exercises for your current recovery week.':'Your operation date is in the future. Your current exercises will appear from the day of surgery.'}</p><a href="${PHONE_MODE?'#phoneOperationDate':'?view=patient-details#opdate'}">${days===null?'Enter operation date':'Check operation date'}</a>`;return;}
   host.innerHTML+=`<p class="small-note">Day ${days} after your operation · ${esc(PHASES[now])}. Follow the exercises your physiotherapist has given you.</p><div class="list"></div><div class="today-links"><a href="?view=recovery-summary">Patient summary →</a><a href="?view=progress#exercise-history">Exercise history →</a><a href="phone.html">Use the phone exercise version →</a></div>`;
-  if (!["left","right"].includes($("side").value)) host.querySelector('.list').insertAdjacentHTML('beforebegin','<p class="setup-prompt">Before your first session, <a href="#side">select your operated leg in Settings →</a></p>');
+  if (!["left","right"].includes($("side").value)) host.querySelector('.list').insertAdjacentHTML('beforebegin','<p class="setup-prompt">Before your first session, <a href="?view=patient-details#side">select your operated leg in Settings →</a></p>');
   const list=host.querySelector('.list');
   $("week"+now).querySelectorAll('.ex-card:not(:disabled)').forEach(card=>{const copy=card.closest(".exercise-row").cloneNode(true),button=copy.querySelector(".ex-card");button.onclick=()=>{phase=now;openExercise(LIB[now][+button.dataset.i]);};list.append(copy);});
   if(!list.children.length)list.innerHTML='<p class="small-note">There are no exercises listed for this phase yet. Browse the full programme below and follow your physiotherapist’s plan.</p>';
@@ -1015,7 +1038,7 @@ function scheduleNewRecoveryDay() {
 scheduleNewRecoveryDay();
 renderHome();
 if(requestedView==="settings"){
-  const url=new URL(location.href);url.searchParams.set("view","exercises-today");if(!url.hash)url.hash="cameraOptions";history.replaceState(null,"",url.pathname+url.search+url.hash);
+  const url=new URL(location.href);url.searchParams.set("view","patient-details");if(!url.hash)url.hash="cameraOptions";history.replaceState(null,"",url.pathname+url.search+url.hash);
 }
 openHomeSection();
 $("closePatientReview").onclick = () => $("patientReview").close();
@@ -1027,6 +1050,7 @@ async function loadExercisePose() {
   poseLoading = true; poseState = "loading";
   try {
     const r = await loadPose({ log: s => console.log(s) });
+    await r.landmarker.setOptions({numPoses:2});
     landmarker = r.landmarker; poseState = "ready"; poseInfo = `${r.library}, ${r.model}`;
     $("engine").textContent = `Pose model ready (${poseInfo}).`;
   } catch (e) {
@@ -1054,10 +1078,14 @@ $("startNow").onclick = () => beginCountdown();
 $("watchGuide").onclick = () => { if (current && !running && countdownStart === null) showExerciseGuide(current); };
 addEventListener("keydown", e => { if (e.code === "Space" && stream && !running && countdownStart === null && !/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(document.activeElement?.tagName || "")) { e.preventDefault(); beginCountdown(); } });
 
+let intelServiceAvailable=false,camerasListed=false;
 async function listCams() {
+  intelServiceAvailable=await intelAvailable();
   try { const devs = await navigator.mediaDevices.enumerateDevices(); const cams = devs.filter(d => d.kind === "videoinput");
-    const want = localStorage.getItem("kr_app_cam") || "";
+    const want = !camerasListed&&pageParams.get("camera")==="intel" ? INTEL_CAMERA_ID : $("camsel").value || localStorage.getItem("kr_app_cam") || "";
+    camerasListed=true;
     $("camsel").innerHTML = (cams.length ? cams.map((c, i) => `<option value="${esc(c.deviceId)}">${esc(c.label || "camera " + (i + 1))}</option>`).join("") : "<option value=''>default camera</option>");
+    if(intelServiceAvailable) $("camsel").insertAdjacentHTML("afterbegin",`<option value="${INTEL_CAMERA_ID}">Intel RealSense with live distance</option>`);
     if ([...$("camsel").options].some(o => o.value === want)) $("camsel").value = want; } catch (e) { }
   updateSettingsSummary();
 }
@@ -1065,14 +1093,30 @@ listCams();
 
 /* ---------------- exercise screen ---------------- */
 const video = $("video"), canvas = $("canvas"), ctx = canvas.getContext("2d");
+const cameraDisplay = createCameraDisplay();
+const intelExerciseCamera=createIntelExerciseCamera({onDistance:depth=>{$("kneeDistance").textContent=distanceLabel(depth);},onError:async error=>{
+  if(running){await finish(false);$("status").textContent=error.message+" The exercise recording has stopped.";}
+  else {stopCamera();cameraFailed(error);}
+}});
+const trackingQuality=new TrackingQuality();
+const rehabCoach=new RehabCoach();
+let coachEnabled=voiceEnabled();
+function updateCoachMute(){coachEnabled=voiceEnabled();$("coachMute").textContent=coachEnabled?'Mute Marin':'Enable Marin';$("coachMute").setAttribute('aria-pressed',String(!coachEnabled));$("voiceEnabled").checked=coachEnabled;}
+$("coachMute").onclick=()=>{setVoiceEnabled(!voiceEnabled());updateCoachMute();};
+$("voiceEnabled").onchange=()=>{setVoiceEnabled($("voiceEnabled").checked);updateCoachMute();};
+addEventListener('kneora-voice-change',updateCoachMute);
+updateCoachMute();
 function fitCameraView() {
-  const stage=$("ex").querySelector('.stage'),scale=Math.min(stage.clientWidth/canvas.width,stage.clientHeight/canvas.height);
+  const stage=$("ex").querySelector('.stage'),footer=stage.querySelector('.exercise-toolbar').offsetHeight,reserve=footer+54,availableHeight=Math.max(80,stage.clientHeight-reserve),scale=Math.min(stage.clientWidth/canvas.width,availableHeight/canvas.height);
+  stage.style.setProperty('--exercise-footer-height',footer+'px');
+  $("cameraView").style.transform=`translateY(${-reserve/2}px)`;
   if(!Number.isFinite(scale)||scale<=0)return;
   $("cameraView").style.width=`${canvas.width*scale}px`;$("cameraView").style.height=`${canvas.height*scale}px`;
-  const pictureTop=(stage.clientHeight-canvas.height*scale)/2;
+  const pictureTop=(availableHeight-canvas.height*scale)/2;
   stage.querySelector('.video-metrics').style.top=`${Math.max(8,stage.querySelector('.top').offsetHeight+8-pictureTop)}px`;
 }
 new ResizeObserver(fitCameraView).observe($("ex").querySelector('.stage'));
+new ResizeObserver(fitCameraView).observe($("ex").querySelector('.exercise-toolbar'));
 function setExerciseSidebar(visible) {
   $("ex").classList.toggle("camera-expanded",!visible);
   $("instructionToggle").setAttribute("aria-expanded",String(visible));
@@ -1121,7 +1165,12 @@ function showSlr(body, positioning, now=performance.now()) {
   $("hipSub").textContent = !positioning ? "0° is the leg in line with your body" : view.otherBent === null ? "Other knee not in view" : view.otherBent ? "Other knee bent: good" : "Bend your other knee, foot flat, before you start";
 }
 function paintOverlay(now) {
+  const quality=trackingQuality.read(now);
+  if(!quality.usable){angleDisplay.reset();liveHipAngle=NaN;liveToeAngle=NaN;$("angle").textContent='–';$("fill").style.width='0%';}
+  $("trackingQuality").textContent=quality.label;
+  $("trackingQuality").dataset.usable=String(quality.usable);
   clearOverlay();
+  if(video.readyState>=2) cameraDisplay.draw(ctx,video,now);
   const pictureNow = pictureClock.read(video.currentTime, now / 1000);
   const showAngle = $("showangle").checked && Number.isFinite(angleDisplay.shown), steadiness = showAngle ? trendCI95(angleDisplay.sampleTimes, angleDisplay.sample) : null;
   for (const part of outline.at(pictureNow)) drawOutline(ctx, part.points, { alpha: part.alpha, scale: canvas.width / 1100,
@@ -1129,6 +1178,16 @@ function paintOverlay(now) {
   if(current?.id==="straight_leg_raise")for(const part of hipOutline.at(pictureNow))drawHipOutline(ctx,part.points,{alpha:part.alpha,scale:canvas.width/1100,angle:$("showangle").checked&&!part.fading?liveHipAngle:null});
   if(current?.id==="straight_leg_raise")for(const part of toeOutline.at(pictureNow))drawToeOutline(ctx,part.points,{alpha:part.alpha,scale:canvas.width/1100,angle:$("showangle").checked&&!part.fading?liveToeAngle:null});
   if (now - lastHandAt <= 450) drawRaisedHand(ctx, lastHandResult, canvas.width, canvas.height);
+  const observed=running?lastAll:previewAll,age=now-(running?lastPoseAt:previewPoseAt),ids=$("side").value==='left'?[23,25,27]:[24,26,28];
+  const visible=quality.usable&&age<450&&ids.every(id=>{const p=observed?.[id];return p&&p.visibility>=.5&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1;});
+  const leg=visible?pickSide(observed,canvas.width,canvas.height,$("side").value,.5):null;
+  const exerciseCue=rehabCoach.update({exercise:current?.id,running,visible,knee:leg?kneeFlexionDeg(leg.hip,leg.knee,leg.ankle):NaN,away:running&&repCounter?.state==='away',holdSeconds:+$("holdtarget").value||0,heldSeconds:running&&repCounter?repCounter.holdS((now-t0)/1000):0,now,steps:current?.steps||[]});
+  const cue=quality.usable?exerciseCue:{key:null,text:quality.message,kind:'visibility',source:null};
+  if($("coachText").textContent!==cue.text)$("coachText").textContent=cue.text;
+  $("coachKind").textContent=cue.kind==='visibility'?'Camera positioning':cue.kind==='camera-reminder'?'Movement reminder':'Exercise guidance';
+  $("coachSource").hidden=!cue.source;if(cue.source){$("coachSource").href=cue.source.url;$("coachSource").textContent=cue.source.label;}
+  rehabVoice.trySpeak(cue,{enabled:coachEnabled,running,countdown:countdownStart!==null,now});
+
 }
 /* Display only. The measured angle is not changed by anything here: the trace, the statistics, the report
    and the counter all keep the per-frame value.
@@ -1185,7 +1244,9 @@ let manualCountingBox = false;
 let legGate = null; // Accepts optical candidates only after the selected leg completes its movement.
 
 const appVoice = new AppVoice({onState: () => refreshHint()});
+const rehabVoice=new RehabVoice(appVoice);
 $("voiceTest").onclick = async () => {
+  if(!voiceEnabled()){$("voiceStatus").textContent="Marin voice is off. Enable spoken guidance in Settings to hear it.";return;}
   $("voiceStatus").textContent = "Preparing Marin…";
   const ready = await appVoice.prepare();
   $("voiceStatus").textContent = ready && appVoice.play() ? "Marin is playing. Check your device volume. This is a voice test; recording has not started." : "Audio could not play. Check your device sound and browser permissions, then try again.";
@@ -1193,7 +1254,7 @@ $("voiceTest").onclick = async () => {
 
 
 async function openExercise(ex) {
-  if (!["left", "right"].includes($("side").value)) { location.href="#side"; return; }
+  if (!["left", "right"].includes($("side").value)) { location.href="?view=patient-details#side"; return; }
   /* The demonstration screen is required on the first opening on this device, but the video itself is skippable.
      Later openings go straight to the exercise; voluntary Watch demonstration controls remain available. */
   if (!await confirmFirstExerciseGuide(ex, showExerciseGuide)) return;
@@ -1202,6 +1263,8 @@ async function openExercise(ex) {
   loadHandModel();
   appVoice.prepare();
   appVoice.prepare("repetitions_complete"); appVoice.prepare("session_ended");
+  trackingQuality.reset();rehabCoach.reset();rehabVoice.reset();$("coachAudioState").textContent='Preparing Marin exercise guidance...';
+  Promise.all(coachingKeys(ex.id).map(key=>appVoice.prepare(key))).then(results=>{if(current!==ex)return;$("coachAudioState").textContent=results.length&&results.every(Boolean)?'Marin voice is AI-generated.':results.length?'New Marin guidance recordings are not installed yet. Written cues are available.':'Follow the written exercise instructions.';});
   $("exPhase").textContent = PHASES[phase]; $("exTitle").textContent = ex.title;
   $("briefSetup").textContent = (isExerciseWorkInProgress(ex) ? "Work in progress. This exercise is available to preview, but its counting and measurements are still being developed and have not been clinically validated. " : "") + SETUP; $("exerciseInstructions").open=isExerciseWorkInProgress(ex); setExerciseSidebar(true);
   $("instr").innerHTML = ex.steps.map(s => `<li>${esc(s)}</li>`).join("");
@@ -1227,21 +1290,29 @@ const screenOpen = gen => gen === openGen && $("ex").classList.contains("open");
 const pct = deg => Math.max(0, Math.min(100, deg / 140 * 100));
 
 async function openCamera(gen) {
-  const constraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }, audio: false };
+  const useIntel=$("camsel").value===INTEL_CAMERA_ID;
+  $("distanceTile").hidden=!useIntel;$("kneeDistance").textContent='Unavailable';
+  const constraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, resizeMode: { ideal: "none" } }, audio: false };
   if(typeof PHONE_MODE!=="undefined"&&PHONE_MODE)constraints.video.facingMode={ideal:"environment"};
   if ($("camsel").value) constraints.video.deviceId = { exact: $("camsel").value };
   let s = null;
   try {
+    if(useIntel){
+      let profile={};try{profile=JSON.parse(localStorage.getItem('kneora_comparison_body_v1:'+$("patient").value)||'{}');}catch{}
+      s=await intelExerciseCamera.start($("side").value,profile);
+    }else {
     if (!navigator.mediaDevices?.getUserMedia) throw new Error("Camera capture is not available in this browser. Open this page in Chrome or Safari using localhost or HTTPS.");
     s = await navigator.mediaDevices.getUserMedia(constraints);
+    }
   }
   catch (e) {
-    if (constraints.video.deviceId && ["OverconstrainedError", "NotFoundError"].includes(e.name)) { try { delete constraints.video.deviceId; s = await navigator.mediaDevices.getUserMedia(constraints); } catch (e2) { return screenOpen(gen) && cameraFailed(e2); } }
+    if (!useIntel && constraints.video.deviceId && ["OverconstrainedError", "NotFoundError"].includes(e.name)) { try { delete constraints.video.deviceId; s = await navigator.mediaDevices.getUserMedia(constraints); } catch (e2) { return screenOpen(gen) && cameraFailed(e2); } }
     else return screenOpen(gen) && cameraFailed(e);
   }
   // the patient may have left the screen while the browser was asking; then the camera goes straight off again
-  if (!screenOpen(gen)) { s.getTracks().forEach(tr => tr.stop()); return; }
+  if (!screenOpen(gen)) { s.getTracks().forEach(tr => tr.stop()); if(useIntel)intelExerciseCamera.stop(); return; }
   stream = s;
+  cameraDisplay.reset();
   await listCams();
   if (!screenOpen(gen)) return stopCamera();
   video.srcObject = stream; await video.play();
@@ -1412,11 +1483,12 @@ function previewStep() {
       const t1 = performance.now();
       let res = null; try { res = landmarker.detectForVideo(video, Math.round(now)); } catch (e) { }
       previewPoseMs += 0.2 * ((performance.now() - t1) - previewPoseMs); previewPoseSkip = Math.max(2, Math.min(6, Math.ceil(previewPoseMs / 25)));   // at most every other picture: the outline is carried between results, and the graphics processor is left free to play the video
-      previewAll = res?.landmarks?.[0] || null; previewPoseAt = now; bodyNow = previewAll; showSlr(previewAll, true, now);
-      previewLeg = (previewJoints ??= new JointFilter(canvas.height)).apply(previewAll ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null, now / 1000);
+      const quality=trackingQuality.update(res?.landmarks,$("side").value,now);
+      previewAll = quality.usable ? res?.landmarks?.[0] || null : null; previewPoseAt = now; bodyNow = previewAll; showSlr(previewAll, true, now);
+      previewLeg = (previewJoints ??= new JointFilter(canvas.height)).apply(previewAll ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.5) : null, now / 1000);
       aimOutline(previewLeg, previewAll, previewLastVideoTime);   // timed by the picture the pose was made from
     }
-    const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.2) : null;
+    const leg = previewAll && now-previewPoseAt <= 450 ? pickSide(previewAll, canvas.width, canvas.height, $("side").value, 0.5) : null;
     if (current.kind !== "hold") {
       const view = inspectExerciseLeg(now-previewPoseAt <= 450 ? previewAll : null, $("side").value, canvas.width, canvas.height);
       $("track").textContent = view.message;
@@ -1454,7 +1526,7 @@ function startSession() {
   if (window.MediaRecorder) {
     try { const mime = pickRecorderMime(); recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined); const recordingChunks = chunks; recorder.ondataavailable = e => { if (e.data.size) recordingChunks.push(e.data); }; recorder.start(1000); $("rec").classList.add("on"); } catch (e) { recorder = null; }
   }
-  if (current.kind === "hold") hold = { phase: "hold", until: t0 + current.hold * 1000, cycles: 0 };
+  if (current.kind === "hold") hold = { phase: "waiting", until: 0, cycles: 0, attempts: [], still: new StillHold() };
   tracker = null;
   if (trackWanted() && jsfeatLib) { tracker = new KneeTracker(canvas.width, canvas.height, fps, {smallMovement:smallMovement()}); tracker.attach(jsfeatLib); }
   legGate = null; tracker = null; repCounter = new AngleRepCounter(undefined, exerciseProfile(current.id).direction, exerciseProfile(current.id).restBand); repSignal = new RepSignal(current.id, $("side").value);
@@ -1487,12 +1559,13 @@ function step() {
     const t1 = performance.now();
     let res = null;
     try { res = landmarker.detectForVideo(video, Math.round(t1)); } catch (e) { console.warn("pose: " + e.message); }
-    legGate?.observe(res?.landmarks?.[0] || null, t, canvas.width, canvas.height);
+    const quality=trackingQuality.update(res?.landmarks,$("side").value,now);
+    legGate?.observe(quality.usable ? res?.landmarks?.[0] || null : null, t, canvas.width, canvas.height);
     poseMs += 0.2 * ((performance.now() - t1) - poseMs); poseSkip = Math.max(2, Math.min(60, Math.ceil(poseMs / 25)));   // at most every other picture, which leaves the graphics processor free to play the video
     lastPoseAt = now;
 
-    lastAll = (res && res.landmarks && res.landmarks[0]) ? res.landmarks[0] : null; bodyNow = lastAll; showSlr(lastAll, false, now);
-    if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.2);
+    lastAll = quality.usable ? res?.landmarks?.[0] || null : null; bodyNow = lastAll; showSlr(lastAll, false, now);
+    if (lastAll) lm = pickSide(lastAll, canvas.width, canvas.height, $("side").value, 0.5);
     angle = trace.add(frameNo, t, lm); lastLm = lm; lastAngle = angle;
     aimOutline(trace.lastLm, lastAll, lastVideoTime);   // trace.lastLm is the operated leg after the One Euro filter: the joints the angle itself comes from
   } else if (landmarker) { lm = lastLm; angle = lastAngle; }
@@ -1500,7 +1573,13 @@ function step() {
 
   /* Repetitions: the watched angle leaves its resting value and comes back (angle-rep-counter.mjs). The knee bend, or
      for a straight leg raise the direction of the whole leg, since there the knee stays straight (rep-signal.mjs). */
-  if (current.kind !== "hold" && bodyNow !== undefined) repCounter.update(repSignal.read(lastAll, canvas.width, canvas.height), t);
+  if (bodyNow !== undefined) {
+    const ids=$("side").value==='left'?[23,25,27]:[24,26,28];
+    const visible=lastAll&&ids.every(i=>{const p=lastAll[i];return p&&p.visibility>=0.5&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1;});
+    const knee=visible?[lastAll[ids[1]].x,lastAll[ids[1]].y]:null;
+    if(current.kind !== "hold")repCounter.update(repSignal.read(lastAll, canvas.width, canvas.height),t,knee);
+    else if(hold.phase!=='rest')hold.still.update(visible?angle:NaN,t,knee);
+  }
   const count = current.kind === "hold" ? hold.cycles : repCounter.reps;
 
   if (count >= current.count && !prescribedDone) { prescribedDone = true; $("status").textContent = `That's your ${current.count}. Finish when you're ready, or carry on.`; $("status").className = "status ok"; }
@@ -1544,6 +1623,10 @@ function paintSession(now) {
     /* The hold timer: how long to stay away from the resting position, then when to come back. A pacing cue only.
        Bottom centre of the picture, clear of the readout. */
     const k = canvas.width / 1280, want = +$("holdtarget").value || 0, heldS = want ? repCounter.holdS((now - t0) / 1000) : 0;
+    const ended=repCounter.stillHold.ended;
+    if(want&&ended&&ended.held_s<want){
+      ctx.save();ctx.fillStyle='rgba(5,10,20,.9)';ctx.fillRect(canvas.width*.15,canvas.height-110*k,canvas.width*.7,78*k);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font=`600 ${Math.round(25*k)}px Arial`;ctx.fillText(ended.reason==='tracking_lost'?'Tracking lost: hold could not be confirmed':`Hold ended early: ${ended.held_s.toFixed(1)} of ${want} s. Return when ready.`,canvas.width/2,canvas.height-63*k);ctx.restore();
+    }
     if (want && heldS > 0.25) { const reached = heldS >= want, w = 420 * k, hh = 84 * k, x = (canvas.width - w) / 2, hy = canvas.height - hh - 28 * k;
       ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
       ctx.fillStyle = reached ? "rgba(20,120,70,.92)" : "rgba(5,10,20,.78)"; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, hy, w, hh, 18 * k) : ctx.rect(x, hy, w, hh); ctx.fill();
@@ -1554,17 +1637,28 @@ function paintSession(now) {
   if (dragging) { ctx.strokeStyle = "#ffe14d"; ctx.setLineDash([8, 6]); ctx.strokeRect(...dragging); ctx.setLineDash([]); }
 }
 
-/* hold exercises: a timer the patient follows. It never looks at the video. */
+/* Stillness starts the pacing timer; it cannot confirm a quadriceps contraction. */
 function tickHold(now) {
-  const left = Math.max(0, (hold.until - now) / 1000);
-  if (hold.phase === "hold") { $("holdCue").textContent = "Squeeze and hold"; $("holdTile").classList.add("on"); }
-  else { $("holdCue").textContent = "Relax"; $("holdTile").classList.remove("on"); }
-  $("holdCount").textContent = Math.ceil(left) + " s";
-  $("holdSub").textContent = `${hold.cycles} of ${current.count} holds done`;
-  if (left <= 0) {
-    if (hold.phase === "hold") { hold.cycles++; $("reps").textContent = hold.cycles; hold.phase = "rest"; hold.until = now + current.rest * 1000; if (navigator.vibrate) navigator.vibrate(30); }
-    else { hold.phase = "hold"; hold.until = now + current.hold * 1000; }
+  const t=(now-t0)/1000;
+  if(hold.phase==='rest'){
+    const left=Math.max(0,(hold.until-now)/1000);
+    $("holdCue").textContent='Relax';$("holdCount").textContent=Math.ceil(left)+' s';$("holdTile").classList.remove('on');
+    if(left===0){hold.phase='waiting';hold.still.reset();}
+  }else{
+    const elapsed=hold.still.read(t),started=hold.still.started!==null&&hold.still.last!==null&&t-hold.still.last<=0.5;
+    $("holdCue").textContent=started?'Hold steady':'Settle your knee';
+    $("holdCount").textContent=started?Math.ceil(Math.max(0,current.hold-elapsed))+' s':'';
+    $("holdTile").classList.toggle('on',started);
+    if(hold.still.ended){
+      const ended=hold.still.ended;
+      hold.attempts.push({...ended,target_s:current.hold,status:ended.reason==='tracking_lost'?'unconfirmed':'incomplete'});
+      hold.phase='rest';hold.until=now+current.rest*1000;
+      hold.result=ended.reason==='tracking_lost'?'Tracking lost: hold not confirmed':`Hold incomplete: ${ended.held_s.toFixed(1)} of ${current.hold} s`;
+      hold.still.reset();
+    }
+    if(elapsed>=current.hold){hold.attempts.push({status:'completed',held_s:elapsed,target_s:current.hold});hold.result='Hold completed';hold.cycles++;$("reps").textContent=hold.cycles;hold.phase='rest';hold.until=now+current.rest*1000;hold.still.reset();if(navigator.vibrate)navigator.vibrate(30);}
   }
+  $("holdSub").textContent=`${hold.cycles} of ${current.count} holds completed${hold.result ? " · "+hold.result : ""}`;
 }
 
 async function finish(abandon = false) {
@@ -1586,6 +1680,13 @@ async function finish(abandon = false) {
   const tr = trackWanted() && tracker ? tracker.summary(duration) : null;
   const pv = null, positionResult = null, angleCount = current.kind === "hold" ? null : repCounter.summary(duration);
   const source = current.kind === "hold" ? "timer" : "angle_hysteresis";
+  if(angleCount){
+    const target=+$("holdtarget").value||0;
+    const attempts=angleCount.events.filter(e=>e.status==='accepted').map(e=>({held_s:e.hold_s,reason:e.hold_end_reason}));
+    if(repCounter.state==='away'&&repCounter.stillHold.started!==null)attempts.push({held_s:repCounter.stillHold.seconds,reason:repCounter.stillHold.ended?.reason||'session_ended'});
+    angleCount.hold_attempts=target?attempts.map(a=>({...a,target_s:target,status:a.held_s>=target?'completed':a.reason==='tracking_lost'?'unconfirmed':'incomplete'})):[];
+  }
+  if(hold&&hold.phase!=='rest'&&hold.still.started!==null)hold.attempts.push({held_s:hold.still.seconds,target_s:current.hold,reason:hold.still.ended?.reason||'session_ended',status:hold.still.ended?.reason==='tracking_lost'?'unconfirmed':'incomplete'});
   const count = current.kind === "hold" ? hold.cycles : angleCount?.repetitions ?? 0;
   // This confirmation follows recorder finalisation and stopCamera(), never just reaching the target count.
   const confirmation = completionNotice(count, current.count);
@@ -1601,7 +1702,7 @@ async function finish(abandon = false) {
     recording: { captured: !!videoBlob?.size, bytes: videoBlob?.size || 0, mime_type: videoBlob?.type || null },
 
     software_version: SOFTWARE, app: { page: "index.html", build: "pubmed-metrics-1", phase, aim: current.aim, hold_target_s: current.kind === "hold" ? null : (+$("holdtarget").value || 0) } };
-  if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles };
+  if (current.kind === "hold") rec.hold = { hold_s: current.hold, rest_s: current.rest, cycles_completed: hold.cycles, attempts: hold.attempts };
   rec.measurement.trace_preview = tracePreview(trace.rows);
   const slot = storeRecord(rec) - 1;   // stored now, before the questions, so walking away from the laptop loses nothing
   refreshExerciseCompletion();
@@ -1653,7 +1754,7 @@ async function finish(abandon = false) {
     $("doneBack").onclick = () => closeExercise();
     $("doneRepeat").onclick = () => { closeExercise(); openExercise(again); };
     if (nextUp) $("doneNext").onclick = () => { closeExercise(); openExercise(nextUp); };
-    if(PHONE_MODE&&!rec.rejected)$("phoneShare").onclick=async()=>{const status=$("phoneShareStatus");try{const sent=await shareSessionRecord(rec);if(sent.shared)status.textContent="Session shared. Import the KNEORA session file on the computer.";else{download(sent.name,sent.blob);status.textContent="Session file downloaded. Move it to the computer and select Import a phone session.";}}catch(error){if(error.name!=="AbortError")status.textContent=`Could not share the session: ${error.message}`;}};
+    if(PHONE_MODE&&!rec.rejected)$("phoneShare").onclick=async()=>{const status=$("phoneShareStatus");try{const sent=await shareSessionRecord(rec);if(sent.shared)status.textContent="Session shared. Import the Kneora session file on the computer.";else{download(sent.name,sent.blob);status.textContent="Session file downloaded. Move it to the computer and select Import a phone session.";}}catch(error){if(error.name!=="AbortError")status.textContent=`Could not share the session: ${error.message}`;}};
     $("doneReject").onclick = () => { rec.rejected = !rec.rejected; rec.rejected_at = rec.rejected ? new Date().toISOString() : null; updateRecord(slot, rec); refreshExerciseCompletion(); renderHome(); saved(); }; };
   saved();
   renderHome();
@@ -1667,7 +1768,7 @@ function ask(title, prompt, values) {
     $("q").querySelector(".skip").onclick = () => res(null);
   });
 }
-function stopCamera() { cancelAnimationFrame(previewId); cancelCountdown(); if (stream) { stream.getTracks().forEach(tr => tr.stop()); stream = null; } video.srcObject = null; }
+function stopCamera() { intelExerciseCamera.stop(); $("kneeDistance").textContent="Unavailable"; cancelAnimationFrame(previewId); cancelCountdown(); if (stream) { stream.getTracks().forEach(tr => tr.stop()); stream = null; } video.srcObject = null; }
 function closeExercise() {
   if (running) { if (!confirm("Leave this session without saving it?")) return; finish(true); }
   openGen++; if (pendingAnswer) pendingAnswer(null); disposeAnalysis(); disposeAnalysis = () => {};

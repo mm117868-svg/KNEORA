@@ -65,15 +65,11 @@ test('the resting value is only learned in the starting position, so starting mi
   assert.equal(counter.reps, 3);
 });
 
-test('the hold timer is not picky: it runs for as long as the leg is away from rest, wherever it is', () => {
-  const counter = new AngleRepCounter(undefined, 'up'); let t = 0; const feed = (angle, seconds) => { for (let k = 0; k < seconds * 15; k++) counter.update(angle(k / 15 / seconds), t += 1 / 15); };
-  feed(() => 0, 2); feed(x => 40 * stroke(x), 1); feed(x => 40 - 15 * x, 2); feed(x => 25 + 10 * Math.sin(x * 9), 2);   // up, sagging, wobbling: still off the bed
-  assert.ok(counter.holdS(t) > 4.3, `held ${counter.holdS(t).toFixed(1)} s`);
-  feed(x => 30 * (1 - stroke(x)), 1); feed(() => 0, 1); assert.equal(counter.holdS(t), 0); assert.equal(counter.reps, 1); assert.ok(counter.events.at(-1).hold_s > 5);
-});
-test('forgiving hold: a leg raised 50 degrees that sags to 12 and wobbles is still one hold and one repetition', () => {
-  const counter = new AngleRepCounter(undefined, 'up', [-25, 25]); let t = 0; const feed = (angle, seconds) => { for (let k = 0; k < seconds * 15; k++) counter.update(angle(k / 15 / seconds), t += 1 / 15); };
-  for (let i = 0; i < 3; i++) { feed(() => 0, 2); feed(x => 50 * stroke(x), 1); feed(x => 50 - 38 * x, 2); feed(x => 12 + 4 * Math.sin(x * 8 * Math.PI), 3);
-    assert.ok(counter.holdS(t) > 5, `movement ${i + 1}: held ${counter.holdS(t).toFixed(1)} s`); feed(x => 12 * (1 - stroke(x)), 0.8); }
-  feed(() => 0, 1); assert.equal(counter.reps, 3);
+test('hold starts after stillness and ends on a drop without losing the repetition',()=>{
+ const c=new AngleRepCounter(undefined,'up');let t=0;
+ const feed=(fn,n)=>{for(let i=0;i<n*20;i++)c.update(fn(i/20),t+=.05,[.5,.5]);};
+ feed(()=>0,2);feed(x=>x*30,1);assert.equal(c.holdS(t),0);
+ feed(()=>30,2);assert.ok(c.holdS(t)>1);
+ feed(()=>20,.2);assert.equal(c.holdS(t),0);assert.equal(c.stillHold.ended.reason,'movement');
+ feed(()=>0,2);assert.equal(c.reps,1);assert.ok(c.events.at(-1).hold_s>1);assert.equal(c.events.at(-1).hold_end_reason,'movement');
 });

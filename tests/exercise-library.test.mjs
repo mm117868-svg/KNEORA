@@ -49,6 +49,7 @@ test('every exercise with a video has a Watch demonstration link, including acti
   for (const ex of all) {
     const link = exerciseDemoLink(ex);
     if (ex.guide === false) { assert.equal(link, '', ex.id); assert.equal(hasVideo(ex.id), false, `${ex.id} now has a video: remove guide: false`); }
+    else if(ex.guideUrl){assert.ok(link.includes(ex.guideUrl));assert.match(link,/Watch demonstration/);}
     else { assert.match(link, new RegExp(`magnific/#${ex.id}"`), ex.id); assert.ok(hasVideo(ex.id), `${ex.id}: no demonstration video`); }
   }
 });

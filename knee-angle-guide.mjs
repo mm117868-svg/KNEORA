@@ -15,20 +15,20 @@ export function kneeGuideGeometry(deg,{kneeX=250,kneeY=220,length=150}={}){
 export function mountKneeAngleGuide(host){
   if(!host)return()=>{};
   const buttons=KNEE_EXAMPLES.map(x=>`<button type="button" data-knee-deg="${x.deg}"><b>${x.deg}°</b><span>${x.label}</span></button>`).join('');
-  host.innerHTML=`<div class="knee-guide-copy"><span class="eyebrow">Understanding knee bend</span><h2>What do the degrees mean?</h2><p><b>0° means the knee is straight.</b> A larger number means the knee is more bent. The app estimates this from a side-on camera picture.</p><div class="knee-guide-reading" aria-live="polite"><span>Knee bend</span><strong data-knee-reading>60°</strong><small data-knee-meaning>More bend</small></div><input data-knee-slider type="range" min="0" max="120" value="60" step="1" aria-label="Explore knee bend from 0 to 120 degrees"><div class="knee-guide-buttons">${buttons}</div><p class="knee-guide-note">This picture explains the number. Your camera reading is an estimate, not a clinical measurement or a target you must reach.</p></div><div class="knee-guide-picture" aria-hidden="true"><svg viewBox="0 0 500 430">
+  host.innerHTML=`<div class="knee-guide-copy"><span class="eyebrow">Understanding knee bend</span><h2>What do the degrees mean?</h2><p><b>0° means the knee is straight.</b> A larger number means the knee is more bent. The app estimates this from a side-on camera picture.</p><div class="knee-guide-reading" aria-live="polite"><span>Knee bend</span><strong data-knee-reading>60°</strong><small data-knee-meaning>More bend</small></div><input data-knee-slider type="range" min="0" max="120" value="60" step="1" aria-label="Explore knee bend from 0 to 120 degrees"><div class="knee-guide-buttons">${buttons}</div><p class="knee-guide-note">This simplified side view explains the number. Your camera reading is an estimate, not a clinical measurement or a target you must reach.</p></div><div class="knee-guide-picture" aria-hidden="true"><svg viewBox="0 0 500 430">
     <path class="guide-straight" d="M250 220 L250 392"/><text class="guide-direction" x="270" y="397">0° STRAIGHT</text>
-    <path class="guide-femur" d="M220 26 L280 26 L276 126 C275 154 286 177 298 197 C306 211 300 228 286 236 C273 243 260 237 250 229 C240 237 227 243 214 236 C200 228 194 211 202 197 C214 177 225 154 224 126Z"/>
-    <path class="guide-cartilage" d="M205 210 C218 220 235 222 250 214 C265 222 282 220 295 210"/>
+    <text class="guide-direction" x="36" y="26">LATERAL VIEW · FROM THE SIDE</text>
+    <text class="guide-direction" x="36" y="65">BACK</text><text class="guide-direction" x="397" y="65">FRONT</text>
+    <path class="guide-femur" d="M232 48 L274 48 L273 151 C273 174 289 191 289 212 C289 235 272 248 252 246 C228 245 215 229 219 208 C221 191 234 178 234 152Z"/>
+    <path class="guide-cartilage" d="M222 218 C224 240 253 250 275 234"/>
     <g class="guide-lower-leg" data-knee-lower>
-      <path class="guide-leg-outline" d="M207 222 C218 210 235 211 250 220 C265 211 282 210 293 222 C299 233 291 244 279 247 L270 381 L230 381 L221 247 C209 244 201 233 207 222Z"/>
-      <path class="guide-tibia" d="M222 236 C229 244 240 246 250 240 C260 246 271 244 278 236 M232 252 L239 372 M268 252 L261 372"/>
-      <path class="guide-fibula" d="M282 252 C289 282 283 337 274 372"/>
+      <path class="guide-leg-outline guide-tibia-side" d="M222 248 Q248 255 279 244 L282 260 Q280 275 268 286 L267 381 L239 381 L237 283 Q224 271 222 248Z"/>
+      <path class="guide-tibia" d="M273 273 Q257 283 255 307 L254 371"/>
+      <path class="guide-fibula" d="M223 275 Q216 266 218 261 Q221 257 225 263 L230 374"/>
     </g>
-    <path class="guide-ligament guide-acl" d="M235 191 L266 244"/><path class="guide-ligament guide-pcl" d="M267 191 L238 244"/>
-    <path class="guide-patella" d="M203 202 C191 205 185 219 189 231 C193 242 204 245 212 237 C220 227 218 210 211 204 C209 202 206 201 203 202Z"/>
     <circle class="guide-joint" cx="250" cy="220" r="5"/>
     <path class="guide-arc" data-knee-arc d=""/><text class="guide-arc-label" data-knee-svg-label x="185" y="330">60°</text>
-    <g class="guide-anatomy-labels"><text x="338" y="86">THIGH BONE</text><path d="M328 82 L278 108"/><text x="46" y="216">KNEECAP</text><path d="M116 212 L188 220"/></g>
+    <g class="guide-anatomy-labels"><text x="338" y="86">THIGH BONE</text><path d="M328 82 L278 108"/></g>
   </svg></div>`;
   const slider=host.querySelector('[data-knee-slider]'),reading=host.querySelector('[data-knee-reading]'),meaning=host.querySelector('[data-knee-meaning]'),lower=host.querySelector('[data-knee-lower]'),arc=host.querySelector('[data-knee-arc]'),svgLabel=host.querySelector('[data-knee-svg-label]');
   const show=value=>{

@@ -54,7 +54,7 @@ export function renderProgressToDate(host,records,options={}) {
  host.querySelector('[data-recent]').onclick=()=>{to.value=today;from.value=dayAt(dayNumber(today)-29);draw();};
  host.querySelector('[data-all]').onclick=()=>{const dates=records.filter(r=>r.exercise===exercise.value).map(r=>r.started_at.slice(0,10)).filter(d=>dayNumber(d)!==null).sort();to.value=dates.at(-1)||today;from.value=dates.length?dayAt(Math.max(dayNumber(dates[0]),dayNumber(to.value)-365)):dayAt(dayNumber(today)-89);draw();};
  host.querySelector('[data-summary]').onclick=()=>{
-  const text=['KNEE RECOVERY: PROGRESS TO DATE',`Patient: ${patientId}`,`Operation: ${operationDate||'not set'}`,`Generated: ${today} (${dayLabel(day)})`,`${records.length} sessions, ${days.size} exercise days, ${measuredReports.length} video reports.`,observationNote,'Typical recovery ranges are not mandatory deadlines.'];
+  const text=['Kneora: PROGRESS TO DATE',`Patient: ${patientId}`,`Operation: ${operationDate||'not set'}`,`Generated: ${today} (${dayLabel(day)})`,`${records.length} sessions, ${days.size} exercise days, ${measuredReports.length} video reports.`,observationNote,'Typical recovery ranges are not mandatory deadlines.'];
   for(const [id,name] of Object.entries(EXERCISE_NAMES)){
    text.push('',name.toUpperCase());
    for(const metric of METRICS[id])for(const group of seriesFor(records,id,metric)){
@@ -66,7 +66,7 @@ export function renderProgressToDate(host,records,options={}) {
   text.push('','PATIENT-REPORTED MEASURES');for(const p of promOverview(proms))text.push(`${PROM_NAMES[p.instrument]}, ${p.side}: ${p.latest.score} / ${p.instrument==='koos_jr'?100:48} on ${p.latest.date}.`);
   if(!proms.length)text.push('No questionnaire scores recorded.');
   text.push('','PUBLISHED RECOVERY CONTEXT');for(const r of REFERENCES)text.push(`${r.measure} | ${r.when}: ${r.reference} ${r.meaning}`,RECOVERY_SOURCES[r.source].url);
-  download('knee-recovery-progress-summary.txt',text.join('\n'));
+  download('kneora-progress-summary.txt',text.join('\n'));
  };
  host.querySelector('[data-metrics]').onclick=()=>csvDownload('all-exercise-metrics.csv',[['Patient','Operation date','Session date and time','Day after surgery','Exercise','Metric','Value','Unit','Source','Recording series','Assistance','Resistance'],...records.flatMap(r=>(METRICS[r.exercise]||[]).map(metric=>[patientId,operationDate,r.started_at,postOpDay(r.started_at.slice(0,10),operationDate),EXERCISE_NAMES[r.exercise],metric.label,finite(metric.get(r)),metric.unit,metric.source,seriesFor([r],r.exercise,metric)[0]?.key||'',exerciseContextFacts(r)[0][1],exerciseContextFacts(r)[1][1]]))]);
  metrics();

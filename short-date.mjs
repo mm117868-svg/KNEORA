@@ -33,7 +33,14 @@ export function parseShortDate(text, {today, previous = '', birthDate = false}) 
 export function bindShortDate(native, text, options) {
   const sync = () => {text.value = shortDate(native.value); text.setCustomValidity('');};
   native.addEventListener('change', sync);
-  text.addEventListener('input', () => text.setCustomValidity(''));
+  text.addEventListener('input', event => {
+    text.setCustomValidity('');
+    // Advance over the separators while typing, without disrupting edits or backspace.
+    if (event.isComposing || event.inputType?.startsWith('delete') || text.selectionStart !== text.value.length) return;
+    const value=text.value;
+    if (/^\d{2}$/.test(value) || /^\d{2}[/]\d{2}$/.test(value)) text.value=value+'/';
+    else if (/^\d{5,8}$/.test(value)) text.value=value.slice(0,2)+'/'+value.slice(2,4)+'/'+value.slice(4);
+  });
   text.addEventListener('change', () => {
     try {
       const value = parseShortDate(text.value, {...options(), previous: native.value});

@@ -17,7 +17,8 @@ test('the home page explains that zero is straight and camera readings are estim
 
 test('the interactive guide shows only an enlarged knee and named joint parts',()=>{
   const guide=fs.readFileSync(new URL('../knee-angle-guide.mjs',import.meta.url),'utf8');
-  for(const part of ['guide-femur','guide-patella','guide-tibia','guide-fibula','guide-cartilage','guide-acl','guide-pcl'])assert.match(guide,new RegExp(part));
+  for(const part of ['guide-femur','guide-tibia','guide-fibula','guide-cartilage'])assert.match(guide,new RegExp(part));
   for(const wholeBodyPart of ['guide-person','guide-arm','guide-foot'])assert.doesNotMatch(guide,new RegExp(wholeBodyPart));
+  assert.match(guide,/LATERAL VIEW/);
   assert.match(guide,/data-knee-lower/);assert.match(guide,/rotate\(\$\{g\.deg\} 250 220\)/);
 });

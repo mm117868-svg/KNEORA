@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0e1726">
-<title>Knee Recovery — TKR Rehab Guide</title>
+<title>Kneora — TKR Rehab Guide</title>
 <style>
   :root{
     --ink:#0e1726;
@@ -184,7 +184,7 @@
   <main class="home" id="home">
     <div class="brandbar">
       <div class="mark"></div>
-      <div><b>Knee Recovery</b><span>Total knee replacement · guided rehab</span></div>
+      <div><b>Kneora</b><span>Total knee replacement · guided rehab</span></div>
     </div>
 
     <section class="hero">

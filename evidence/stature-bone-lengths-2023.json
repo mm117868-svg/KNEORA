@@ -1,0 +1,655 @@
+{
+  "source": "https://pubmed.ncbi.nlm.nih.gov/37231033/",
+  "doi": "10.1038/s41598-023-34670-2",
+  "tables": [
+    3,
+    4
+  ],
+  "licence": "CC BY 4.0",
+  "rows": [
+    {
+      "group": "male",
+      "height_cm": 148.0,
+      "n": 1,
+      "femur_cm": 31.2,
+      "tibia_cm": 36.8
+    },
+    {
+      "group": "male",
+      "height_cm": 152.0,
+      "n": 2,
+      "femur_cm": 40.3,
+      "tibia_cm": 30.3
+    },
+    {
+      "group": "male",
+      "height_cm": 153.0,
+      "n": 1,
+      "femur_cm": 36.0,
+      "tibia_cm": 32.1
+    },
+    {
+      "group": "male",
+      "height_cm": 154.0,
+      "n": 1,
+      "femur_cm": 43.4,
+      "tibia_cm": 32.6
+    },
+    {
+      "group": "male",
+      "height_cm": 155.0,
+      "n": 4,
+      "femur_cm": 40.2,
+      "tibia_cm": 32.1
+    },
+    {
+      "group": "male",
+      "height_cm": 156.0,
+      "n": 2,
+      "femur_cm": 39.95,
+      "tibia_cm": 31.45
+    },
+    {
+      "group": "male",
+      "height_cm": 157.0,
+      "n": 2,
+      "femur_cm": 41.85,
+      "tibia_cm": 33.55
+    },
+    {
+      "group": "male",
+      "height_cm": 158.0,
+      "n": 3,
+      "femur_cm": 41.57,
+      "tibia_cm": 32.53
+    },
+    {
+      "group": "male",
+      "height_cm": 159.0,
+      "n": 4,
+      "femur_cm": 42.0,
+      "tibia_cm": 33.28
+    },
+    {
+      "group": "male",
+      "height_cm": 160.0,
+      "n": 14,
+      "femur_cm": 42.6,
+      "tibia_cm": 33.71
+    },
+    {
+      "group": "male",
+      "height_cm": 161.0,
+      "n": 2,
+      "femur_cm": 43.25,
+      "tibia_cm": 34.2
+    },
+    {
+      "group": "male",
+      "height_cm": 162.0,
+      "n": 2,
+      "femur_cm": 44.55,
+      "tibia_cm": 34.15
+    },
+    {
+      "group": "male",
+      "height_cm": 163.0,
+      "n": 7,
+      "femur_cm": 42.6,
+      "tibia_cm": 33.56
+    },
+    {
+      "group": "male",
+      "height_cm": 164.0,
+      "n": 3,
+      "femur_cm": 44.77,
+      "tibia_cm": 33.47
+    },
+    {
+      "group": "male",
+      "height_cm": 165.0,
+      "n": 36,
+      "femur_cm": 44.09,
+      "tibia_cm": 34.48
+    },
+    {
+      "group": "male",
+      "height_cm": 166.0,
+      "n": 16,
+      "femur_cm": 43.83,
+      "tibia_cm": 35.5
+    },
+    {
+      "group": "male",
+      "height_cm": 167.0,
+      "n": 32,
+      "femur_cm": 44.77,
+      "tibia_cm": 34.99
+    },
+    {
+      "group": "male",
+      "height_cm": 168.0,
+      "n": 64,
+      "femur_cm": 45.1,
+      "tibia_cm": 34.76
+    },
+    {
+      "group": "male",
+      "height_cm": 169.0,
+      "n": 23,
+      "femur_cm": 45.64,
+      "tibia_cm": 35.28
+    },
+    {
+      "group": "male",
+      "height_cm": 170.0,
+      "n": 108,
+      "femur_cm": 45.71,
+      "tibia_cm": 35.69
+    },
+    {
+      "group": "male",
+      "height_cm": 171.0,
+      "n": 45,
+      "femur_cm": 46.24,
+      "tibia_cm": 36.03
+    },
+    {
+      "group": "male",
+      "height_cm": 172.0,
+      "n": 104,
+      "femur_cm": 46.17,
+      "tibia_cm": 36.19
+    },
+    {
+      "group": "male",
+      "height_cm": 173.0,
+      "n": 62,
+      "femur_cm": 47.04,
+      "tibia_cm": 36.4
+    },
+    {
+      "group": "male",
+      "height_cm": 174.0,
+      "n": 65,
+      "femur_cm": 46.93,
+      "tibia_cm": 36.74
+    },
+    {
+      "group": "male",
+      "height_cm": 175.0,
+      "n": 96,
+      "femur_cm": 47.03,
+      "tibia_cm": 36.91
+    },
+    {
+      "group": "male",
+      "height_cm": 176.0,
+      "n": 112,
+      "femur_cm": 47.63,
+      "tibia_cm": 37.17
+    },
+    {
+      "group": "male",
+      "height_cm": 177.0,
+      "n": 47,
+      "femur_cm": 48.08,
+      "tibia_cm": 37.53
+    },
+    {
+      "group": "male",
+      "height_cm": 178.0,
+      "n": 113,
+      "femur_cm": 48.21,
+      "tibia_cm": 37.64
+    },
+    {
+      "group": "male",
+      "height_cm": 179.0,
+      "n": 45,
+      "femur_cm": 48.44,
+      "tibia_cm": 37.94
+    },
+    {
+      "group": "male",
+      "height_cm": 180.0,
+      "n": 148,
+      "femur_cm": 48.82,
+      "tibia_cm": 38.3
+    },
+    {
+      "group": "male",
+      "height_cm": 181.0,
+      "n": 37,
+      "femur_cm": 49.35,
+      "tibia_cm": 38.73
+    },
+    {
+      "group": "male",
+      "height_cm": 182.0,
+      "n": 58,
+      "femur_cm": 49.85,
+      "tibia_cm": 39.23
+    },
+    {
+      "group": "male",
+      "height_cm": 183.0,
+      "n": 82,
+      "femur_cm": 49.94,
+      "tibia_cm": 39.17
+    },
+    {
+      "group": "male",
+      "height_cm": 184.0,
+      "n": 46,
+      "femur_cm": 50.39,
+      "tibia_cm": 39.63
+    },
+    {
+      "group": "male",
+      "height_cm": 185.0,
+      "n": 72,
+      "femur_cm": 50.06,
+      "tibia_cm": 39.69
+    },
+    {
+      "group": "male",
+      "height_cm": 186.0,
+      "n": 54,
+      "femur_cm": 50.88,
+      "tibia_cm": 40.24
+    },
+    {
+      "group": "male",
+      "height_cm": 187.0,
+      "n": 31,
+      "femur_cm": 50.68,
+      "tibia_cm": 39.92
+    },
+    {
+      "group": "male",
+      "height_cm": 188.0,
+      "n": 28,
+      "femur_cm": 51.4,
+      "tibia_cm": 40.16
+    },
+    {
+      "group": "male",
+      "height_cm": 189.0,
+      "n": 19,
+      "femur_cm": 51.2,
+      "tibia_cm": 40.6
+    },
+    {
+      "group": "male",
+      "height_cm": 190.0,
+      "n": 38,
+      "femur_cm": 51.89,
+      "tibia_cm": 40.94
+    },
+    {
+      "group": "male",
+      "height_cm": 191.0,
+      "n": 7,
+      "femur_cm": 52.2,
+      "tibia_cm": 40.46
+    },
+    {
+      "group": "male",
+      "height_cm": 192.0,
+      "n": 11,
+      "femur_cm": 53.75,
+      "tibia_cm": 42.79
+    },
+    {
+      "group": "male",
+      "height_cm": 193.0,
+      "n": 6,
+      "femur_cm": 53.12,
+      "tibia_cm": 42.73
+    },
+    {
+      "group": "male",
+      "height_cm": 194.0,
+      "n": 6,
+      "femur_cm": 55.23,
+      "tibia_cm": 44.28
+    },
+    {
+      "group": "male",
+      "height_cm": 195.0,
+      "n": 3,
+      "femur_cm": 55.7,
+      "tibia_cm": 43.63
+    },
+    {
+      "group": "male",
+      "height_cm": 196.0,
+      "n": 3,
+      "femur_cm": 54.0,
+      "tibia_cm": 42.23
+    },
+    {
+      "group": "male",
+      "height_cm": 197.0,
+      "n": 2,
+      "femur_cm": 52.5,
+      "tibia_cm": 41.6
+    },
+    {
+      "group": "male",
+      "height_cm": 198.0,
+      "n": 2,
+      "femur_cm": 55.5,
+      "tibia_cm": 45.0
+    },
+    {
+      "group": "male",
+      "height_cm": 200.0,
+      "n": 4,
+      "femur_cm": 55.55,
+      "tibia_cm": 44.53
+    },
+    {
+      "group": "male",
+      "height_cm": 202.0,
+      "n": 1,
+      "femur_cm": 50.2,
+      "tibia_cm": 38.1
+    },
+    {
+      "group": "female",
+      "height_cm": 140.0,
+      "n": 2,
+      "femur_cm": 36.55,
+      "tibia_cm": 28.45
+    },
+    {
+      "group": "female",
+      "height_cm": 142.0,
+      "n": 2,
+      "femur_cm": 32.15,
+      "tibia_cm": 29.25
+    },
+    {
+      "group": "female",
+      "height_cm": 143.0,
+      "n": 1,
+      "femur_cm": 37.9,
+      "tibia_cm": 30.2
+    },
+    {
+      "group": "female",
+      "height_cm": 145.0,
+      "n": 2,
+      "femur_cm": 38.7,
+      "tibia_cm": 30.4
+    },
+    {
+      "group": "female",
+      "height_cm": 146.0,
+      "n": 5,
+      "femur_cm": 41.12,
+      "tibia_cm": 31.72
+    },
+    {
+      "group": "female",
+      "height_cm": 147.0,
+      "n": 7,
+      "femur_cm": 40.66,
+      "tibia_cm": 31.57
+    },
+    {
+      "group": "female",
+      "height_cm": 148.0,
+      "n": 7,
+      "femur_cm": 39.97,
+      "tibia_cm": 31.16
+    },
+    {
+      "group": "female",
+      "height_cm": 149.0,
+      "n": 4,
+      "femur_cm": 38.33,
+      "tibia_cm": 29.93
+    },
+    {
+      "group": "female",
+      "height_cm": 150.0,
+      "n": 58,
+      "femur_cm": 39.93,
+      "tibia_cm": 31.03
+    },
+    {
+      "group": "female",
+      "height_cm": 151.0,
+      "n": 10,
+      "femur_cm": 40.84,
+      "tibia_cm": 31.62
+    },
+    {
+      "group": "female",
+      "height_cm": 152.0,
+      "n": 44,
+      "femur_cm": 40.47,
+      "tibia_cm": 31.58
+    },
+    {
+      "group": "female",
+      "height_cm": 153.0,
+      "n": 37,
+      "femur_cm": 40.97,
+      "tibia_cm": 32.01
+    },
+    {
+      "group": "female",
+      "height_cm": 154.0,
+      "n": 33,
+      "femur_cm": 41.91,
+      "tibia_cm": 32.64
+    },
+    {
+      "group": "female",
+      "height_cm": 155.0,
+      "n": 75,
+      "femur_cm": 41.06,
+      "tibia_cm": 32.36
+    },
+    {
+      "group": "female",
+      "height_cm": 156.0,
+      "n": 79,
+      "femur_cm": 41.14,
+      "tibia_cm": 32.42
+    },
+    {
+      "group": "female",
+      "height_cm": 157.0,
+      "n": 61,
+      "femur_cm": 41.96,
+      "tibia_cm": 32.73
+    },
+    {
+      "group": "female",
+      "height_cm": 158.0,
+      "n": 142,
+      "femur_cm": 42.29,
+      "tibia_cm": 32.89
+    },
+    {
+      "group": "female",
+      "height_cm": 159.0,
+      "n": 49,
+      "femur_cm": 43.0,
+      "tibia_cm": 33.26
+    },
+    {
+      "group": "female",
+      "height_cm": 160.0,
+      "n": 272,
+      "femur_cm": 42.95,
+      "tibia_cm": 33.51
+    },
+    {
+      "group": "female",
+      "height_cm": 161.0,
+      "n": 59,
+      "femur_cm": 43.79,
+      "tibia_cm": 34.32
+    },
+    {
+      "group": "female",
+      "height_cm": 162.0,
+      "n": 143,
+      "femur_cm": 43.75,
+      "tibia_cm": 34.13
+    },
+    {
+      "group": "female",
+      "height_cm": 163.0,
+      "n": 159,
+      "femur_cm": 44.06,
+      "tibia_cm": 34.43
+    },
+    {
+      "group": "female",
+      "height_cm": 164.0,
+      "n": 123,
+      "femur_cm": 44.46,
+      "tibia_cm": 34.52
+    },
+    {
+      "group": "female",
+      "height_cm": 165.0,
+      "n": 254,
+      "femur_cm": 44.16,
+      "tibia_cm": 34.65
+    },
+    {
+      "group": "female",
+      "height_cm": 166.0,
+      "n": 73,
+      "femur_cm": 45.04,
+      "tibia_cm": 35.16
+    },
+    {
+      "group": "female",
+      "height_cm": 167.0,
+      "n": 116,
+      "femur_cm": 44.96,
+      "tibia_cm": 35.1
+    },
+    {
+      "group": "female",
+      "height_cm": 168.0,
+      "n": 190,
+      "femur_cm": 45.42,
+      "tibia_cm": 35.48
+    },
+    {
+      "group": "female",
+      "height_cm": 169.0,
+      "n": 45,
+      "femur_cm": 45.66,
+      "tibia_cm": 35.54
+    },
+    {
+      "group": "female",
+      "height_cm": 170.0,
+      "n": 190,
+      "femur_cm": 46.21,
+      "tibia_cm": 36.07
+    },
+    {
+      "group": "female",
+      "height_cm": 171.0,
+      "n": 22,
+      "femur_cm": 46.97,
+      "tibia_cm": 37.03
+    },
+    {
+      "group": "female",
+      "height_cm": 172.0,
+      "n": 69,
+      "femur_cm": 46.92,
+      "tibia_cm": 36.84
+    },
+    {
+      "group": "female",
+      "height_cm": 173.0,
+      "n": 38,
+      "femur_cm": 47.36,
+      "tibia_cm": 37.33
+    },
+    {
+      "group": "female",
+      "height_cm": 174.0,
+      "n": 38,
+      "femur_cm": 47.55,
+      "tibia_cm": 37.09
+    },
+    {
+      "group": "female",
+      "height_cm": 175.0,
+      "n": 46,
+      "femur_cm": 47.42,
+      "tibia_cm": 37.34
+    },
+    {
+      "group": "female",
+      "height_cm": 176.0,
+      "n": 30,
+      "femur_cm": 48.0,
+      "tibia_cm": 37.91
+    },
+    {
+      "group": "female",
+      "height_cm": 177.0,
+      "n": 4,
+      "femur_cm": 49.53,
+      "tibia_cm": 38.43
+    },
+    {
+      "group": "female",
+      "height_cm": 178.0,
+      "n": 17,
+      "femur_cm": 48.74,
+      "tibia_cm": 38.56
+    },
+    {
+      "group": "female",
+      "height_cm": 179.0,
+      "n": 5,
+      "femur_cm": 48.96,
+      "tibia_cm": 38.88
+    },
+    {
+      "group": "female",
+      "height_cm": 180.0,
+      "n": 10,
+      "femur_cm": 50.79,
+      "tibia_cm": 39.7
+    },
+    {
+      "group": "female",
+      "height_cm": 181.0,
+      "n": 3,
+      "femur_cm": 50.43,
+      "tibia_cm": 40.03
+    },
+    {
+      "group": "female",
+      "height_cm": 187.0,
+      "n": 1,
+      "femur_cm": 52.5,
+      "tibia_cm": 40.6
+    },
+    {
+      "group": "female",
+      "height_cm": 189.0,
+      "n": 1,
+      "femur_cm": 49.4,
+      "tibia_cm": 39.8
+    }
+  ]
+}

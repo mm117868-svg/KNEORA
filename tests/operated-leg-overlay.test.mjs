@@ -1,3 +1,5 @@
+import {TrackingQuality} from '../tracking-quality.mjs';
+import {RehabCoach} from '../rehab-coach.mjs';
 /* What the patient sees drawn over the picture: the operated leg and nothing else.
 
    The pose model always returns the whole body. These checks run the real preview loop from index.html with a
@@ -34,13 +36,13 @@ function run(side, {found = true, palm = false, frames = 6, exercise = 'heel_sli
   const marks = [], labels = [], elements = new Map();
   const ctx = {clearRect() { marks.length = 0; }, beginPath() {}, stroke() {}, fill() {}, save() {}, restore() {}, closePath() {}, setLineDash() {}, strokeText() {},
     fillText(text, x, y) { marks.push([x, y]); labels.push(text); }, moveTo(x, y) { marks.push([x, y]); }, lineTo(x, y) { marks.push([x, y]); }, arc(x, y) { marks.push([x, y]); }};
-  const $ = id => { if (!elements.has(id)) elements.set(id, {hidden: true, style: {}, textContent: '', innerHTML: '', className: '', value: id === 'side' ? side : '', checked: id === 'showangle', classList: {add() {}, remove() {}, toggle() {}}, addEventListener() {}}); return elements.get(id); };
+  const $ = id => { if (!elements.has(id)) elements.set(id, {hidden: true, dataset:{}, style: {}, textContent: '', innerHTML: '', className: '', value: id === 'side' ? side : '', checked: id === 'showangle', classList: {add() {}, remove() {}, toggle() {}}, addEventListener() {}}); return elements.get(id); };
   let now = 1000, handUp = false;
   const openPalm={gestures:[[{categoryName:'Open_Palm',score:.9}]],landmarks:[Array.from({length:21},()=>({x:.5,y:.5}))]};
   const noPalm={gestures:[],landmarks:[]};
-  const context = vm.createContext({$, ctx, canvas: {width: W, height: H}, video: {readyState: 4, currentTime: 0, videoWidth: W}, stream: {}, running: false, current: {id:exercise,kind:'reps'},
+  const context = vm.createContext({trackingQuality:new TrackingQuality(),rehabCoach:new RehabCoach(),rehabVoice:{trySpeak(){}},coachEnabled:false,cameraDisplay:{draw(){}},$, ctx, canvas: {width: W, height: H}, video: {readyState: 4, currentTime: 0, videoWidth: W}, stream: {}, running: false, current: {id:exercise,kind:'reps'},
     pickSide, JointFilter, FluidOutline, PictureClock, drawOutline, drawHipOutline, drawToeOutline, trendCI95, kneeFlexionDeg, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, highFiveState, HIGH_FIVE_SETTINGS, slrView, slrKeyLandmarks, slrToeLandmarks, drawRaisedHand() {}, pct: d => d, performance: {now: () => now},
-    angleDisplay: {shown: NaN, sample: [], sampleTimes: [], update(a) { this.shown = a; this.sample = [a - 1, a + 1, a - 1, a + 1]; this.sampleTimes = [0, 33, 66, 100]; return a; }}, hipAngleDisplay: {update(a){return a;}}, toeAngleDisplay:{update(a){return a;}}, appVoice: {play() { return true; }, stop() {}}, refreshHint() {}, setExerciseSidebar() {}, startSession() {},
+    angleDisplay: {reset(){this.shown=NaN;},shown: NaN, sample: [], sampleTimes: [], update(a) { this.shown = a; this.sample = [a - 1, a + 1, a - 1, a + 1]; this.sampleTimes = [0, 33, 66, 100]; return a; }}, hipAngleDisplay: {update(a){return a;}}, toeAngleDisplay:{update(a){return a;}}, appVoice: {play() { return true; }, stop() {}}, refreshHint() {}, setExerciseSidebar() {}, startSession() {},
     requestAnimationFrame() { return 1; }, cancelAnimationFrame() {}, landmarker: {detectForVideo: () => ({landmarks: found ? [handUp ? raised : body] : []})},
     handRecognizer: {recognizeForVideo: () => palm ? openPalm : noPalm},
     requestAnimationFrameUnused: null});
