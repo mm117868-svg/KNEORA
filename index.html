@@ -8,7 +8,7 @@
 <title>Kneora · Cambridge Kinematics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="progress-to-date.css?v=1">
+<link rel="stylesheet" href="progress-to-date.css?v=2">
 <link rel="stylesheet" href="exercise-summary.css?v=cards-1">
 <link rel="stylesheet" href="recovery-timeline.css?v=1">
 <link rel="stylesheet" href="recovery-summary.css?v=paired-check-1">
@@ -589,7 +589,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M14 5 L14 19 L26 33" stroke="#1a1918" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter"/><circle cx="12.5" cy="23.5" r="4.6" fill="#d64026"/></svg>
       <b>Cambridge<br>Kinematics<sup class="brand-trademark" aria-hidden="true">™</sup></b>
     </a>
-    <nav class="patient-header-nav" aria-label="Patient navigation"><a class="home-link" href="./" data-page="home">Home</a><a class="details-link" href="?view=patient-details" data-page="patient-details">Patient details</a><a class="exercises-link" href="?view=exercises-today" data-page="exercises-today">Exercises today</a><a class="summary-link" href="?view=recovery-summary" data-page="recovery-summary">Recovery summary</a><a class="to-date-link" href="?view=progress-to-date" data-page="progress-to-date">Exercise metrics</a><a class="timeline-link" href="?view=recovery-timeline" data-page="recovery-timeline">Recovery timeline</a></nav>
+    <nav class="patient-header-nav" aria-label="Patient navigation"><a class="home-link" href="./" data-page="home">Home</a><a class="details-link" href="?view=patient-details" data-page="patient-details">Patient details</a><a class="exercises-link" href="?view=exercises-today" data-page="exercises-today">Exercises today</a><a class="summary-link" href="?view=recovery-summary" data-page="recovery-summary">Recovery summary</a><a class="to-date-link" href="?view=progress-to-date" data-page="progress-to-date">Physiotherapy feedback</a><a class="timeline-link" href="?view=recovery-timeline" data-page="recovery-timeline">Recovery timeline</a></nav>
   </header>
 
   <section class="pt-page" id="progressToDate" aria-label="Progress to date" hidden></section>
@@ -773,7 +773,7 @@ import { mountExerciseContext } from "./exercise-context.mjs?v=pubmed-1";
 import { renderDetailedExerciseSummary } from "./exercise-details.mjs?v=cards-1";
 import { renderRecoverySummary } from "./recovery-summary.mjs?v=scatter-1";
 import { renderRecoveryTimeline } from "./recovery-timeline.mjs?v=1";
-import { renderProgressToDate } from "./progress-to-date.mjs?v=pubmed-1";
+import { renderProgressToDate } from "./progress-to-date.mjs?v=physio-feedback-1";
 import { renderPatientMeasures } from "./patient-measures.mjs?v=followups-1";
 import { patientRecords, completedExercisesForDay, renderPatientProgress, renderHomeActivity, sessionSummary } from "./patient-progress.js?v=cards-1";
 import { LegMotionGate, inspectExerciseLeg } from "./pose-gate.js?v=wide-smooth-1";
@@ -897,7 +897,7 @@ document.querySelector(`.patient-header-nav [data-page="${PAGE_VIEW}"]`)?.setAtt
 mountKneeAngleGuide($("kneeAngleGuide"));
 mountMetricAngleDiagrams($("recoveryHome"));
 
-if (PROGRESS_VIEW) document.title = `${PAGE_VIEW === "recovery-summary" ? "Recovery summary" : PAGE_VIEW === "recovery-timeline" ? "Recovery timeline" : PAGE_VIEW === "progress-to-date" ? "Exercise metrics" : PAGE_VIEW === "patient-measures" ? "Patient-reported measures" : "Your progress tracker"} · Cambridge Kinematics`;
+if (PROGRESS_VIEW) document.title = `${PAGE_VIEW === "recovery-summary" ? "Recovery summary" : PAGE_VIEW === "recovery-timeline" ? "Recovery timeline" : PAGE_VIEW === "progress-to-date" ? "Physiotherapy feedback" : PAGE_VIEW === "patient-measures" ? "Patient-reported measures" : "Your progress tracker"} · Cambridge Kinematics`;
 const NOPOSE = PAGE_VIEW!=="exercises-today" || pageParams.has("nopose");
 
 /* ---------------- settings ---------------- */
