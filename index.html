@@ -444,6 +444,11 @@ body:not(.progress-view) #home>.details{grid-column:1/-1}
 .setting-box legend{font-size:14px;font-weight:700;padding:0 7px}
 .setting-box>.f+.f{margin-top:16px}
 .setting-box .small-note{max-width:none;font-size:12px;line-height:1.6;margin-top:12px}
+.camera-advice{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.camera-advice summary{cursor:pointer;font-size:13px;font-weight:800;line-height:1.5}
+.camera-advice p{max-width:none;font-size:12px;line-height:1.65;color:var(--muted);margin:12px 0 0}
+.camera-advice strong{color:var(--ink)}
+.camera-advice .evidence-links{font-size:11px}
 .setting-check{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.5;cursor:pointer}
 .setting-check+.setting-check{margin-top:18px}
 .setting-check input{accent-color:var(--brand);width:18px;height:18px;flex:0 0 18px;margin:2px 0 0}
@@ -637,6 +642,13 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
       </fieldset>
       <fieldset class="setting-box"><legend>Live camera display</legend>
         <p class="small-note">Colour, brightness and contrast adjust automatically. The complete camera frame stays visible. <a href="intel-comparison.html">Compare Intel depth with a height-based estimate</a>.</p>
+        <details class="camera-advice">
+          <summary>What to wear and how to position the camera</summary>
+          <p><strong>Clothing:</strong> Wear a plain, matte blue or green fitted top, shorts that leave the knee visible, and plain socks or shoes that contrast with the floor. Avoid black or grey clothing, loose trousers, reflective strips, shiny materials and busy patterns.</p>
+          <p><strong>Camera:</strong> Place the camera side-on with the operated hip, knee, ankle and foot all in view. Use even indoor lighting and a plain background that contrasts with your clothing. Avoid direct sunlight, glare and mirrors.</p>
+          <p><strong>Evidence:</strong> Published Intel RealSense D415 research has characterised the camera and tested markerless gait and balance systems. These studies support further development, but they do not validate Kneora's knee-angle measurements or its use after total knee replacement.</p>
+          <p class="evidence-links">PubMed: <a href="https://pubmed.ncbi.nlm.nih.gov/30691011/" target="_blank" rel="noopener">D415 camera characterisation</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/33824790/" target="_blank" rel="noopener">D415 stride study</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/42451232/" target="_blank" rel="noopener">D415 balance study</a></p>
+        </details>
         <label class="f">Hold at the far end of each movement<select id="holdtarget"><option value="-1" selected>Variable · record hold duration</option><option value="0">No hold timer</option><option value="3">3 seconds</option><option value="5">5 seconds</option><option value="10">10 seconds</option></select><small class="small-note">Variable mode counts up once your knee settles and records the duration when you move or finish. There is no pass or fail duration. Choose a fixed target only if it is part of your physiotherapist’s plan.</small></label>
         <p><strong>Live angles and required landmarks are always shown.</strong> They appear while positioning, during the countdown and throughout the exercise. Unavailable or unreliable angles show a dash. The ± value and shaded band describe short-term steadiness, not clinical accuracy.</p>
         <p class="small-note">Only the landmarks needed for the exercise are outlined. Heel slides and seated knee extensions show the operated hip, knee and ankle with the live knee angle. Straight leg raises also show the operated-side shoulder, heel and toe, with live hip-raise and toe-direction angles. A toe reading of 0° means the toes point towards the top of a level camera picture. The other leg, face and unrelated upper-body landmarks are never drawn. The outline is steadied for display; measurements use the original positions.</p>
