@@ -11,11 +11,11 @@ export class TrackingQuality {
   const pts=ids.map(i=>body[i]),outside=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&(p.x<0||p.x>1||p.y<0||p.y>1);
   if(outside(pts[2]))return fail('Ankle outside frame','Your ankle is outside the picture. Move the camera slightly further back.');
   if(pts.some(outside))return fail('Leg outside frame','Move the camera slightly further back to include your operated hip, knee and ankle.');
-  if(pts.some(p=>!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)||(p.visibility??0)<.5))return fail('Low visibility','I cannot see enough of your operated leg. Keep your hip, knee and ankle unobstructed.');
+  if(pts.some(p=>!p||!Number.isFinite(p.x)||!Number.isFinite(p.y)||(p.visibility??0)<.2))return fail('Low visibility','I cannot see enough of your operated leg. Keep your hip, knee and ankle unobstructed.');
   this.previous=pts.map(p=>({x:p.x,y:p.y}));
-  if(prior&&dt<500&&pts.some((p,i)=>Math.hypot(p.x-prior[i].x,p.y-prior[i].y)>.15))this.resumeAt=now+350;
+  if(prior&&dt<1200&&pts.some((p,i)=>Math.hypot(p.x-prior[i].x,p.y-prior[i].y)>.25))this.resumeAt=now+150;
   if(now<this.resumeAt)return this.result={usable:false,label:'Tracking settling',message:'Measurement paused while tracking settles. Keep the camera steady.'};
   return this.result={usable:true,label:'Leg visible · tracking stable',message:''};
  }
- read(now){return now-this.last>500?{usable:false,label:'Tracking interrupted',message:'Measurement paused until your leg is visible again.'}:this.result;}
+ read(now){return now-this.last>1200?{usable:false,label:'Tracking interrupted',message:'Measurement paused until your leg is visible again.'}:this.result;}
 }

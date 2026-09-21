@@ -17,6 +17,12 @@ test('other gestures and low-confidence palms are not accepted', () => {
   assert.equal(highFiveState(result('Open_Palm', HIGH_FIVE_SETTINGS.score - .01)), 'other');
 });
 
+test('a clearly extended palm from the hand-pose landmarks is accepted when the classifier is uncertain',()=>{
+ const points=Array.from({length:21},()=>({x:.5,y:.7}));points[0]={x:.5,y:.85};
+ for(const [mcp,pip,tip,x] of [[5,6,8,.38],[9,10,12,.46],[13,14,16,.54],[17,18,20,.62]]){points[mcp]={x,y:.65};points[pip]={x,y:.5};points[tip]={x,y:.2};}
+ assert.equal(highFiveState(result('None',.9,points)),'open');
+});
+
 test('missing results and missing hands are distinguished', () => {
   assert.equal(highFiveState(null), 'unknown');
   assert.equal(highFiveState({gestures:[],landmarks:[]}), 'absent');

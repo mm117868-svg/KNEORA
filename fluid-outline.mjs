@@ -236,10 +236,10 @@ export function drawOutline(ctx, points, { alpha = 1, colour = '#ff3b3b', light 
 /* A neutral path for exercises such as squats that need both legs and the trunk visible. It marks the selected
    landmarks without implying that every segment is itself an angle measurement. */
 export function drawLandmarkPath(ctx,points,{alpha=1,colour='#ff3b3b',light='#ffb0a8',scale=1}={}){
-  if(!usable(points)||points.length<2||!(alpha>0))return;
+  if(!usable(points)||!(alpha>0))return;
   const w=Math.max(3,5*scale),path=()=>{ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);for(const point of points.slice(1))ctx.lineTo(point[0],point[1]);ctx.stroke();};
-  ctx.save?.();ctx.globalAlpha=alpha;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='rgba(5,10,20,.55)';ctx.lineWidth=w+Math.max(3,4*scale);path();
-  const run=ctx.createLinearGradient?.(points[0][0],points[0][1],points.at(-1)[0],points.at(-1)[1]);if(run){run.addColorStop(0,colour);run.addColorStop(1,light);}ctx.strokeStyle=run||colour;ctx.lineWidth=w;path();
+  ctx.save?.();ctx.globalAlpha=alpha;ctx.lineCap='round';ctx.lineJoin='round';
+  if(points.length>1){ctx.strokeStyle='rgba(5,10,20,.55)';ctx.lineWidth=w+Math.max(3,4*scale);path();const run=ctx.createLinearGradient?.(points[0][0],points[0][1],points.at(-1)[0],points.at(-1)[1]);if(run){run.addColorStop(0,colour);run.addColorStop(1,light);}ctx.strokeStyle=run||colour;ctx.lineWidth=w;path();}
   for(const [i,point] of points.entries()){ctx.beginPath();ctx.arc(point[0],point[1],w*(i>0&&i<points.length-1?1.45:1.2),0,TAU);ctx.fillStyle=i>0&&i<points.length-1?'#fff':colour;ctx.fill();ctx.lineWidth=Math.max(2,2.5*scale);ctx.strokeStyle=i>0&&i<points.length-1?colour:'#fff';ctx.stroke();}ctx.restore?.();
 }
 

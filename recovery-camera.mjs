@@ -3,7 +3,7 @@ import {kneeFrame,summariseEndpoint} from './recovery-measurements.mjs?v=interva
 import {raisedHandState,drawRaisedHand,WaveDetector} from './raised-hand.mjs?v=wave-1';
 import {EndpointGesture} from './endpoint-gesture.mjs';
 import {EndpointPreviewAverage} from './endpoint-smoothing.mjs?v=steadiness-1';
-import {FluidOutline,drawOutline} from './fluid-outline.mjs?v=exercise-landmarks-3';
+import {FluidOutline,drawOutline} from './fluid-outline.mjs?v=exercise-landmarks-4';
 import {trendCI95} from './confidence.mjs?v=1';
 export const ENDPOINT_CAPTURE_MS=6000;
 export const ENDPOINT_PICTURES=10;

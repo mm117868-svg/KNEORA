@@ -2,9 +2,9 @@
 // It is sampled at 8 Hz only while waiting to start, so it does not compete with exercise measurement.
 export const HIGH_FIVE_SETTINGS = Object.freeze({
   score: .5,
-  detection: .3,
-  presence: .3,
-  tracking: .3,
+  detection: .2,
+  presence: .2,
+  tracking: .2,
   sampleMs: 125
 });
 
@@ -42,8 +42,14 @@ export function highFiveState(result) {
       Number.isFinite(point.x) && Number.isFinite(point.y) &&
       point.x >= 0 && point.x <= 1 && point.y >= 0 && point.y <= 1
     );
-    if (inFrame && gesture?.categoryName === 'Open_Palm' &&
-        Number.isFinite(gesture.score) && gesture.score >= HIGH_FIVE_SETTINGS.score) return 'open';
+    if (!inFrame) continue;
+    const labelledOpen=gesture?.categoryName === 'Open_Palm'&&Number.isFinite(gesture.score)&&gesture.score>=HIGH_FIVE_SETTINGS.score;
+    const classifierUncertain=!gesture||gesture.categoryName==='None'||gesture.categoryName==='Unknown';
+    /* The same MediaPipe hand model also supplies 21 landmarks. On difficult Intel colour frames the gesture
+       classifier can return None despite a clear palm, so accept three visibly extended fingers as a fallback. */
+    const distance=(a,b)=>Math.hypot(hand[a].x-hand[b].x,hand[a].y-hand[b].y);
+    const extended=[[6,8],[10,12],[14,16],[18,20]].filter(([pip,tip])=>distance(0,tip)>distance(0,pip)*1.18).length;
+    if(labelledOpen||(classifierUncertain&&extended>=3))return 'open';
   }
   return 'other';
 }

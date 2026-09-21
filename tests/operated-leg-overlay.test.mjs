@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {pickSide, JointFilter, kneeFlexionDeg} from '../kneerec.js';
-import {FluidOutline, PictureClock, drawOutline, drawHipOutline, drawToeOutline, drawLandmarkPath} from '../fluid-outline.mjs';
+import {FLUID, FluidOutline, PictureClock, drawOutline, drawHipOutline, drawToeOutline, drawLandmarkPath} from '../fluid-outline.mjs';
 import {trendCI95} from '../confidence.mjs';
 import {inspectExerciseLeg} from '../pose-gate.js';
 import {raisedHandState, RAISED_HAND, WaveDetector} from '../raised-hand.mjs';
@@ -42,7 +42,7 @@ function run(side, {found = true, palm = false, frames = 6, exercise = 'heel_sli
   const openPalm={gestures:[[{categoryName:'Open_Palm',score:.9}]],landmarks:[Array.from({length:21},()=>({x:.5,y:.5}))]};
   const noPalm={gestures:[],landmarks:[]};
   const context = vm.createContext({trackingQuality:new TrackingQuality(),rehabCoach:new RehabCoach(),rehabVoice:{trySpeak(){}},coachEnabled:false,cameraDisplay:{draw(){}},$, ctx, canvas: {width: W, height: H}, video: {readyState: 4, currentTime: 0, videoWidth: W}, stream: {}, running: false, current: {id:exercise,kind:'reps'},
-    pickSide, JointFilter, FluidOutline, PictureClock, drawOutline, drawHipOutline, drawToeOutline, drawLandmarkPath, squatLandmarkPaths, trendCI95, kneeFlexionDeg, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, highFiveState, HIGH_FIVE_SETTINGS, slrView, slrKeyLandmarks, slrToeLandmarks, drawRaisedHand() {}, pct: d => d, performance: {now: () => now},
+    pickSide, JointFilter, FLUID, FluidOutline, PictureClock, drawOutline, drawHipOutline, drawToeOutline, drawLandmarkPath, squatLandmarkPaths, trendCI95, kneeFlexionDeg, inspectExerciseLeg, raisedHandState, RAISED_HAND, WaveDetector, highFiveState, HIGH_FIVE_SETTINGS, slrView, slrKeyLandmarks, slrToeLandmarks, drawRaisedHand() {}, pct: d => d, performance: {now: () => now},
     angleDisplay: {reset(){this.shown=NaN;},shown: NaN, sample: [], sampleTimes: [], update(a) { this.shown = a; this.sample = [a - 1, a + 1, a - 1, a + 1]; this.sampleTimes = [0, 33, 66, 100]; return a; }}, hipAngleDisplay: {update(a){return a;}}, toeAngleDisplay:{update(a){return a;}}, appVoice: {play() { return true; }, stop() {}}, refreshHint() {}, setExerciseSidebar() {}, startSession() {},
     requestAnimationFrame() { return 1; }, cancelAnimationFrame() {}, landmarker: {detectForVideo: () => ({landmarks: found ? [handUp ? raised : body] : []})},
     handRecognizer: {recognizeForVideo: () => palm ? openPalm : noPalm},
@@ -86,7 +86,7 @@ test('the patient screen no longer has any way to draw the whole skeleton', () =
   assert.doesNotMatch(html, /drawLeg\(/);
   assert.equal((html.match(/drawOutline\(ctx, /g) || []).length, 1, 'one place draws a body part, and it draws one leg');
   assert.match(html, /aimOutline\(previewLeg, rawBody, previewLastVideoTime\)/);
-  assert.match(html, /aimOutline\(trace\.lastLm, rawBody, lastVideoTime\)/);
+  assert.match(html, /aimOutline\(displayLeg, rawBody, lastVideoTime\)/);
 });
 
 test('the picture is the video itself: the canvas is cleared, never painted with camera frames', () => {

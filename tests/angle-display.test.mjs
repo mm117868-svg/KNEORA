@@ -29,10 +29,10 @@ test('the reading follows a real movement without falling far behind',()=>{
  assert.ok(worst<12,`fell ${worst.toFixed(1)} degrees behind`);
 });
 
-test('the reading clears when the leg leaves the picture',()=>{
+test('the most recent knee angle remains visible when tracking briefly leaves the picture',()=>{
  const d=new AngleDisplay();for(let i=0;i<10;i++)d.update(60,i*step);
  let v=NaN;for(let i=0;i<20;i++)v=d.update(NaN,340+i*step);
- assert.ok(Number.isNaN(v));
+ assert.equal(Math.round(v),60);
 });
 
 test('reset clears the window and the reading',()=>{
