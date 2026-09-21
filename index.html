@@ -636,7 +636,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
         <p class="small-note">Choose the leg that was operated on before opening an exercise.</p>
       </fieldset>
       <fieldset class="setting-box"><legend>Live camera display</legend>
-        <p class="small-note">Brightness and contrast adjust automatically. The complete camera frame stays visible. <a href="intel-comparison.html">Compare Intel depth with a height-based estimate</a>.</p>
+        <p class="small-note">Colour, brightness and contrast adjust automatically. The complete camera frame stays visible. <a href="intel-comparison.html">Compare Intel depth with a height-based estimate</a>.</p>
         <label class="f">Hold at the far end of each movement<select id="holdtarget"><option value="-1" selected>Variable · record hold duration</option><option value="0">No hold timer</option><option value="3">3 seconds</option><option value="5">5 seconds</option><option value="10">10 seconds</option></select><small class="small-note">Variable mode counts up once your knee settles and records the duration when you move or finish. There is no pass or fail duration. Choose a fixed target only if it is part of your physiotherapist’s plan.</small></label>
         <p><strong>Live angles and required landmarks are always shown.</strong> They appear while positioning, during the countdown and throughout the exercise. Unavailable or unreliable angles show a dash. The ± value and shaded band describe short-term steadiness, not clinical accuracy.</p>
         <p class="small-note">Only the landmarks needed for the exercise are outlined. Heel slides and seated knee extensions show the operated hip, knee and ankle with the live knee angle. Straight leg raises also show the operated-side shoulder, heel and toe, with live hip-raise and toe-direction angles. A toe reading of 0° means the toes point towards the top of a level camera picture. The other leg, face and unrelated upper-body landmarks are never drawn. The outline is steadied for display; measurements use the original positions.</p>
@@ -751,7 +751,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 <dialog id="patientReview" class="patient-review" aria-labelledby="patientReviewTitle"><div class="patient-review-header"><span id="patientReviewTitle">Your exercise summary</span><button type="button" id="closePatientReview">Close</button></div><div id="patientReviewContent"></div></dialog>
 
 <script type="module">
-import {createCameraDisplay} from "./camera-display.mjs?v=1";
+import {createCameraDisplay} from "./camera-display.mjs?v=colour-1";
 import {INTEL_CAMERA_ID,createIntelExerciseCamera,intelAvailable,distanceLabel} from "./intel-exercise-camera.mjs?v=handpose-1";
 import {RehabCoach,RehabVoice} from "./rehab-coach.mjs";
 import {showExerciseGuide} from './exercise-guides/guide-player.js?v=magnific-1';

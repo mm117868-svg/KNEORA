@@ -48,4 +48,12 @@ Feedback page result: passed
 - The complete automated suite passed: 335 tests.
 - Source formatting check passed.
 
+## Live camera colour update
+
+- The visible camera picture now receives a restrained 22% saturation increase after the existing automatic brightness and contrast correction.
+- Neutral greys remain neutral, while muted colours are easier to distinguish.
+- The correction is display only. Pose tracking, angle measurement and saved recordings continue to use the original camera stream.
+- The Intel browser integration check still passes for open-palm start, live depth distance and camera release.
+- The complete automated suite passed: 337 tests.
+
 final result: passed

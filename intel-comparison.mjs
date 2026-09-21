@@ -1,4 +1,4 @@
-import {createCameraDisplay} from './camera-display.mjs';
+import {createCameraDisplay} from './camera-display.mjs?v=colour-1';
 const $=id=>document.getElementById(id), display=createCameraDisplay(),ctx=$('picture').getContext('2d');
 let token=null,generation=0,timer=null,rows=[],busy=false,lastFrameAt=0;
 setInterval(()=>{if(token&&performance.now()-lastFrameAt>1500){clear();$("status").textContent="Waiting for a fresh camera frame. Distance unavailable.";}},500);

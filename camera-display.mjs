@@ -1,5 +1,10 @@
 // Display-only tone correction. Analysis and recordings retain the original stream.
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+export const DISPLAY_SATURATION = 1.22;
+export function colourisePixel(r,g,b,saturation=DISPLAY_SATURATION) {
+  const light=.2126*r+.7152*g+.0722*b;
+  return [r,g,b].map(channel=>Math.round(clamp(light+(channel-light)*saturation,0,255)));
+}
 export function exposureTarget(data) {
   const histogram = new Uint32Array(256);
   for (let i = 0; i < data.length; i += 4) histogram[Math.round(.2126*data[i]+.7152*data[i+1]+.0722*data[i+2])]++;
@@ -51,7 +56,10 @@ export function createCameraDisplay() {
       // Always use the complete source frame. No source rectangle or digital zoom.
       pc.drawImage(video,0,0,w,h);
       const frame=pc.getImageData(0,0,w,h), lut=toneTable(current), data=frame.data;
-      for(let i=0;i<data.length;i+=4){data[i]=lut[data[i]];data[i+1]=lut[data[i+1]];data[i+2]=lut[data[i+2]];}
+      for(let i=0;i<data.length;i+=4){
+        const colour=colourisePixel(lut[data[i]],lut[data[i+1]],lut[data[i+2]]);
+        data[i]=colour[0];data[i+1]=colour[1];data[i+2]=colour[2];
+      }
       pc.putImageData(frame,0,0);
       ctx.drawImage(picture,0,0,ctx.canvas.width,ctx.canvas.height);
     } catch {
