@@ -752,7 +752,7 @@ body:not(.progress-view) #home>.camera-options{margin:0 0 20px}.settings-chevron
 
 <script type="module">
 import {createCameraDisplay} from "./camera-display.mjs?v=colour-1";
-import {INTEL_CAMERA_ID,createIntelExerciseCamera,intelAvailable,distanceLabel} from "./intel-exercise-camera.mjs?v=handpose-1";
+import {INTEL_CAMERA_ID,createIntelExerciseCamera,intelAvailable,distanceReading} from "./intel-exercise-camera.mjs?v=distance-hold-1";
 import {RehabCoach,RehabVoice} from "./rehab-coach.mjs";
 import {showExerciseGuide} from './exercise-guides/guide-player.js?v=magnific-1';
 import {confirmFirstExerciseGuide} from './exercise-guide-state.mjs?v=first-view-1';
@@ -1096,7 +1096,14 @@ listCams();
 /* ---------------- exercise screen ---------------- */
 const video = $("video"), canvas = $("canvas"), ctx = canvas.getContext("2d");
 const cameraDisplay = createCameraDisplay();
-const intelExerciseCamera=createIntelExerciseCamera({onDistance:depth=>{$("kneeDistance").textContent=distanceLabel(depth);},onFrame:(frame,now)=>{
+let lastKneeDistance=null;
+function showKneeDistance(depth){
+  const reading=distanceReading(depth,lastKneeDistance);
+  if(reading.fresh)lastKneeDistance=reading.metres;
+  $("kneeDistance").textContent=reading.metres===null?'Waiting for distance':`${reading.metres.toFixed(2)} m`;
+  $("distanceTile").classList.toggle('last-reading',!reading.fresh&&reading.metres!==null);
+}
+const intelExerciseCamera=createIntelExerciseCamera({onDistance:showKneeDistance,onFrame:(frame,now)=>{
   if(running||!handRecognizer)return;
   if(countdownStart===null&&now-lastPalmAt>=HIGH_FIVE_SETTINGS.sampleMs){lastPalmAt=now;try{lastPalmResult=handRecognizer.recognizeForVideo(frame,Math.round(now));}catch{lastPalmResult=null;}}
   handleIntelPalmFrame(now);
@@ -1307,7 +1314,7 @@ const pct = deg => Math.max(0, Math.min(100, deg / 140 * 100));
 
 async function openCamera(gen) {
   const useIntel=$("camsel").value===INTEL_CAMERA_ID;
-  $("distanceTile").hidden=!useIntel;$("kneeDistance").textContent='Unavailable';
+  lastKneeDistance=null;$("distanceTile").classList.remove('last-reading');$("distanceTile").hidden=!useIntel;$("kneeDistance").textContent='Waiting for distance';
   const constraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, resizeMode: { ideal: "none" } }, audio: false };
   if(typeof PHONE_MODE!=="undefined"&&PHONE_MODE)constraints.video.facingMode={ideal:"environment"};
   if ($("camsel").value) constraints.video.deviceId = { exact: $("camsel").value };
@@ -1801,7 +1808,7 @@ function ask(title, prompt, values) {
     $("q").querySelector(".skip").onclick = () => res(null);
   });
 }
-function stopCamera() { intelExerciseCamera.stop(); $("kneeDistance").textContent="Unavailable"; cancelAnimationFrame(previewId); cancelCountdown(); if (stream) { stream.getTracks().forEach(tr => tr.stop()); stream = null; } video.srcObject = null; }
+function stopCamera() { intelExerciseCamera.stop(); lastKneeDistance=null;$("distanceTile").classList.remove('last-reading');$("kneeDistance").textContent="Waiting for distance"; cancelAnimationFrame(previewId); cancelCountdown(); if (stream) { stream.getTracks().forEach(tr => tr.stop()); stream = null; } video.srcObject = null; }
 function closeExercise() {
   if (running) { if (!confirm("Leave this session without saving it?")) return; finish(true); }
   openGen++; if (pendingAnswer) pendingAnswer(null); disposeAnalysis(); disposeAnalysis = () => {};

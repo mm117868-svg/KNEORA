@@ -54,6 +54,8 @@ Feedback page result: passed
 - Neutral greys remain neutral, while muted colours are easier to distinguish.
 - The correction is display only. Pose tracking, angle measurement and saved recordings continue to use the original camera stream.
 - The Intel browser integration check still passes for open-palm start, live depth distance and camera release.
-- The complete automated suite passed: 337 tests.
+- The distance tile keeps its most recent valid depth value through a temporary dropout and marks it as `last reading`; it no longer replaces a useful value with `Unavailable`.
+- The retained distance is cleared when the camera session is restarted or closed, so it cannot carry into another session.
+- The complete automated suite passed: 338 tests.
 
 final result: passed

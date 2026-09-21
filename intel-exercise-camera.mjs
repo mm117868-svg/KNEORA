@@ -1,8 +1,12 @@
 // One SDK owner supplies both colour and depth; never open its RGB stream twice.
 export const INTEL_CAMERA_ID = 'intel-realsense-depth';
+export function distanceReading(depth,previous=null) {
+  const fresh=!!(depth?.available&&Number.isFinite(depth.knee_distance_m)&&depth.knee_distance_m>0);
+  return {metres:fresh?depth.knee_distance_m:(Number.isFinite(previous)&&previous>0?previous:null),fresh};
+}
 export function distanceLabel(depth) {
-  return depth?.available && Number.isFinite(depth.knee_distance_m) && depth.knee_distance_m > 0
-    ? `${depth.knee_distance_m.toFixed(2)} m` : 'Unavailable';
+  const reading=distanceReading(depth);
+  return reading.metres===null?'Unavailable':`${reading.metres.toFixed(2)} m`;
 }
 export async function intelAvailable() {
   try { const r=await fetch('/api/intel/status',{signal:AbortSignal.timeout(1500)});return r.ok&&(await r.json()).service==='kneora-intel'; } catch {return false;}
